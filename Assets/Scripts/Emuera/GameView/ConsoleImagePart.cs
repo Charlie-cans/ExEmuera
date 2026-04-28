@@ -21,6 +21,10 @@ namespace MinorShift.Emuera.GameView
 			ButtonResourceName = resNameb;
 
             cImage = AppContents.GetSprite(ResourceName);
+#if UNITY_EDITOR
+			if (cImage == null && !string.IsNullOrEmpty(ResourceName))
+				UnityEngine.Debug.Log("[Emuera] sprite missing: " + ResourceName);
+#endif
 #if !UNITY_EDITOR
             if(cImage == null)
             {

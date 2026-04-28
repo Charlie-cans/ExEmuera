@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace uEmuera.Drawing
 {
@@ -327,34 +328,58 @@ namespace uEmuera.Drawing
         //public static Color Yellow { get { return new Color(uColor.yellow); } }
         public static Color FromName(string name)
         {
-            switch(name)
-            {
-            case "Black":
-                return Black;
-            case "Blue":
-                return Blue;
-        //    case "Clear":
-        //        return Clear;
-        //    case "Cyan":
-        //        return Cyan;
-            case "Gray":
-                return Gray;
-            case "Green":
-                return Green;
-            case "Grey":
-                return Grey;
-        //    case "Magenta":
-        //        return Magenta;
-            case "Red":
-                return Red;
-            case "White":
-                return White;
-        //    case "Yellow":
-        //        return Yellow;
-            }
-            uEmuera.Logger.Info("Not Match Color '" + name + "'");
+            if (string.IsNullOrEmpty(name)) return Black;
+            if (name.StartsWith("#")) return ParseHexColor(name);
+            var n = name.ToLowerInvariant().Replace(" ", "");
+            if (colorMap.TryGetValue(n, out var c)) return c;
+            UnityEngine.Debug.LogWarning("[Emuera] Not Match Color '" + name + "'");
             return Black;
         }
+        static Color ParseHexColor(string hex)
+        {
+            hex = hex.TrimStart('#');
+            if (hex.Length == 6)
+                return new Color(
+                    Convert.ToInt32(hex.Substring(0,2), 16),
+                    Convert.ToInt32(hex.Substring(2,2), 16),
+                    Convert.ToInt32(hex.Substring(4,2), 16));
+            return Black;
+        }
+        static readonly Dictionary<string,Color> colorMap = new Dictionary<string,Color>
+        {
+            {"black",Black},{"white",White},{"red",Red},{"green",Green},{"blue",Blue},
+            {"gray",Gray},{"grey",Grey},{"yellow",new Color(255,255,0)},
+            {"cyan",new Color(0,255,255)},{"magenta",new Color(255,0,255)},
+            {"orange",new Color(255,165,0)},{"pink",new Color(255,192,203)},
+            {"brown",new Color(165,42,42)},{"purple",new Color(128,0,128)},
+            {"gold",new Color(255,215,0)},{"silver",new Color(192,192,192)},
+            {"lime",new Color(0,255,0)},{"maroon",new Color(128,0,0)},
+            {"navy",new Color(0,0,128)},{"olive",new Color(128,128,0)},
+            {"teal",new Color(0,128,128)},{"violet",new Color(238,130,238)},
+            {"indigo",new Color(75,0,130)},{"coral",new Color(255,127,80)},
+            {"crimson",new Color(220,20,60)},{"khaki",new Color(240,230,140)},
+            {"lavender",new Color(230,230,250)},{"plum",new Color(221,160,221)},
+            {"salmon",new Color(250,128,114)},{"tan",new Color(210,180,140)},
+            {"tomato",new Color(255,99,71)},{"turquoise",new Color(64,224,208)},
+            {"wheat",new Color(245,222,179)},
+            {"darkturquoise",new Color(0,206,209)},
+            {"royalblue",new Color(65,105,225)},
+            {"midnightblue",new Color(25,25,112)},
+            {"hotpink",new Color(255,105,180)},
+            {"deepskyblue",new Color(0,191,255)},
+            {"dodgerblue",new Color(30,144,255)},
+            {"lawngreen",new Color(124,252,0)},
+            {"limegreen",new Color(50,205,50)},
+            {"aquamarine",new Color(127,255,212)},
+            {"chocolate",new Color(210,105,30)},
+            {"lightgray",new Color(211,211,211)},
+            {"dimgray",new Color(105,105,105)},
+            {"darkgray",new Color(169,169,169)},
+            {"lightgrey",new Color(211,211,211)},
+            {"darkgrey",new Color(169,169,169)},
+            {"dimgrey",new Color(105,105,105)},
+            {"transparent",new Color(0,0,0,0)},
+        };
 
         //public uColor ucolor { get { return new uColor(r, g, b, a); } }
 

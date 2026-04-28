@@ -328,21 +328,11 @@ namespace MinorShift.Emuera.GameProc
 			if ((currentLine == null) || (currentLine is NullLine))
 				return;//現在の行が特殊な状態ならスルー
 			if (!console.Enabled)
-				return;//クローズしてるとMessageBox.Showができないので。
-			string caption = string.Format("無限ループの可能性があります");
-			string text = string.Format(
-				"現在、{0}の{1}行目を実行中です。\n最後の入力から{3}ミリ秒経過し{2}行が実行されました。\n処理を中断し強制終了しますか？",
-				currentLine.Position.Filename, currentLine.Position.LineNo, state.lineCount, time);
-			DialogResult result = MessageBox.Show(text, caption, MessageBoxButtons.YesNo);
-			if (result == DialogResult.Yes)
-			{
-				throw new CodeEE("無限ループの疑いにより強制終了が選択されました");
-			}
-			else
-			{
-				state.lineCount = 0;
-				startTime = _Library.WinmmTimer.TickCount;
-			}
+				return;
+			// Unity: reset timer instead of showing MessageBox (not available on background threads)
+			UnityEngine.Debug.LogWarning("[Emuera] Infinite loop check triggered, resetting timer");
+			state.lineCount = 0;
+			startTime = _Library.WinmmTimer.TickCount;
 		}
 
 		int methodStack = 0;

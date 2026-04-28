@@ -632,6 +632,8 @@ namespace MinorShift.Emuera.GameView
 							throw new CodeEE("</nonbutton>の前に<nonbutton>がありません");
 						state.CurrentButtonTag = null;
 						state.FlagButton = true;
+					return null;
+					case "div":
 						return null;
 					default:
 						throw new CodeEE("終了タグ</"+tag+">は解釈できません");
@@ -853,6 +855,18 @@ namespace MinorShift.Emuera.GameView
 							b = Color.FromArgb(bcolor >> 16, (bcolor >> 8) & 0xFF, bcolor & 0xFF);
 						}
 						return ConsoleShapePart.CreateShape(type, param, c, b, color >= 0);
+					}
+				case "div":
+					// EM+EE div tag stub - skip attributes and render inner content
+					{
+						while (wc != null && !wc.EOL)
+						{
+							var w = wc.Current as IdentifierWord; wc.ShiftNext();
+							var op = wc.Current as OperatorWord; wc.ShiftNext();
+							var attr = wc.Current as LiteralStringWord; wc.ShiftNext();
+							if (w == null || op == null || attr == null) goto error;
+						}
+						return null;
 					}
 				case "button":
 				case "nonbutton":
