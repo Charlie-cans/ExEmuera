@@ -4180,12 +4180,11 @@ namespace MinorShift.Emuera.GameData.Function
 			public LoadTextMethod()
 			{
 				ReturnType = typeof(string);
-				argumentTypeArray = new Type[] { typeof(Int64), typeof(Int64), typeof(Int64) };
+				argumentTypeArray = new Type[] { typeof(string), typeof(Int64), typeof(Int64) };
 				CanRestructure = false;
 			}
 			public override string CheckArgumentType(string name, IOperandTerm[] arguments)
 			{
-
 				if (arguments.Length < 1)
 					return string.Format(Properties.Resources.SyntaxErrMesMethodDefaultArgumentNum1, name, 1);
 				if (arguments.Length > 3)
@@ -4194,34 +4193,30 @@ namespace MinorShift.Emuera.GameData.Function
 				{
 					if (arguments[i] == null)
 						return string.Format(Properties.Resources.SyntaxErrMesMethodDefaultArgumentNotNullable0, name, i + 1);
-					if (i < argumentTypeArray.Length && argumentTypeArray[i] != arguments[i].GetOperandType())
-						return string.Format(Properties.Resources.SyntaxErrMesMethodDefaultArgumentType0, name, i + 1);
 				}
 				return null;
 			}
 			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
 			{
-                Int64 i64 = arguments[0].GetIntValue(exm);
-                if (i64 < 0 || i64 > int.MaxValue)
-					return "";
-				bool forceSavdir = arguments.Length > 1 && (arguments[1].GetIntValue(exm) != 0);
-				bool forceUTF8 = arguments.Length > 2 && (arguments[2].GetIntValue(exm) != 0);
-				int fileIndex = (int)i64;
-				string filepath = forceSavdir ?
-					GetSaveDataPathText(fileIndex, Config.ForceSavDir) :
-					GetSaveDataPathText(fileIndex, Config.SavDir);
-				Encoding encoding = forceUTF8 ?
-					Encoding.GetEncoding("UTF-8") :
-					Config.SaveEncode;
-				if (!System.IO.File.Exists(filepath))
-					return "";
-                string ret;
-                try
-                {
-                    ret = System.IO.File.ReadAllText(filepath, encoding);
-                }
-                catch { return ""; }
-                return ret;
+				// EM+EE: first arg can be string (filepath) or int (save index)
+				string filepath;
+				if (arguments[0].GetOperandType() == typeof(string))
+				{
+					filepath = arguments[0].GetStrValue(exm);
+				}
+				else
+				{
+					Int64 i64 = arguments[0].GetIntValue(exm);
+					if (i64 < 0 || i64 > int.MaxValue) return "";
+					bool forceSavdir = arguments.Length > 1 && (arguments[1].GetIntValue(exm) != 0);
+					int fileIndex = (int)i64;
+					filepath = forceSavdir ?
+						GetSaveDataPathText(fileIndex, Config.ForceSavDir) :
+						GetSaveDataPathText(fileIndex, Config.SavDir);
+				}
+				if (!System.IO.File.Exists(filepath)) return "";
+				try { return System.IO.File.ReadAllText(filepath, Config.SaveEncode); }
+				catch { return ""; }
 			}
 		}
 
@@ -4680,16 +4675,38 @@ namespace MinorShift.Emuera.GameData.Function
 			public DataTableFromXmlMethod()
 			{
 				ReturnType = typeof(long);
-				argumentTypeArray = new Type[] { typeof(string), typeof(string) };
+				argumentTypeArray = new Type[] { typeof(string) };
 				CanRestructure = false;
+			}
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments)
+			{
+				if (arguments.Length < 2 || arguments.Length > 3)
+					return name + "関数:引数の数が間違っています";
+				if (arguments[0] == null || arguments[0].GetOperandType() != typeof(string))
+					return name + "関数:第1引数は文字列型でなければなりません";
+				for (int i = 1; i < arguments.Length; i++)
+					if (arguments[i] == null) return name + "関数:引数がnullです";
+				return null;
 			}
 			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
 			{
 				string key = arguments[0].GetStrValue(exm);
-				string xml = arguments[1].GetStrValue(exm);
 				var dict = GlobalStatic.VariableData.DataTables;
 				if (!dict.TryGetValue(key, out var dt)) { dt = new System.Data.DataTable(key); dict[key] = dt; }
-				try { using (var sr = new System.IO.StringReader(xml)) { dt.ReadXml(sr); } return 1; }
+				try
+				{
+					// Read schema if provided (3-arg form: DT_FROMXML name, schema_xml, data_xml)
+					if (arguments.Length >= 3) {
+						string schemaXml = arguments[1].GetStrValue(exm);
+						string dataXml = arguments[2].GetStrValue(exm);
+						using (var sr = new System.IO.StringReader(schemaXml)) { dt.ReadXmlSchema(sr); }
+						using (var sr = new System.IO.StringReader(dataXml)) { dt.ReadXml(sr); }
+					} else {
+						string xml = arguments[1].GetStrValue(exm);
+						using (var sr = new System.IO.StringReader(xml)) { dt.ReadXml(sr); }
+					}
+					return 1;
+				}
 				catch { return 0; }
 			}
 		}
@@ -4915,11 +4932,16 @@ namespace MinorShift.Emuera.GameData.Function
 			}
 			#endregion
 		#region EM+EE more stubs
-		private sealed class PluginStubMethod : FunctionMethod
+		private sealed class PluginIntStubMethod : FunctionMethod
 		{
-			public PluginStubMethod() { ReturnType = typeof(string); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public PluginIntStubMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[0]; CanRestructure = false; }
 			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
 			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 0; }
+		}
+		private sealed class PluginStrStubMethod : FunctionMethod
+		{
+			public PluginStrStubMethod() { ReturnType = typeof(string); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
 			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
 		}
 		private sealed class ExistFunctionStub : FunctionMethod

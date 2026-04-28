@@ -73,6 +73,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		SP_REF,
 		SP_REFBYNAME,
 		SP_HTMLSPLIT,
+		SP_HTML_PRINT,
 		SP_DT_COLUMN_OPTIONS,
 	}
 }

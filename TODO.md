@@ -19,6 +19,8 @@
 - [x] 颜色名补全 40+ CSS 颜色
 - [x] 无限循环检测不再弹 MessageBox
 - [x] HTML_PRINTFORM 新指令
+- [x] HTML_PRINT 后缀变体 (HTML_PRINTC/PRINTL/PRINTLC/PRINTFORMC/PRINTFORMLC/PRINTBUTTONC/PRINTBUTTON_EXC)
+- [x] CSV .als 别名文件加载 (loadAliases, ScriptPosition双参构造器)
 - [x] <div> 标签防崩溃桩
 - [x] <shape> param px 后缀支持
 
@@ -43,8 +45,9 @@
   - 追踪 GCREATEFROMFILE → SPRITECREATE → AppContents.GetSprite 链
 
 ### 中优先级
-- [ ] Sound 系统 (PLAYSOUND/STOPSOUND/SETSOUNDVOLUME)
+- [ ] Sound 系统 (PLAYSOUND/STOPSOUND/SETSOUNDVOLUME/GETSOUNDORBGMINFO)
   - 当前 Unity AudioSource 桩，需文件加载 + 播放
+  - GETSOUNDORBGMINFO: eratw-sub-modding `音乐播放.ERB` / TEST.ERB 中引用
 
 - [ ] XML 系统 (XML_DOCUMENT/XML_GET/XML_SET/XML_ADDNODE 等)
   - 用 System.Xml 实现

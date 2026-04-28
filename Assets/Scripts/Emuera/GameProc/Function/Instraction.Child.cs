@@ -41,12 +41,12 @@ namespace MinorShift.Emuera.GameProc.Function
 				}
 				else if (st.CurrentEqualTo("S"))
 				{
-					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
 					st.Jump(1);
 				}
 				else if (st.CurrentEqualTo("FORMS"))
 				{
-					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
 					isForms = true;
 					st.Jump(5);
 				}
@@ -239,22 +239,97 @@ namespace MinorShift.Emuera.GameProc.Function
 		
 		private sealed class HTML_PRINT_Instruction : AbstractInstruction
 		{
-			public HTML_PRINT_Instruction()
+			public HTML_PRINT_Instruction(string name = "HTML_PRINT")
 			{
+				//HTML_PRINT(FORM)?(C|LC|L)?
+				//HTML_PRINTBUTTON(C)?
+
 				flag = EXTENDED | METHOD_SAFE;
-				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
+				StringStream st = new StringStream(name);
+				st.Jump(10);//HTML_PRINT
+
+				if (st.CurrentEqualTo("FORM"))
+				{
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.FORM_STR_NULLABLE);
+					isForm = true;
+					st.Jump(4);
+				}
+				else if (st.CurrentEqualTo("BUTTON"))
+				{
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
+					isButton = true;
+					st.Jump(6);
+				}
+				else
+				{
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
+				}
+
+				if (st.CurrentEqualTo("LC"))
+				{
+					isLC = true;
+					st.Jump(2);
+				}
+				else if (st.CurrentEqualTo("C"))
+				{
+					isC = true;
+					st.Jump(1);
+				}
+				else if (st.CurrentEqualTo("L"))
+				{
+					isL = true;
+					st.Jump(1);
+				}
+				// Handle BUTTON_EXC suffix
+				if (isButton && st.CurrentEqualTo("_EXC"))
+				{
+					st.Jump(4);
+				}
+				// Handle _TEST suffix
+				if (st.CurrentEqualTo("_TEST"))
+				{
+					st.Jump(5);
+				}
+				if (!st.EOS)
+				{
+					// Unknown suffix, fall back to base
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
+					isForm = false;
+					isButton = false;
+					isC = false;
+					isLC = false;
+					isL = false;
+				}
 			}
+
+			readonly bool isForm;
+			readonly bool isButton;
+			readonly bool isC;
+			readonly bool isLC;
+			readonly bool isL;
 
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
 			{
-                if (GlobalStatic.Process.SkipPrint)
-                    return;
-                string str = null;
+				if (GlobalStatic.Process.SkipPrint)
+					return;
+				string str = null;
 				if (func.Argument.IsConst)
 					str = func.Argument.ConstStr;
 				else
 					str = ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
-				exm.Console.PrintHtml(str);
+				if (isForm)
+				{
+					str = exm.CheckEscape(str);
+					StrFormWord wt = LexicalAnalyzer.AnalyseFormattedString(new StringStream(str), FormStrEndWith.EoL, false);
+					StrForm strForm = StrForm.FromWordToken(wt);
+					str = strForm.GetString(exm);
+				}
+				if (isC)
+					exm.Console.PrintC(str, true);
+				else if (isLC)
+					exm.Console.PrintC(str, false);
+				else
+					exm.Console.PrintHtml(str);
 			}
 		}
 
@@ -306,7 +381,7 @@ namespace MinorShift.Emuera.GameProc.Function
 			public PRINT_IMG_Instruction()
 			{
 				flag = EXTENDED | METHOD_SAFE;
-				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
 			}
 
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
@@ -876,6 +951,60 @@ namespace MinorShift.Emuera.GameProc.Function
 			}
 		}
 
+		private sealed class TRYCALLF_Instruction : AbstractInstruction
+		{
+			public TRYCALLF_Instruction(bool form)
+			{
+				if (form)
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_CALLFORMF);
+				else
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_CALLF);
+				flag = EXTENDED | METHOD_SAFE | FORCE_SETARG;
+			}
+
+			public override void SetJumpTo(ref bool useCallForm, InstructionLine func, int currentDepth, ref string FunctionoNotFoundName)
+			{
+				if (!func.Argument.IsConst)
+				{
+					useCallForm = true;
+					return;
+				}
+				SpCallFArgment callfArg = (SpCallFArgment)func.Argument;
+				try
+				{
+					callfArg.FuncTerm = GlobalStatic.IdentifierDictionary.GetFunctionMethod(GlobalStatic.LabelDictionary, callfArg.ConstStr, callfArg.RowArgs, true);
+				}
+				catch
+				{
+					return;
+				}
+				if (callfArg.FuncTerm == null)
+				{
+					return;
+				}
+			}
+
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				IOperandTerm mToken = null;
+				string labelName = null;
+				if ((!func.Argument.IsConst) || (exm.Console.RunERBFromMemory))
+				{
+					SpCallFArgment spCallformArg = (SpCallFArgment)func.Argument;
+					labelName = spCallformArg.FuncnameTerm.GetStrValue(exm);
+					mToken = GlobalStatic.IdentifierDictionary.GetFunctionMethod(GlobalStatic.LabelDictionary, labelName, spCallformArg.RowArgs, true);
+				}
+				else
+				{
+					labelName = func.Argument.ConstStr;
+					mToken = ((SpCallFArgment)func.Argument).FuncTerm;
+				}
+				if (mToken == null)
+					return;
+				mToken.GetValue(exm);
+			}
+		}
+
 		private sealed class BAR_Instruction : AbstractInstruction
 		{
 			public BAR_Instruction(bool newline)
@@ -1390,7 +1519,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		{
 			public LOADCHARA_Instruction()
 			{
-				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
 				flag = METHOD_SAFE | EXTENDED;
 			}
 
@@ -1429,7 +1558,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		{
 			public LOADVAR_Instruction()
 			{
-				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
 				flag = METHOD_SAFE | EXTENDED;
 			}
 
@@ -2458,7 +2587,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		#region EM+EE Sound instructions
 		private sealed class PLAYSOUND_Instruction : AbstractInstruction
 		{
-			public PLAYSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
+			public PLAYSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; }
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.PlaySound(((ExpressionArgument)func.Argument).Term.GetStrValue(exm)); }
 		}
 		private sealed class STOPSOUND_Instruction : AbstractInstruction
@@ -2473,7 +2602,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		}
 		private sealed class PLAYBGM_Instruction : AbstractInstruction
 		{
-			public PLAYBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
+			public PLAYBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; }
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.PlayBGM(((ExpressionArgument)func.Argument).Term.GetStrValue(exm)); }
 		}
 		private sealed class STOPBGM_Instruction : AbstractInstruction
@@ -2490,15 +2619,15 @@ namespace MinorShift.Emuera.GameProc.Function
 
 		#region EM+EE Stub instructions
 		private sealed class TOOLTIPSETFONT_Instruction : AbstractInstruction
-		{ public TOOLTIPSETFONT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		{ public TOOLTIPSETFONT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class TOOLTIPSETFONTSIZE_Instruction : AbstractInstruction
 		{ public TOOLTIPSETFONTSIZE_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class TOOLTIPCUSTOM_Instruction : AbstractInstruction
-		{ public TOOLTIPCUSTOM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		{ public TOOLTIPCUSTOM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class TOOLTIPFORMAT_Instruction : AbstractInstruction
 		{ public TOOLTIPFORMAT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.FORM_STR); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class TOOLTIPIMG_Instruction : AbstractInstruction
-		{ public TOOLTIPIMG_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		{ public TOOLTIPIMG_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class SKIPLOG_Instruction : AbstractInstruction
 		{
 			public SKIPLOG_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }

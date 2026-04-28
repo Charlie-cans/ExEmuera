@@ -336,6 +336,8 @@ namespace MinorShift.Emuera.GameProc.Function
 			addFunction(FunctionCode.CALLEVENT, new CALLEVENT_Instruction());
 			addFunction(FunctionCode.CALLF, new CALLF_Instruction(false));
 			addFunction(FunctionCode.CALLFORMF, new CALLF_Instruction(true));
+			addFunction(FunctionCode.TRYCALLF, new TRYCALLF_Instruction(false));
+			addFunction(FunctionCode.TRYCALLFORMF, new TRYCALLF_Instruction(true));
 			addFunction(FunctionCode.RESTART, new RESTART_Instruction());//関数の再開。関数の最初に戻る。
 			addFunction(FunctionCode.GOTO, new GOTO_Instruction(false, false, false));//$ラベルへジャンプ
 			addFunction(FunctionCode.TRYGOTO, new GOTO_Instruction(false, true, false), EXTENDED);
@@ -367,8 +369,15 @@ namespace MinorShift.Emuera.GameProc.Function
 			addFunction(FunctionCode.LOADCHARA, new LOADCHARA_Instruction());
 			addFunction(FunctionCode.REF, new REF_Instruction(false));
 			addFunction(FunctionCode.REFBYNAME, new REF_Instruction(true));
-			addFunction(FunctionCode.HTML_PRINT, new HTML_PRINT_Instruction());
-			addFunction(FunctionCode.HTML_PRINTFORM, new HTML_PRINTFORM_Instruction());
+			addFunction(FunctionCode.HTML_PRINT, new HTML_PRINT_Instruction("HTML_PRINT"));
+			addFunction(FunctionCode.HTML_PRINTC, new HTML_PRINT_Instruction("HTML_PRINTC"));
+			addFunction(FunctionCode.HTML_PRINTL, new HTML_PRINT_Instruction("HTML_PRINTL"));
+			addFunction(FunctionCode.HTML_PRINTLC, new HTML_PRINT_Instruction("HTML_PRINTLC"));
+			addFunction(FunctionCode.HTML_PRINTFORM, new HTML_PRINT_Instruction("HTML_PRINTFORM"));
+			addFunction(FunctionCode.HTML_PRINTFORMC, new HTML_PRINT_Instruction("HTML_PRINTFORMC"));
+			addFunction(FunctionCode.HTML_PRINTFORMLC, new HTML_PRINT_Instruction("HTML_PRINTFORMLC"));
+			addFunction(FunctionCode.HTML_PRINTBUTTONC, new HTML_PRINT_Instruction("HTML_PRINTBUTTONC"));
+			addFunction(FunctionCode.HTML_PRINTBUTTON_EXC, new HTML_PRINT_Instruction("HTML_PRINTBUTTON_EXC"));
 			addFunction(FunctionCode.HTML_TAGSPLIT, new HTML_TAGSPLIT_Instruction());
 			addFunction(FunctionCode.PRINT_IMG, new PRINT_IMG_Instruction());
 			addFunction(FunctionCode.PRINT_RECT, new PRINT_RECT_Instruction());
