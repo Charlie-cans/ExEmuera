@@ -41,12 +41,12 @@ namespace MinorShift.Emuera.GameProc.Function
 				}
 				else if (st.CurrentEqualTo("S"))
 				{
-					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
 					st.Jump(1);
 				}
 				else if (st.CurrentEqualTo("FORMS"))
 				{
-					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
 					isForms = true;
 					st.Jump(5);
 				}
@@ -381,7 +381,7 @@ namespace MinorShift.Emuera.GameProc.Function
 			public PRINT_IMG_Instruction()
 			{
 				flag = EXTENDED | METHOD_SAFE;
-				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
 			}
 
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
@@ -1519,7 +1519,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		{
 			public LOADCHARA_Instruction()
 			{
-				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
 				flag = METHOD_SAFE | EXTENDED;
 			}
 
@@ -1558,7 +1558,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		{
 			public LOADVAR_Instruction()
 			{
-				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT);
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
 				flag = METHOD_SAFE | EXTENDED;
 			}
 
@@ -2587,7 +2587,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		#region EM+EE Sound instructions
 		private sealed class PLAYSOUND_Instruction : AbstractInstruction
 		{
-			public PLAYSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; }
+			public PLAYSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.PlaySound(((ExpressionArgument)func.Argument).Term.GetStrValue(exm)); }
 		}
 		private sealed class STOPSOUND_Instruction : AbstractInstruction
@@ -2602,7 +2602,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		}
 		private sealed class PLAYBGM_Instruction : AbstractInstruction
 		{
-			public PLAYBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; }
+			public PLAYBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.PlayBGM(((ExpressionArgument)func.Argument).Term.GetStrValue(exm)); }
 		}
 		private sealed class STOPBGM_Instruction : AbstractInstruction
@@ -2619,15 +2619,15 @@ namespace MinorShift.Emuera.GameProc.Function
 
 		#region EM+EE Stub instructions
 		private sealed class TOOLTIPSETFONT_Instruction : AbstractInstruction
-		{ public TOOLTIPSETFONT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		{ public TOOLTIPSETFONT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class TOOLTIPSETFONTSIZE_Instruction : AbstractInstruction
 		{ public TOOLTIPSETFONTSIZE_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class TOOLTIPCUSTOM_Instruction : AbstractInstruction
-		{ public TOOLTIPCUSTOM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		{ public TOOLTIPCUSTOM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class TOOLTIPFORMAT_Instruction : AbstractInstruction
 		{ public TOOLTIPFORMAT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.FORM_STR); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class TOOLTIPIMG_Instruction : AbstractInstruction
-		{ public TOOLTIPIMG_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		{ public TOOLTIPIMG_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
 		private sealed class SKIPLOG_Instruction : AbstractInstruction
 		{
 			public SKIPLOG_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
