@@ -55,6 +55,7 @@ namespace MinorShift.Emuera
 			MainWindow = null;
 			LabelDictionary = null;
 			IdentifierDictionary = null;
+			SqliteManager.Reset();
 			tempDic.Clear();
 		}
 	}

@@ -3356,6 +3356,7 @@ namespace MinorShift.Emuera.GameData.Function
 						filepath = Program.ContentDir + filename;
 					if (!System.IO.File.Exists(filepath))
 						return 0;
+			UnityEngine.Debug.Log("[Emuera-IMG] GCREATEFROMFILE: " + filepath + " exists=" + System.IO.File.Exists(filepath));
 					bmp = new BitmapTexture(filepath);
 					if (bmp.Width > AbstractImage.MAX_IMAGESIZE || bmp.Height > AbstractImage.MAX_IMAGESIZE)
 						return 0;
@@ -4892,12 +4893,81 @@ namespace MinorShift.Emuera.GameData.Function
 		}
 		#endregion
 
-		#region EM+EE SQL stubs (SQL_CONNECT / SQL_EXECUTE / SQL_IMPORT_MAP_XML etc.)
+		#region EM+EE SQLite real implementations
+		private sealed class SqlConnectMethod : FunctionMethod
+		{
+			public SqlConnectMethod() { ReturnType = typeof(long); argumentTypeArray = new[] { typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				SqliteManager.Connect(arguments[0].GetStrValue(exm));
+				return 1;
+			}
+		}
+		private sealed class SqlDisconnectMethod : FunctionMethod
+		{
+			public SqlDisconnectMethod() { ReturnType = typeof(long); argumentTypeArray = new[] { typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				SqliteManager.Disconnect(arguments[0].GetStrValue(exm));
+				return 1;
+			}
+		}
+		private sealed class SqlExecuteScalarStringMethod : FunctionMethod
+		{
+			public SqlExecuteScalarStringMethod() { ReturnType = typeof(string); argumentTypeArray = new[] { typeof(string), typeof(string) }; CanRestructure = false; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				return SqliteManager.ExecuteScalarString(arguments[0].GetStrValue(exm), arguments[1].GetStrValue(exm));
+			}
+		}
+		private sealed class SqlExecuteScalarLongMethod : FunctionMethod
+		{
+			public SqlExecuteScalarLongMethod() { ReturnType = typeof(long); argumentTypeArray = new[] { typeof(string), typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				return SqliteManager.ExecuteScalarLong(arguments[0].GetStrValue(exm), arguments[1].GetStrValue(exm));
+			}
+		}
+		private sealed class SqlExecuteNonQueryMethod : FunctionMethod
+		{
+			public SqlExecuteNonQueryMethod() { ReturnType = typeof(long); argumentTypeArray = new[] { typeof(string), typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				SqliteManager.ExecuteNonQuery(arguments[0].GetStrValue(exm), arguments[1].GetStrValue(exm));
+				return 1;
+			}
+		}
+		private sealed class SqlImportMapXmlMethod : FunctionMethod
+		{
+			public SqlImportMapXmlMethod() { ReturnType = typeof(long); argumentTypeArray = new[] { typeof(string), typeof(string), typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				SqliteManager.ImportMapXml(arguments[0].GetStrValue(exm), arguments[1].GetStrValue(exm), arguments[2].GetStrValue(exm));
+				return 1;
+			}
+		}
+		private sealed class SqlExecuteReaderMethod : FunctionMethod
+		{
+			public SqlExecuteReaderMethod() { ReturnType = typeof(long); argumentTypeArray = new[] { typeof(string), typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				SqliteManager.ExecuteReader(arguments[0].GetStrValue(exm), arguments[1].GetStrValue(exm), null);
+				return 1;
+			}
+		}
+		// Remaining SQL stubs (not used by eratw-sub-modding)
 		private sealed class SqlStubMethod : FunctionMethod
 		{
 			public SqlStubMethod(int argCount = 1) { ReturnType = typeof(long); argumentTypeArray = new Type[argCount]; for (int i = 0; i < argCount; i++) argumentTypeArray[i] = typeof(string); CanRestructure = false; }
-				public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
-				public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 1; }
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 1; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
+		}
+		private sealed class SqlStrStubMethod : FunctionMethod
+		{
+			public SqlStrStubMethod(int argCount = 1) { ReturnType = typeof(string); argumentTypeArray = new Type[argCount]; for (int i = 0; i < argCount; i++) argumentTypeArray[i] = typeof(string); CanRestructure = false; }
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 1; }
 			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
 		}
 			#endregion

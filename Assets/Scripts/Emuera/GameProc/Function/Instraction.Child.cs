@@ -2640,6 +2640,38 @@ namespace MinorShift.Emuera.GameProc.Function
 			public FORCE_BEGIN_Instruction() { ArgBuilder = null; flag = METHOD_SAFE | EXTENDED | FLOW_CONTROL; }
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.Process.Initialize(); }
 		}
+		#region SQL Instructions
+		private sealed class SQL_Instruction : AbstractInstruction
+		{
+			readonly int argCount;
+
+			public SQL_Instruction(int argCount)
+			{
+				this.argCount = argCount;
+				flag = EXTENDED | METHOD_SAFE;
+				if (argCount == 1) ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_SQL_1);
+				else if (argCount == 2) ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_SQL_2);
+				else ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_SQL_3);
+			}
+
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				var sqlArg = (ArgumentParser.SqlArgment)func.Argument;
+				string[] args = new string[argCount];
+				for (int i = 0; i < sqlArg.Terms.Length && i < argCount; i++)
+					args[i] = sqlArg.Terms[i].GetStrValue(exm);
+				switch (func.FunctionCode)
+				{
+					case FunctionCode.SQL_CONNECT: SqliteManager.Connect(args[0]); break;
+					case FunctionCode.SQL_DISCONNECT: SqliteManager.Disconnect(args[0]); break;
+					case FunctionCode.SQL_IMPORT_MAP_XML: SqliteManager.ImportMapXml(args[0], args[1], args[2]); break;
+					case FunctionCode.SQL_IMPORT_DT_XML: SqliteManager.ImportMapXml(args[0], args[1], args[2]); break;
+					case FunctionCode.SQL_EXECUTE: SqliteManager.ExecuteNonQuery(args[0], args[1]); break;
+					case FunctionCode.SQL_EXECUTE_NON_QUERY: SqliteManager.ExecuteNonQuery(args[0], args[1]); break;
+					case FunctionCode.SQL_EXECUTE_READER: SqliteManager.ExecuteReader(args[0], args[1], null); break;
+				}
+			}
+		}
 		#endregion
 	}
 }

@@ -18,19 +18,18 @@
 - [x] 图片加载 15s 延迟 → 立即
 - [x] 颜色名补全 40+ CSS 颜色
 - [x] 无限循环检测不再弹 MessageBox
-- [x] HTML_PRINTFORM 新指令
-- [x] HTML_PRINT 后缀变体 (HTML_PRINTC/PRINTL/PRINTLC/PRINTFORMC/PRINTFORMLC/PRINTBUTTONC/PRINTBUTTON_EXC)
-- [x] CSV .als 别名文件加载 (loadAliases, ScriptPosition双参构造器)
 - [x] <div> 标签防崩溃桩
 - [x] <shape> param px 后缀支持
+- [x] CSV .als 别名文件加载 (loadAliases, ScriptPosition双参构造器)
+- [x] HTML_PRINTFORM 新指令
+- [x] HTML_PRINT 后缀变体 (HTML_PRINTC/PRINTL/PRINTLC/PRINTFORMC/PRINTFORMLC/PRINTBUTTONC/PRINTBUTTON_EXC)
+- [x] HTML_PRINT 第2参数支持 (SP_HTML_PRINT builder, string + optional int)
+- [x] TRYCALLFORMF / TRYCALLF 注册 (TRYCALLF_Instruction 静默失败版)
+- [x] SQLite 系统 (Mono.Data.Sqlite + sqlite3.dll, SQL_CONNECT/EXECUTE_SCALAR_STRING/EXECUTE_SCALAR_LONG/EXECUTE_NON_QUERY/EXECUTE_READER/IMPORT_MAP_XML)
 
 ## 需要完整实现（非桩）
 
 ### 高优先级
-- [ ] SQLite 系统 (SQL_CONNECT/SQL_EXECUTE/SQL_IMPORT_MAP_XML 等)
-  - 需要 NuGet Microsoft.Data.Sqlite
-  - 涉及 FunctionMethod 注册 + 数据库 CRUD
-
 - [ ] `<div>` 标签完整渲染
   - 需要移植 ConsoleDivPart (GDI+ → Unity UI)
   - MixedNum/StyledBoxModel/BoxBorder 等类
@@ -45,9 +44,8 @@
   - 追踪 GCREATEFROMFILE → SPRITECREATE → AppContents.GetSprite 链
 
 ### 中优先级
-- [ ] Sound 系统 (PLAYSOUND/STOPSOUND/SETSOUNDVOLUME/GETSOUNDORBGMINFO)
+- [ ] Sound 系统 (PLAYSOUND/STOPSOUND/SETSOUNDVOLUME)
   - 当前 Unity AudioSource 桩，需文件加载 + 播放
-  - GETSOUNDORBGMINFO: eratw-sub-modding `音乐播放.ERB` / TEST.ERB 中引用
 
 - [ ] XML 系统 (XML_DOCUMENT/XML_GET/XML_SET/XML_ADDNODE 等)
   - 用 System.Xml 实现
@@ -67,8 +65,17 @@
 - [ ] SETBGIMAGE/CLEARBGIMAGE/REMOVEBGIMAGE
 - [ ] HTML_PRINT_ISLAND/HTML_PRINT_ISLAND_CLEAR
 
+## 非 EE 标准扩展（无法从 EE 源码移植）
+
+以下指令在 eratw-sub-modding 中使用，但 EE 桌面版源码中也不存在。可能来自社区 fork 或自定义插件：
+
+- `GETSOUNDORBGMINFO` — 音乐补丁 `音乐播放.ERB`、TEST.ERB
+- `TRYCCALLSTR` — TEST.ERB
+- `GDRAWGWITHROTATE` — TEST.ERB (Skia 图形扩展)
+- `SET_SKIA_QUALITY` — TEST.ERB (Skia 画质设置)
+
 ## 已知限制
 - 图片渲染白屏：sprite 查找失败，GCREATEFROMFILE 异步加载链问题
 - `<div>` 无视觉效果：只有功能桩，无边框/背景/布局
-- SQL 全桩：数据库操作返回 1 不报错但无实际效果
 - Sound 全桩：不播放音频
+- 非 EE 标准扩展指令：见上方列表，均为 TEST.ERB / DLC 中使用，不影响主流程

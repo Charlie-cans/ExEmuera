@@ -60,11 +60,15 @@ namespace uEmuera.Drawing
             while(tiot.mutex == null)
                 System.Threading.Thread.Sleep(10);
             tiot.mutex.WaitOne();
+			tiot.mutex.WaitOne();
+			if (textureinfo != null) {
+				UnityEngine.Debug.Log("[Emuera-IMG] Bitmap OK: " + path + " " + size.Width + "x" + size.Height);
+				tiot.mutex.ReleaseMutex();
+				tiot.mutex.Close();
+			} else {
+				UnityEngine.Debug.Log("[Emuera-IMG] Bitmap FAIL: " + path);
+			}
 
-            if(textureinfo == null)
-                return;
-            tiot.mutex.ReleaseMutex();
-            tiot.mutex.Close();
         }
         public UnityEngine.Texture2D texture
         {

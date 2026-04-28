@@ -112,7 +112,8 @@ public class EmueraImage : EmueraBehaviour
         }
         else
         {
-            image.enabled = false;
+            // Non-button images should still display, just not be clickable
+            image.enabled = true;
             click_handler_.enabled = false;
         }
 
@@ -151,6 +152,8 @@ public class EmueraImage : EmueraBehaviour
             width = Mathf.Max(image_part.PointX - ud.posx + image_rect.Width, width);
 
             image.name = image_part.Image.Name;
+			if (image_part.Image == null) UnityEngine.Debug.Log("[Emuera-IMG] Render: NULL sprite for " + image_part.ResourceName);
+			else UnityEngine.Debug.Log("[Emuera-IMG] Render: " + image_part.ResourceName + " -> " + image_part.Image.Name);
             imageinfo.Load(image_part.Image);
             image_infos_.Add(imageinfo);
         }

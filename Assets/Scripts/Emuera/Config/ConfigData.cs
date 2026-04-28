@@ -313,9 +313,14 @@ static ConfigData() { }
 				case ConfigCode.PrintCLength:// "PRINTCの文字数"
 				case ConfigCode.FontSize:// "フォントサイズ"
 				case ConfigCode.LineHeight:// "一行の高さ"
+				case ConfigCode.FPS:// "フレーム毎秒"
+				case ConfigCode.SkipFrame:// "最大スキップフレーム数"
+				case ConfigCode.ScrollHeight:// "スクロール行数"
 				case ConfigCode.SaveDataNos:// "表示するセーブデータ数"
 				case ConfigCode.MaxShopItem:// "販売アイテム数"
 				case ConfigCode.ComAbleDefault:// "COM_ABLE初期値"
+				case ConfigCode.InfiniteLoopAlertTime:// "無限ループ警告までのミリ秒数"
+				case ConfigCode.DisplayWarningLevel:// "表示する最低警告レベル"
 					term = new SingleTerm(item.GetValue<int>());
 					break;
 				//<Color>

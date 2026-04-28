@@ -230,6 +230,9 @@ namespace MinorShift.Emuera.GameProc.Function
 			argb[FunctionArgType.SP_HTMLSPLIT] = new SP_HTMLSPLIT_ArgumentBuilder();
 			argb[FunctionArgType.SP_HTML_PRINT] = new SP_HTML_PRINT_ArgumentBuilder();
 			argb[FunctionArgType.SP_DT_COLUMN_OPTIONS] = new SP_DT_COLUMN_OPTIONS_ArgumentBuilder();
+			argb[FunctionArgType.SP_SQL_1] = new SQL_ArgumentBuilder(1);
+			argb[FunctionArgType.SP_SQL_2] = new SQL_ArgumentBuilder(2);
+			argb[FunctionArgType.SP_SQL_3] = new SQL_ArgumentBuilder(3);
 
         }
 		
@@ -1971,6 +1974,31 @@ namespace MinorShift.Emuera.GameProc.Function
 				if (!checkArgumentType(line, exm, terms))
 					return null;
 				return new ExpressionArgument(terms[0]);
+			}
+		}
+
+		internal sealed class SqlArgment : Argument
+		{
+			public readonly IOperandTerm[] Terms;
+			public SqlArgment(IOperandTerm[] terms) { Terms = terms; }
+		}
+
+		private sealed class SQL_ArgumentBuilder : ArgumentBuilder
+		{
+			int argCount;
+			public SQL_ArgumentBuilder(int argCount) { this.argCount = argCount; }
+			public override Argument CreateArgument(InstructionLine line, ExpressionMediator exm)
+			{
+				IOperandTerm[] terms = popTerms(line);
+				for (int i = 0; i < terms.Length && i < argCount; i++)
+					terms[i] = terms[i].Restructure(exm);
+				var ret = new SqlArgment(terms);
+				if (terms.Length > 0 && terms[0] is SingleTerm)
+				{
+					ret.IsConst = true;
+					ret.ConstStr = terms[0].GetStrValue(null);
+				}
+				return ret;
 			}
 		}
 	}
