@@ -258,6 +258,21 @@ namespace MinorShift.Emuera.GameProc.Function
 			}
 		}
 
+		private sealed class HTML_PRINTFORM_Instruction : AbstractInstruction
+		{
+			public HTML_PRINTFORM_Instruction()
+			{
+				flag = EXTENDED | METHOD_SAFE;
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.FORM_STR_NULLABLE);
+			}
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				if (GlobalStatic.Process.SkipPrint) return;
+				string str = func.Argument.IsConst ? func.Argument.ConstStr : ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
+				exm.Console.PrintHtml(str);
+			}
+		}
+
 		private sealed class HTML_TAGSPLIT_Instruction : AbstractInstruction
 		{
 			public HTML_TAGSPLIT_Instruction()
@@ -2437,6 +2452,64 @@ namespace MinorShift.Emuera.GameProc.Function
 					throw new CodeEE("指定されたラベル名\"$" + label + "\"は無効な$ラベル行です");
 				state.JumpTo(jumpto);
 			}
+		}
+		#endregion
+
+		#region EM+EE Sound instructions
+		private sealed class PLAYSOUND_Instruction : AbstractInstruction
+		{
+			public PLAYSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.PlaySound(((ExpressionArgument)func.Argument).Term.GetStrValue(exm)); }
+		}
+		private sealed class STOPSOUND_Instruction : AbstractInstruction
+		{
+			public STOPSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.StopSound(); }
+		}
+		private sealed class SETSOUNDVOLUME_Instruction : AbstractInstruction
+		{
+			public SETSOUNDVOLUME_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.SetSoundVolume((int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm)); }
+		}
+		private sealed class PLAYBGM_Instruction : AbstractInstruction
+		{
+			public PLAYBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.PlayBGM(((ExpressionArgument)func.Argument).Term.GetStrValue(exm)); }
+		}
+		private sealed class STOPBGM_Instruction : AbstractInstruction
+		{
+			public STOPBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.StopBGM(); }
+		}
+		private sealed class SETBGMVOLUME_Instruction : AbstractInstruction
+		{
+			public SETBGMVOLUME_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.MainWindow.SetBGMVolume((int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm)); }
+		}
+		#endregion
+
+		#region EM+EE Stub instructions
+		private sealed class TOOLTIPSETFONT_Instruction : AbstractInstruction
+		{ public TOOLTIPSETFONT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		private sealed class TOOLTIPSETFONTSIZE_Instruction : AbstractInstruction
+		{ public TOOLTIPSETFONTSIZE_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		private sealed class TOOLTIPCUSTOM_Instruction : AbstractInstruction
+		{ public TOOLTIPCUSTOM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		private sealed class TOOLTIPFORMAT_Instruction : AbstractInstruction
+		{ public TOOLTIPFORMAT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.FORM_STR); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		private sealed class TOOLTIPIMG_Instruction : AbstractInstruction
+		{ public TOOLTIPIMG_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		private sealed class SKIPLOG_Instruction : AbstractInstruction
+		{
+			public SKIPLOG_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.Process.SkipLog = true; }
+		}
+		private sealed class UPDATECHECK_Instruction : AbstractInstruction
+		{ public UPDATECHECK_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = METHOD_SAFE | EXTENDED; } public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { } }
+		private sealed class FORCE_BEGIN_Instruction : AbstractInstruction
+		{
+			public FORCE_BEGIN_Instruction() { ArgBuilder = null; flag = METHOD_SAFE | EXTENDED | FLOW_CONTROL; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.Process.Initialize(); }
 		}
 		#endregion
 	}

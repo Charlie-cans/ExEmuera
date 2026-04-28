@@ -27,6 +27,10 @@ namespace MinorShift.Emuera.GameData.Variable
 		//readonly VariableLocal<Int64, Int64Calculator> argVars;
 		//readonly VariableLocal<string, StringCalculator> argString;
 		readonly List<CharacterData> characterList;
+		// EM+EE DataTables
+		public Dictionary<string, System.Data.DataTable> DataTables = new Dictionary<string, System.Data.DataTable>();
+		// EM+EE String Maps (MAP_* functions)
+		public Dictionary<string, Dictionary<string, string>> DataStringMaps = new Dictionary<string, Dictionary<string, string>>();
 		public Int64[] DataInteger { get { return dataInteger; } }
 		public string[] DataString { get { return dataString; } }
 		public Int64[][] DataIntegerArray { get { return dataIntegerArray; } }
@@ -1103,6 +1107,11 @@ namespace MinorShift.Emuera.GameData.Variable
 			for (int i = 0; i < characterList.Count; i++)
 				characterList[i].Dispose();
 			characterList.Clear();
+			// EM+EE DataTable cleanup
+			foreach (var dt in DataTables.Values)
+				dt.Dispose();
+			DataTables.Clear();
+			DataStringMaps.Clear();
 		}
 
 		#endregion

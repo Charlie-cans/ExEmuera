@@ -82,6 +82,7 @@ namespace MinorShift.Emuera.GameData
 
 		private readonly GameBase gamebase;
 		private string[][] names = new string[(int)VariableCode.__COUNT_CSV_STRING_ARRAY_1D__][];
+		private Dictionary<string, int>[] aliases = new Dictionary<string, int>[(int)VariableCode.__COUNT_CSV_STRING_ARRAY_1D__];
 		private Dictionary<string, int>[] nameToIntDics = new Dictionary<string, int>[(int)VariableCode.__COUNT_CSV_STRING_ARRAY_1D__];
 		private Dictionary<string, int> relationDic = new Dictionary<string, int>();
 		public string[] GetCsvNameList(VariableCode code)
@@ -632,6 +633,16 @@ check1break:
 				{
 					if (!string.IsNullOrEmpty(nameArray[j]) && !nameToIntDics[i].ContainsKey(nameArray[j]))
 						nameToIntDics[i].Add(nameArray[j], j);
+				}
+				//Add CSV Aliases
+				Dictionary<string, int> aliasDict = aliases[i];
+				if (aliasDict != null)
+				{
+					foreach (var alias in aliasDict)
+					{
+						if (!string.IsNullOrEmpty(alias.Key) && !nameToIntDics[i].ContainsKey(alias.Key))
+							nameToIntDics[i].Add(alias.Key, alias.Value);
+					}
 				}
 			}
 			//if (!Program.AnalysisMode)
@@ -1440,6 +1451,71 @@ check1break:
 
 						targetI[index] = price;
 					}
+				}
+			}
+			catch
+			{
+				uEmuera.Media.SystemSounds.Hand.Play();
+				if (position != null)
+					ParserMediator.Warn("予期しないエラーが発生しました", position, 3);
+				else
+					output.PrintError("予期しないエラーが発生しました");
+				return;
+			}
+			finally
+			{
+				eReader.Close();
+			}
+
+			var aliasPath = Path.GetDirectoryName(csvPath) + "\\" + Path.GetFileNameWithoutExtension(csvPath) + ".als";
+			if (File.Exists(aliasPath))
+			{
+				loadAliases(aliasPath, targetIndex);
+			}
+
+		}
+
+		private void loadAliases(string aliasPath, int targetIndex)
+		{
+
+			if (!File.Exists(aliasPath))
+				return;
+			if (aliases[targetIndex] == null)
+			{
+				aliases[targetIndex] = new Dictionary<string, int>();
+			}
+			Dictionary<string, int> target = aliases[targetIndex];
+			List<int> defined = new List<int>();
+			EraStreamReader eReader = new EraStreamReader(false);
+			if (!eReader.Open(aliasPath))
+			{
+				output.PrintError(eReader.Filename + "のオープンに失敗しました");
+				return;
+			}
+			ScriptPosition position = null;
+			try
+			{
+				StringStream st = null;
+				while ((st = eReader.ReadEnabledLine()) != null)
+				{
+					position = new ScriptPosition(eReader.Filename, eReader.LineNo, st.RowString);
+					string[] tokens = st.Substring().Split(',');
+					if (tokens.Length < 2)
+					{
+						ParserMediator.Warn("\",\"が必要です", position, 1);
+						continue;
+					}
+					int index = 0;
+					if (!Int32.TryParse(tokens[0], out index))
+					{
+						ParserMediator.Warn("一つ目の値を整数値に変換できません", position, 1);
+						continue;
+					}
+					if (defined.Contains(index))
+						ParserMediator.Warn(index.ToString() + "番目の要素はすでに定義されています（新しい値で上書きします）", position, 1);
+					else
+						defined.Add(index);
+					target.Add(tokens[1], index);
 				}
 			}
 			catch

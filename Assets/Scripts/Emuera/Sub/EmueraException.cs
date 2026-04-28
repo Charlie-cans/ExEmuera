@@ -114,6 +114,15 @@ namespace MinorShift.Emuera.Sub
             else
                 Filename = srcFile;
 		}
+		public ScriptPosition(string srcFile, int srcLineNo)
+		{
+			LineNo = srcLineNo;
+            RowLine = "";
+            if (srcFile == null)
+				Filename = "";
+            else
+                Filename = srcFile;
+		}
 		public readonly int LineNo;
 		public readonly string RowLine;
 		public readonly string Filename;

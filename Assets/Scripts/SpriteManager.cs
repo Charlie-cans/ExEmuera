@@ -175,15 +175,23 @@ internal static class SpriteManager
 
         if (extname == "webp")
         {
-            var tex = Texture2DExt.CreateTexture2DFromWebP(content, false, false,
-                out Error err);
-            if (err != Error.Success)
+            try
             {
-                Debug.LogWarning($"{filename} {err.ToString()}");
+                var tex = Texture2DExt.CreateTexture2DFromWebP(content, false, false,
+                    out Error err);
+                if (err != Error.Success)
+                {
+                    Debug.LogWarning($"{filename} {err.ToString()}");
+                    return null;
+                }
+                ti = new TextureInfo(filename, tex);
+                texture_dict.Add(filename, ti);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"{filename} WebP decode failed: {e.Message}");
                 return null;
             }
-            ti = new TextureInfo(filename, tex);
-            texture_dict.Add(filename, ti);
         }
         else
         {
@@ -278,18 +286,26 @@ internal static class SpriteManager
 
             if (extname == "webp")
             {
-                var tex = Texture2DExt.CreateTexture2DFromWebP(content, false, false,
-                out Error err);
-                if (err != Error.Success)
+                try
                 {
-                    Debug.LogWarning($"{baseimage.path} {err.ToString()}");
+                    var tex = Texture2DExt.CreateTexture2DFromWebP(content, false, false,
+                    out Error err);
+                    if (err != Error.Success)
+                    {
+                        Debug.LogWarning($"{baseimage.path} {err.ToString()}");
+                        yield break;
+                    }
+                    ti = new TextureInfo(baseimage.path, tex);
+                    texture_dict.Add(baseimage.path, ti);
+
+                    baseimage.size.Width = tex.width;
+                    baseimage.size.Height = tex.height;
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"{baseimage.path} WebP decode failed: {e.Message}");
                     yield break;
                 }
-                ti = new TextureInfo(baseimage.path, tex);
-                texture_dict.Add(baseimage.path, ti);
-
-                baseimage.size.Width = tex.width;
-                baseimage.size.Height = tex.height;
             }
             else
             {
@@ -368,7 +384,7 @@ internal static class SpriteManager
         {
             do
             {
-                yield return new WaitForSeconds(15);
+                yield return null;
             } while(texture_other_threads.Count == 0
                 && render_texture_other_threads.Count == 0);
 

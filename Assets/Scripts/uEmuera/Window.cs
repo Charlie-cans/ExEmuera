@@ -34,6 +34,27 @@ namespace uEmuera.Window
     {
         public static string uEmueraVer = "";
 
+		// EM+EE Sound (Unity AudioSource stubs)
+		private static UnityEngine.AudioSource sfxSource;
+		private static UnityEngine.AudioSource bgmSource;
+		private static void EnsureAudioSources()
+		{
+			if (sfxSource == null)
+			{
+				var go = new UnityEngine.GameObject("EmueraAudio");
+				UnityEngine.Object.DontDestroyOnLoad(go);
+				sfxSource = go.AddComponent<UnityEngine.AudioSource>();
+				bgmSource = go.AddComponent<UnityEngine.AudioSource>();
+				bgmSource.loop = true;
+			}
+		}
+		public void PlaySound(string filename) { EnsureAudioSources(); var p = System.IO.Path.Combine(MinorShift._Library.Sys.ExeDir, "sound", filename); if (System.IO.File.Exists(p)) UnityEngine.Debug.Log("[Emuera] PLAYSOUND: " + p); }
+		public void StopSound() { if (sfxSource != null) sfxSource.Stop(); }
+		public void PlayBGM(string filename) { EnsureAudioSources(); var p = System.IO.Path.Combine(MinorShift._Library.Sys.ExeDir, "sound", filename); if (System.IO.File.Exists(p)) UnityEngine.Debug.Log("[Emuera] PLAYBGM: " + p); }
+		public void StopBGM() { if (bgmSource != null) bgmSource.Stop(); }
+		public void SetSoundVolume(int vol) { EnsureAudioSources(); sfxSource.volume = UnityEngine.Mathf.Clamp01(vol / 100.0f); }
+		public void SetBGMVolume(int vol) { EnsureAudioSources(); bgmSource.volume = UnityEngine.Mathf.Clamp01(vol / 100.0f); }
+
         public MainWindow()
         {}
 

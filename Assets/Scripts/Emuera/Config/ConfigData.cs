@@ -225,13 +225,14 @@ static ConfigData() { }
 		}
 		public AConfigItem GetConfigItem(string key)
 		{
+			string normKey = key.Replace(" ", "");
 			foreach (AConfigItem item in configArray)
 			{
 				if (item == null)
 					continue;
-				if (item.Name == key)
+				if (string.Equals(item.Name, key, StringComparison.OrdinalIgnoreCase) || string.Equals(item.Name, normKey, StringComparison.OrdinalIgnoreCase))
 					return item;
-				if (item.Text == key)
+				if (string.Equals(item.Text, key, StringComparison.OrdinalIgnoreCase))
 					return item;
 			}
 			return null;

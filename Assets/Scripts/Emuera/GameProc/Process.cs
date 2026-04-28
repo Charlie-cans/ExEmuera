@@ -46,6 +46,8 @@ namespace MinorShift.Emuera.GameProc
         //色々あって復活させてみる
         bool initialiing;
         public bool inInitializeing { get { return initialiing;  } }
+        // EM+EE
+        public bool SkipLog = false;
 
         public bool Initialize()
 		{

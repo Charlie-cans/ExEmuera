@@ -368,6 +368,7 @@ namespace MinorShift.Emuera.GameProc.Function
 			addFunction(FunctionCode.REF, new REF_Instruction(false));
 			addFunction(FunctionCode.REFBYNAME, new REF_Instruction(true));
 			addFunction(FunctionCode.HTML_PRINT, new HTML_PRINT_Instruction());
+			addFunction(FunctionCode.HTML_PRINTFORM, new HTML_PRINTFORM_Instruction());
 			addFunction(FunctionCode.HTML_TAGSPLIT, new HTML_TAGSPLIT_Instruction());
 			addFunction(FunctionCode.PRINT_IMG, new PRINT_IMG_Instruction());
 			addFunction(FunctionCode.PRINT_RECT, new PRINT_RECT_Instruction());
@@ -385,7 +386,45 @@ namespace MinorShift.Emuera.GameProc.Function
 			addFunction(FunctionCode.POWER, argb[FunctionArgType.SP_POWER], METHOD_SAFE | EXTENDED);//引数が違うのでMETHOD化できない。
 			addFunction(FunctionCode.PRINTCPERLINE, argb[FunctionArgType.SP_GETINT], METHOD_SAFE | EXTENDED);//よく考えたら引数の仕様違うや
 			addFunction(FunctionCode.SAVENOS, argb[FunctionArgType.SP_GETINT], METHOD_SAFE | EXTENDED);//引数の仕様が違うので(ry
-			addFunction(FunctionCode.ENCODETOUNI, argb[FunctionArgType.FORM_STR_NULLABLE], METHOD_SAFE | EXTENDED);//式中関数版を追加。処理が全然違う
+			addFunction(FunctionCode.ENCODETOUNI, argb[FunctionArgType.FORM_STR_NULLABLE], METHOD_SAFE | EXTENDED);
+			#endregion
+
+			#region EM+EE additions
+			addFunction(FunctionCode.PLAYSOUND, new PLAYSOUND_Instruction());
+			addFunction(FunctionCode.STOPSOUND, new STOPSOUND_Instruction());
+			addFunction(FunctionCode.PLAYBGM, new PLAYBGM_Instruction());
+			addFunction(FunctionCode.STOPBGM, new STOPBGM_Instruction());
+			addFunction(FunctionCode.SETSOUNDVOLUME, new SETSOUNDVOLUME_Instruction());
+			addFunction(FunctionCode.SETBGMVOLUME, new SETBGMVOLUME_Instruction());
+			addFunction(FunctionCode.TOOLTIP_SETFONT, new TOOLTIPSETFONT_Instruction());
+			addFunction(FunctionCode.TOOLTIP_SETFONTSIZE, new TOOLTIPSETFONTSIZE_Instruction());
+			addFunction(FunctionCode.TOOLTIP_CUSTOM, new TOOLTIPCUSTOM_Instruction());
+			addFunction(FunctionCode.TOOLTIP_FORMAT, new TOOLTIPFORMAT_Instruction());
+			addFunction(FunctionCode.TOOLTIP_IMG, new TOOLTIPIMG_Instruction());
+			addFunction(FunctionCode.SKIPLOG, new SKIPLOG_Instruction());
+			addFunction(FunctionCode.UPDATECHECK, new UPDATECHECK_Instruction());
+			addFunction(FunctionCode.PRINTN, argb[FunctionArgType.STR_NULLABLE], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.PRINTVN, argb[FunctionArgType.STR_NULLABLE], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.PRINTSN, argb[FunctionArgType.STR_NULLABLE], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.PRINTFORMN, argb[FunctionArgType.STR_NULLABLE], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.PRINTFORMSN, argb[FunctionArgType.STR_NULLABLE], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.INPUTANY, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.BINPUT, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.BINPUTS, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.ONEBINPUT, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.ONEBINPUTS, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.QUIT_AND_RESTART, argb[FunctionArgType.VOID], EXTENDED | FLOW_CONTROL);
+			addFunction(FunctionCode.FORCE_QUIT, argb[FunctionArgType.VOID], EXTENDED | FLOW_CONTROL);
+			addFunction(FunctionCode.FORCE_QUIT_AND_RESTART, argb[FunctionArgType.VOID], EXTENDED | FLOW_CONTROL);
+			addFunction(FunctionCode.FORCE_BEGIN, new FORCE_BEGIN_Instruction());
+			addFunction(FunctionCode.DT_COLUMN_OPTIONS, argb[FunctionArgType.SP_DT_COLUMN_OPTIONS], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.VARI, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.VARS, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.HTML_PRINT_ISLAND, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.HTML_PRINT_ISLAND_CLEAR, argb[FunctionArgType.VOID], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.SETBGIMAGE, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.CLEARBGIMAGE, argb[FunctionArgType.VOID], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.REMOVEBGIMAGE, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
 			#endregion
 
 			Dictionary<string, FunctionMethod> methodList = FunctionMethodCreator.GetMethodList();

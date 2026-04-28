@@ -3453,9 +3453,9 @@ namespace MinorShift.Emuera.GameData.Function
 
 				Rectangle rect = new Rectangle(0, 0, g.Width, g.Height);
 				if(arguments.Length == 6)
-				{//四角形は正でも負でもよいが親画像の外を指してはいけない
+				{// EM+EE: 範囲制限緩和 - only require intersection, not full containment
 					rect = ReadRectangle(Name, exm, arguments, 2);
-					if (rect.X + rect.Width < 0 || rect.X + rect.Width > g.Width || rect.Y + rect.Height < 0 || rect.Y + rect.Height > g.Height)
+					if (!rect.IntersectsWith(new Rectangle(0, 0, g.Width, g.Height)))
 						throw new CodeEE(string.Format(Properties.Resources.RuntimeErrMesMethodCIMGCreateOutOfRange0, Name));
 				}
 				AppContents.CreateSpriteG(imgname, g, rect);
@@ -4316,6 +4316,639 @@ namespace MinorShift.Emuera.GameData.Function
 			}
 		}
 
+		#endregion
+
+		#region EM+EE CLEARMEMORY
+		private sealed class ClearMemoryMethod : FunctionMethod
+		{
+			public ClearMemoryMethod()
+			{
+				ReturnType = typeof(long);
+				argumentTypeArray = new Type[0];
+				CanRestructure = false;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				long before = System.GC.GetTotalMemory(false);
+				System.GC.Collect();
+				return before - System.GC.GetTotalMemory(false);
+			}
+		}
+		#endregion
+
+		#region EM+EE EXISTSOUND
+		private sealed class ExistSoundMethod : FunctionMethod
+		{
+			public ExistSoundMethod()
+			{
+				ReturnType = typeof(long);
+				argumentTypeArray = new Type[] { typeof(string) };
+				CanRestructure = false;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string str = arguments[0].GetStrValue(exm);
+				string filepath = System.IO.Path.GetFullPath(MinorShift._Library.Sys.ExeDir + "sound/" + str);
+				if (System.IO.File.Exists(filepath)) return 1;
+				return 0;
+			}
+		}
+		#endregion
+
+		#region EM+EE DataTable Management
+		private sealed class DataTableManagementMethod : FunctionMethod
+		{
+			public enum Operation { Create, Check, Release, Case, Clear }
+			Operation type;
+			public DataTableManagementMethod(Operation t)
+			{
+				type = t;
+				ReturnType = typeof(long);
+				argumentTypeArray = new Type[] { typeof(string) };
+				CanRestructure = false;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				switch (type)
+				{
+					case Operation.Create:
+						if (!dict.ContainsKey(key))
+						{
+							var dt = new System.Data.DataTable(key);
+							dict[key] = dt;
+						}
+						return 1;
+					case Operation.Check: return dict.ContainsKey(key) ? 1 : 0;
+					case Operation.Release: return dict.Remove(key) ? 1 : 0;
+					case Operation.Case: return 0;
+					case Operation.Clear:
+						if (dict.TryGetValue(key, out var dtc)) { dtc.Clear(); return 1; }
+						return 0;
+				}
+				return 0;
+			}
+		}
+		#endregion
+
+		#region EM+EE DataTable Column Management
+		private sealed class DataTableColumnManagementMethod : FunctionMethod
+		{
+			public enum Operation { Create, Names, Check, Remove }
+			Operation type;
+			public DataTableColumnManagementMethod(Operation t)
+			{
+				type = t;
+				CanRestructure = false;
+				switch (t)
+				{
+					case Operation.Create:
+						ReturnType = typeof(long);
+						argumentTypeArray = new Type[] { typeof(string), typeof(string), typeof(string) };
+						break;
+					case Operation.Names:
+						ReturnType = typeof(string);
+						argumentTypeArray = new Type[] { typeof(string) };
+						break;
+					case Operation.Check:
+						ReturnType = typeof(long);
+						argumentTypeArray = new Type[] { typeof(string), typeof(string) };
+						break;
+					case Operation.Remove:
+						ReturnType = typeof(long);
+						argumentTypeArray = new Type[] { typeof(string), typeof(string) };
+						break;
+				}
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) return 0;
+				switch (type)
+				{
+					case Operation.Create:
+					{
+						string cName = arguments[1].GetStrValue(exm);
+						if (dt.Columns.Contains(cName)) return 0;
+						string typeStr = arguments[2].GetStrValue(exm).ToLower();
+						Type t = typeStr switch { "int8" => typeof(sbyte), "int16" => typeof(short), "int32" => typeof(int), "int64" => typeof(long), _ => typeof(string) };
+						dt.Columns.Add(cName, t);
+						return 1;
+					}
+					case Operation.Check:
+					{
+						string cName = arguments[1].GetStrValue(exm);
+						if (dt.Columns.Contains(cName))
+						{
+							Type ct = dt.Columns[cName].DataType;
+							if (ct == typeof(sbyte)) return 1;
+							if (ct == typeof(short)) return 2;
+							if (ct == typeof(int)) return 3;
+							if (ct == typeof(long)) return 4;
+							if (ct == typeof(string)) return 5;
+						}
+						return 0;
+					}
+					case Operation.Remove:
+					{
+						string cName = arguments[1].GetStrValue(exm);
+						if (dt.Columns.Contains(cName)) { dt.Columns.Remove(cName); return 1; }
+						return 0;
+					}
+				}
+				return 0;
+			}
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				if (type == Operation.Names)
+				{
+					string key = arguments[0].GetStrValue(exm);
+					var dict = GlobalStatic.VariableData.DataTables;
+					if (!dict.TryGetValue(key, out var dt)) return "";
+					var sb = new System.Text.StringBuilder();
+					foreach (System.Data.DataColumn c in dt.Columns)
+					{
+						if (sb.Length > 0) sb.Append(',');
+						sb.Append(c.ColumnName);
+					}
+					return sb.ToString();
+				}
+				return "";
+			}
+		}
+		#endregion
+
+		#region EM+EE DataTable Row Operations
+		private sealed class DataTableRowSetMethod : FunctionMethod
+		{
+			public enum Operation { Add, Set }
+			Operation type;
+			public DataTableRowSetMethod(Operation t)
+			{
+				type = t;
+				ReturnType = typeof(long);
+				argumentTypeArray = new Type[] { typeof(string), typeof(string) };
+				CanRestructure = false;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) return 0;
+				string idVal = arguments[1].GetStrValue(exm);
+				System.Data.DataRow row = null;
+				if (type == Operation.Set && dt.Rows.Count > 0) row = dt.Rows[0];
+				else { row = dt.NewRow(); dt.Rows.Add(row); }
+				if (dt.Columns.Count > 0 && dt.Columns[0].DataType == typeof(string))
+					row[0] = idVal;
+				return 1;
+			}
+		}
+
+		private sealed class DataTableRowRemoveMethod : FunctionMethod
+		{
+			public DataTableRowRemoveMethod()
+			{
+				ReturnType = typeof(long);
+				argumentTypeArray = new Type[] { typeof(string), typeof(string) };
+				CanRestructure = false;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				string id = arguments[1].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) return 0;
+				for (int i = dt.Rows.Count - 1; i >= 0; i--)
+					if (dt.Rows[i][0].ToString() == id)
+						dt.Rows.RemoveAt(i);
+				return 1;
+			}
+		}
+		#endregion
+
+		#region EM+EE DataTable Cell/Select/XML Stubs
+		private sealed class DataTableCellGetMethod : FunctionMethod
+		{
+			public enum Operation { Get, IsNull, Gets }
+			Operation type;
+			public DataTableCellGetMethod(Operation t)
+			{
+				type = t;
+				CanRestructure = false;
+				ReturnType = (t == Operation.Gets) ? typeof(string) : typeof(long);
+				argumentTypeArray = new Type[] { typeof(string), typeof(string), typeof(string) };
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				string id = arguments[1].GetStrValue(exm);
+				string col = arguments[2].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) return 0;
+				foreach (System.Data.DataRow row in dt.Rows)
+				{
+					if (row[0].ToString() == id)
+					{
+						if (type == Operation.IsNull) return row.IsNull(col) ? 1 : 0;
+						if (!row.IsNull(col) && row[col] is IConvertible c)
+							return System.Convert.ToInt64(c);
+						return 0;
+					}
+				}
+				return 0;
+			}
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				if (type != Operation.Gets) return "";
+				string key = arguments[0].GetStrValue(exm);
+				string id = arguments[1].GetStrValue(exm);
+				string col = arguments[2].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) return "";
+				foreach (System.Data.DataRow row in dt.Rows)
+					if (row[0].ToString() == id && !row.IsNull(col))
+						return row[col].ToString();
+				return "";
+			}
+		}
+
+		private sealed class DataTableCellSetMethod : FunctionMethod
+		{
+			public DataTableCellSetMethod()
+			{
+				ReturnType = typeof(long);
+				argumentTypeArray = new Type[] { typeof(string), typeof(string), typeof(string), typeof(long) };
+				CanRestructure = false;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				string id = arguments[1].GetStrValue(exm);
+				string col = arguments[2].GetStrValue(exm);
+				long val = arguments[3].GetIntValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) return 0;
+				foreach (System.Data.DataRow row in dt.Rows)
+				{
+					if (row[0].ToString() == id)
+					{
+						if (dt.Columns[col].DataType == typeof(string))
+							row[col] = val.ToString();
+						else if (dt.Columns[col].DataType == typeof(sbyte))
+							row[col] = (sbyte)System.Math.Min(System.Math.Max(val, sbyte.MinValue), sbyte.MaxValue);
+						else if (dt.Columns[col].DataType == typeof(short))
+							row[col] = (short)System.Math.Min(System.Math.Max(val, short.MinValue), short.MaxValue);
+						else if (dt.Columns[col].DataType == typeof(int))
+							row[col] = (int)System.Math.Min(System.Math.Max(val, int.MinValue), int.MaxValue);
+						else
+							row[col] = val;
+						return 0;
+					}
+				}
+				return 0;
+			}
+		}
+
+		private sealed class DataTableLengthMethod : FunctionMethod
+		{
+			public enum Operation { Row, Column }
+			Operation type;
+			public DataTableLengthMethod(Operation t)
+			{
+				type = t;
+				ReturnType = typeof(long);
+				argumentTypeArray = new Type[] { typeof(string) };
+				CanRestructure = false;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) return 0;
+				return type == Operation.Row ? dt.Rows.Count : dt.Columns.Count;
+			}
+		}
+
+		private sealed class DataTableSelectMethod : FunctionMethod
+		{
+			public DataTableSelectMethod()
+			{
+				ReturnType = typeof(string);
+				argumentTypeArray = new Type[] { typeof(string), typeof(string), typeof(string) };
+				CanRestructure = false;
+			}
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				string col = arguments[1].GetStrValue(exm);
+				string val = arguments[2].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) return "";
+				foreach (System.Data.DataRow row in dt.Rows)
+					if (!row.IsNull(col) && row[col].ToString() == val)
+						return row[0].ToString();
+				return "";
+			}
+		}
+
+		private sealed class DataTableToXmlMethod : FunctionMethod
+		{
+			public DataTableToXmlMethod()
+			{
+				ReturnType = typeof(string);
+				argumentTypeArray = new Type[] { typeof(string) };
+				CanRestructure = false;
+			}
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) return "";
+				using (var sw = new System.IO.StringWriter())
+				{
+					dt.WriteXml(sw);
+					return sw.ToString();
+				}
+			}
+		}
+
+		private sealed class DataTableFromXmlMethod : FunctionMethod
+		{
+			public DataTableFromXmlMethod()
+			{
+				ReturnType = typeof(long);
+				argumentTypeArray = new Type[] { typeof(string), typeof(string) };
+				CanRestructure = false;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				string xml = arguments[1].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataTables;
+				if (!dict.TryGetValue(key, out var dt)) { dt = new System.Data.DataTable(key); dict[key] = dt; }
+				try { using (var sr = new System.IO.StringReader(xml)) { dt.ReadXml(sr); } return 1; }
+				catch { return 0; }
+			}
+		}
+		#endregion
+
+		#region EM+EE XML Stub
+		private sealed class XmlStubMethod : FunctionMethod
+		{
+			string name;
+			public XmlStubMethod(string n)
+			{
+				name = n;
+				ReturnType = typeof(long);
+				argumentTypeArray = new Type[] { typeof(string) };
+				CanRestructure = false;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 0; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
+		}
+		#endregion
+
+		#region EM+EE MAP
+		private sealed class MapManagementMethod : FunctionMethod
+		{
+			public enum Operation { Create, Check, Release }
+			Operation op;
+			public MapManagementMethod(Operation t) { op = t; ReturnType = typeof(long); argumentTypeArray = new Type[] { typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = arguments[0].GetStrValue(exm);
+				var dict = GlobalStatic.VariableData.DataStringMaps;
+				switch (op)
+				{
+					case Operation.Check: return dict.ContainsKey(key) ? 1 : 0;
+					case Operation.Release: dict.Remove(key); return 1;
+				}
+				if (!dict.ContainsKey(key)) dict[key] = new Dictionary<string, string>();
+				return 1;
+			}
+		}
+		private sealed class MapDataOperationMethod : FunctionMethod
+		{
+			public enum Operation { Set, Has, Remove, Clear, Size }
+			Operation op;
+			public MapDataOperationMethod(Operation t)
+			{
+				op = t; ReturnType = typeof(long); CanRestructure = false;
+				switch (t) {
+					case Operation.Set: argumentTypeArray = new Type[] { typeof(string), typeof(string), typeof(string) }; break;
+					case Operation.Has: case Operation.Remove: argumentTypeArray = new Type[] { typeof(string), typeof(string) }; break;
+					default: argumentTypeArray = new Type[] { typeof(string) }; break;
+				}
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				if (!GlobalStatic.VariableData.DataStringMaps.TryGetValue(arguments[0].GetStrValue(exm), out var sMap)) return -1;
+				switch (op) {
+					case Operation.Clear: sMap.Clear(); return 1;
+					case Operation.Size: return sMap.Count;
+					case Operation.Has: return sMap.ContainsKey(arguments[1].GetStrValue(exm)) ? 1 : 0;
+					case Operation.Remove: sMap.Remove(arguments[1].GetStrValue(exm)); return 1;
+					case Operation.Set: sMap[arguments[1].GetStrValue(exm)] = arguments[2].GetStrValue(exm); return 1;
+				}
+				return 0;
+			}
+		}
+		private sealed class MapGetStrMethod : FunctionMethod
+		{
+			public enum Operation { Get, GetKeys }
+			Operation op;
+			public MapGetStrMethod(Operation t)
+			{ op = t; ReturnType = typeof(string); CanRestructure = false; argumentTypeArray = t == Operation.Get ? new Type[] { typeof(string), typeof(string) } : new Type[] { typeof(string) }; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				if (!GlobalStatic.VariableData.DataStringMaps.TryGetValue(arguments[0].GetStrValue(exm), out var sMap)) return "";
+				if (op == Operation.Get) { var k = arguments[1].GetStrValue(exm); return sMap.TryGetValue(k, out var v) ? v : ""; }
+				var sb = new System.Text.StringBuilder();
+				foreach (var k in sMap.Keys) { if (sb.Length > 0) sb.Append(','); sb.Append(k); }
+				return sb.ToString();
+			}
+		}
+		#endregion
+
+		#region EM+EE GetVar/SetVar
+		private sealed class GetVarMethod : FunctionMethod
+		{
+			bool isStr;
+			public GetVarMethod(bool s) { isStr = s; ReturnType = isStr ? typeof(string) : typeof(long); argumentTypeArray = new Type[] { typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string name = arguments[0].GetStrValue(exm);
+				WordCollection wc = LexicalAnalyzer.Analyse(new StringStream(name), LexEndWith.EoL, LexAnalyzeFlag.None);
+				IOperandTerm[] terms = ExpressionParser.ReduceArguments(wc, ArgsEndWith.EoL, false);
+				if (terms != null && terms.Length > 0 && terms[0] is VariableTerm vt)
+				{
+					if (vt.Identifier == null) throw new CodeEE(name + " は変数ではありません");
+					if (!vt.IsInteger) throw new CodeEE(name + " は整数変数ではありません");
+					return vt.GetIntValue(exm);
+				}
+				throw new CodeEE(name + " は変数ではありません");
+			}
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string name = arguments[0].GetStrValue(exm);
+				WordCollection wc = LexicalAnalyzer.Analyse(new StringStream(name), LexEndWith.EoL, LexAnalyzeFlag.None);
+				IOperandTerm[] terms = ExpressionParser.ReduceArguments(wc, ArgsEndWith.EoL, false);
+				if (terms != null && terms.Length > 0 && terms[0] is VariableTerm vt)
+				{
+					if (vt.Identifier == null) throw new CodeEE(name + " は変数ではありません");
+					if (!vt.IsString) throw new CodeEE(name + " は文字列変数ではありません");
+					return vt.GetStrValue(exm);
+				}
+				throw new CodeEE(name + " は変数ではありません");
+			}
+		}
+		private sealed class SetVarMethod : FunctionMethod
+		{
+			public SetVarMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[] { typeof(string), typeof(Int64) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string name = arguments[0].GetStrValue(exm);
+				long val = arguments[1].GetIntValue(exm);
+				WordCollection wc = LexicalAnalyzer.Analyse(new StringStream(name), LexEndWith.EoL, LexAnalyzeFlag.None);
+				IOperandTerm[] terms = ExpressionParser.ReduceArguments(wc, ArgsEndWith.EoL, false);
+				if (terms != null && terms.Length > 0 && terms[0] is VariableTerm vt && vt.Identifier != null)
+					vt.SetValue(new SingleTerm(val), exm); return val;
+				return 0;
+			}
+		}
+
+		private sealed class GetUsingMemoryMethod : FunctionMethod
+		{
+			public GetUsingMemoryMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return System.GC.GetTotalMemory(false); }
+		}
+		#endregion
+
+		#region EM+EE Misc Stubs
+		private sealed class ErdNameMethod : FunctionMethod
+		{
+			public ErdNameMethod() { ReturnType = typeof(string); argumentTypeArray = new Type[] { typeof(string) }; CanRestructure = false; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return arguments[0].GetStrValue(exm); }
+		}
+		private sealed class SpriteDisposeAllMethod : FunctionMethod
+		{
+			public SpriteDisposeAllMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 0; }
+		}
+		private sealed class GetDisplayLineMethod : FunctionMethod
+		{
+			public GetDisplayLineMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[] { typeof(long) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return arguments[0].GetIntValue(exm); }
+		}
+		private sealed class ExistFileMethod : FunctionMethod
+		{
+			public ExistFileMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[] { typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string path = arguments[0].GetStrValue(exm);
+				return System.IO.File.Exists(path) ? 1L : 0L;
+			}
+		}
+		private sealed class MoveTextBoxMethod : FunctionMethod
+		{
+			bool resume;
+			public MoveTextBoxMethod(bool r) { resume = r; ReturnType = typeof(long); argumentTypeArray = resume ? new Type[] { typeof(string) } : new Type[] { typeof(long), typeof(long), typeof(long), typeof(long) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 0; }
+		}
+		private sealed class GetTextBoxMethod : FunctionMethod
+		{
+			public GetTextBoxMethod() { ReturnType = typeof(string); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
+		}
+		private sealed class ChangeTextBoxMethod : FunctionMethod
+		{
+			public ChangeTextBoxMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[] { typeof(long), typeof(long), typeof(long), typeof(long) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 0; }
+		}
+		private sealed class GetDoingFunctionMethod : FunctionMethod
+		{
+			public GetDoingFunctionMethod() { ReturnType = typeof(string); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
+		}
+		#endregion
+
+		#region EM+EE SQL stubs (SQL_CONNECT / SQL_EXECUTE / SQL_IMPORT_MAP_XML etc.)
+		private sealed class SqlStubMethod : FunctionMethod
+		{
+			public SqlStubMethod(int argCount = 1) { ReturnType = typeof(long); argumentTypeArray = new Type[argCount]; for (int i = 0; i < argCount; i++) argumentTypeArray[i] = typeof(string); CanRestructure = false; }
+				public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
+				public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 1; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
+		}
+			#endregion
+		#region EM+EE HTML stubs
+		private sealed class HtmlStringLenStub : FunctionMethod
+		{
+			public HtmlStringLenStub() { ReturnType = typeof(long); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return arguments[0].GetStrValue(exm).Length; }
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
+		}
+		private sealed class HtmlSubStringStub : FunctionMethod
+		{
+			public HtmlSubStringStub() { ReturnType = typeof(string); argumentTypeArray = new Type[] { typeof(string), typeof(long), typeof(long) }; CanRestructure = false; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) {
+				var s = arguments[0].GetStrValue(exm);
+				var start = (int)arguments[1].GetIntValue(exm);
+				var len = (int)arguments[2].GetIntValue(exm);
+				if (start < 0 || start >= s.Length) return "";
+				if (start + len > s.Length) len = s.Length - start;
+				return s.Substring(start, len);
+			}
+		}
+		private sealed class HtmlStringLinesStub : FunctionMethod
+		{
+			public HtmlStringLinesStub() { ReturnType = typeof(long); argumentTypeArray = new Type[] { typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) {
+				var s = arguments[0].GetStrValue(exm);
+				var count = 1;
+				foreach (var ch in s) if (ch == '\n') count++;
+				return count;
+			}
+			}
+			#endregion
+		#region EM+EE more stubs
+		private sealed class PluginStubMethod : FunctionMethod
+		{
+			public PluginStubMethod() { ReturnType = typeof(string); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 0; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
+		}
+		private sealed class ExistFunctionStub : FunctionMethod
+		{
+			public ExistFunctionStub() { ReturnType = typeof(long); argumentTypeArray = new Type[] { typeof(string) }; CanRestructure = false; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 0; }
+		}
+		private sealed class RegexStubMethod : FunctionMethod
+		{
+			public RegexStubMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 0; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
+		}
+		private sealed class HtmlToPlainTextStub : FunctionMethod
+		{
+			public HtmlToPlainTextStub() { ReturnType = typeof(string); argumentTypeArray = new Type[] { typeof(string) }; CanRestructure = false; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return arguments[0].GetStrValue(exm); }
+		}
+		private sealed class HtmlGetPrintedStrStub : FunctionMethod
+		{
+			public HtmlGetPrintedStrStub() { ReturnType = typeof(string); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
+		}
+		private sealed class HtmlPopPrintingStrStub : FunctionMethod
+		{
+			public HtmlPopPrintingStrStub() { ReturnType = typeof(string); argumentTypeArray = new Type[] { typeof(string) }; CanRestructure = false; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return arguments[0].GetStrValue(exm); }
+		}
 		#endregion
 	}
 }

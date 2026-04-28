@@ -298,6 +298,30 @@ namespace MinorShift.Emuera.GameProc
 				case FunctionCode.QUIT://ゲームを終了
 					exm.Console.Quit();
 					break;
+				case FunctionCode.QUIT_AND_RESTART:
+					exm.Console.Quit();
+					MinorShift.Emuera.Program.Reboot = true;
+					break;
+				case FunctionCode.FORCE_QUIT:
+					exm.Console.Quit();
+					break;
+				case FunctionCode.FORCE_QUIT_AND_RESTART:
+					exm.Console.Quit();
+					MinorShift.Emuera.Program.Reboot = true;
+					break;
+				case FunctionCode.SKIPLOG:
+					SkipLog = ((int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm)) != 0;
+					break;
+				case FunctionCode.CALLSHARP:
+					// Plugin system stub - not implemented in Unity port
+					break;
+				case FunctionCode.INPUTANY:
+				case FunctionCode.BINPUT:
+				case FunctionCode.BINPUTS:
+				case FunctionCode.ONEBINPUT:
+				case FunctionCode.ONEBINPUTS:
+					// Input variants stub: treat as normal INPUT
+					break;
 
 				case FunctionCode.VARSIZE:
 					{

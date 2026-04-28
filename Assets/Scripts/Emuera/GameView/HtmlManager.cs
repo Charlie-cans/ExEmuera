@@ -818,19 +818,22 @@ namespace MinorShift.Emuera.GameView
 										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
 									type = attrValue;
 									break;
-								case "param":
-									if (param != null)
-										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
-									{
-										string[] tokens = attrValue.Split(',');
-										param = new int[tokens.Length];
-										for (int i = 0; i < tokens.Length; i++)
+									case "param":
+										if (param != null)
+											throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
 										{
-											if (!int.TryParse(tokens[i], out param[i]))
-												throw new CodeEE("<" + tag + ">タグの" + word.Code + "属性の属性値が数値として解釈できません");
+											string[] tokens = attrValue.Split(',');
+											param = new int[tokens.Length];
+											for (int i = 0; i < tokens.Length; i++)
+											{
+												string t = tokens[i].Trim();
+												if (t.EndsWith("px", StringComparison.OrdinalIgnoreCase))
+													t = t.Substring(0, t.Length - 2);
+												if (!int.TryParse(t, out param[i]))
+													throw new CodeEE("<" + tag + ">タグの" + word.Code + "属性の属性値が数値として解釈できません");
+											}
+											break;
 										}
-										break;
-									}
 								default:
 									throw new CodeEE("<" + tag + ">タグの属性名" + word.Code + "は解釈できません");
 							}
