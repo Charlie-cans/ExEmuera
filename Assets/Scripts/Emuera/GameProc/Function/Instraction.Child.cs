@@ -306,8 +306,10 @@ namespace MinorShift.Emuera.GameProc.Function
 			readonly bool isButton;
 			readonly bool isC;
 			readonly bool isLC;
+#pragma warning disable CS0414
 			readonly bool isL;
 
+	#pragma warning restore CS0414
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
 			{
 				if (GlobalStatic.Process.SkipPrint)

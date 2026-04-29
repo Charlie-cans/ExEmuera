@@ -24,7 +24,7 @@ namespace uEmuera
                 .MinimumLevel.Debug()
                 .WriteTo.File(
                     path: Path.Combine(_sessionDir, "emuera.log"),
-                    outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{Tag}] {Message:lj}{Exception}",
+                    outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{Tag}] {Message}{NewLine}{Exception}",
                     fileSizeLimitBytes: 16 * 1024 * 1024,
                     rollOnFileSizeLimit: true,
                     retainedFileCountLimit: 9,

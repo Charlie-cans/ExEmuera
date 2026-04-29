@@ -121,6 +121,7 @@ namespace MinorShift.Emuera.GameView
 
 	internal sealed partial class EmueraConsole :IDisposable
 	{
+		#pragma warning disable CS0414
 		public EmueraConsole(MainWindow parent)
 		{
 			window = parent;

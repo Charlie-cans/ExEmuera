@@ -11,18 +11,19 @@ namespace MinorShift.Emuera
 {
 	internal abstract class AConfigItem
 	{
-		public AConfigItem(ConfigCode code, string text)
+		public AConfigItem(ConfigCode code, string text, string engText = null)
 		{
 			this.Code = code;
 			this.Name = code.ToString();
 			this.Text = text;
+			this.EngText = engText ?? text;
 		}
 
 		public static ConfigItem<T> Copy<T>(ConfigItem<T> other)
 		{
 			if(other == null)
 				return null;
-			ConfigItem<T> ret = new ConfigItem<T>(other.Code, other.Text, other.Value);
+			ConfigItem<T> ret = new ConfigItem<T>(other.Code, other.Text, other.EngText, other.Value);
 			ret.Fixed = other.Fixed;
 			return ret;
 		}
@@ -35,12 +36,17 @@ namespace MinorShift.Emuera
 		public readonly ConfigCode Code;
 		public readonly string Name;
 		public readonly string Text;
+		public string EngText;
 		public bool Fixed;
 	}
 	
 	internal sealed class ConfigItem<T> : AConfigItem
 	{
 		public ConfigItem(ConfigCode code,string text, T t):base(code, text)
+		{
+			this.val = t;
+		}
+		public ConfigItem(ConfigCode code,string text, string engText, T t):base(code, text, engText)
 		{
 			this.val = t;
 		}

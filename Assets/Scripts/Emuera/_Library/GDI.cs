@@ -84,6 +84,7 @@ namespace MinorShift._Library
 
 	internal static class GDI
 	{
+		#pragma warning disable CS0414
   //      [DllImport("gdi32.dll", CharSet = CharSet.Auto)]
 		//static extern bool TextOut(IntPtr hdc, int nXStart, int nYStart, string lpString, int cbString);
 		//[DllImport("gdi32.dll")]

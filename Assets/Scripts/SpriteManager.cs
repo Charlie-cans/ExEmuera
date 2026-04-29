@@ -121,7 +121,7 @@ internal static class SpriteManager
         //}
 #endif
     }
-    public static void GetSprite(ASprite src, 
+    public static void GetSprite(ASprite src,
                                 object obj, Action<object, SpriteInfo> callback)
     {
         if(src == null || src.Bitmap == null)
@@ -136,6 +136,7 @@ internal static class SpriteManager
         texture_dict.TryGetValue(basename, out ti);
         if(ti == null)
         {
+            Log.ForContext("Tag", "IMG").Debug($"GetSprite MISS {basename} -> start Loading");
             var item = new CallbackInfo(src, obj, callback);
             List<CallbackInfo> list = null;
             if(loading_set.TryGetValue(basename, out list))
@@ -148,7 +149,10 @@ internal static class SpriteManager
             }
         }
         else
+        {
+            Log.ForContext("Tag", "IMG").Debug($"GetSprite HIT {basename}");
             callback(obj, GetSpriteInfo(ti, src));
+        }
     }
 
     public static TextureInfo GetTextureInfo(string filename)
@@ -333,6 +337,7 @@ internal static class SpriteManager
         List<CallbackInfo> list = null;
         if(loading_set.TryGetValue(pathKey, out list))
         {
+            Log.ForContext("Tag", "IMG").Debug($"Loading dispatch: ti={ti != null} count={list.Count} pathKey={pathKey}");
             var count = list.Count;
             CallbackInfo item = null;
             for(int i=0; i<count; ++i)
@@ -341,8 +346,10 @@ internal static class SpriteManager
                 item.DoCallback(GetSpriteInfo(ti, item.src));
             }
             list.Clear();
-            loading_set.Remove(baseimage.path);
+            loading_set.Remove(pathKey);
         }
+        else
+            Log.ForContext("Tag", "IMG").Warning($"Loading no callback list: pathKey={pathKey}");
     }
     static SpriteInfo GetSpriteInfo(TextureInfo textinfo, ASprite src)
     {

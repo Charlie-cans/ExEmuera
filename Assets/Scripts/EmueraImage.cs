@@ -20,12 +20,14 @@ public class EmueraImage : EmueraBehaviour
         {
             if(obj == null)
             {
+                Log.ForContext("Tag", "IMG").Warning("OnLoadImageCallback: obj is null");
                 SpriteManager.GivebackSpriteInfo(spriteinfo);
                 return;
             }
             var c = obj as ImageInfo;
             if(!c.gameObject.activeSelf)
             {
+                Log.ForContext("Tag", "IMG").Warning($"OnLoadImageCallback: inactive {c.gameObject.name}");
                 SpriteManager.GivebackSpriteInfo(spriteinfo);
                 return;
             }

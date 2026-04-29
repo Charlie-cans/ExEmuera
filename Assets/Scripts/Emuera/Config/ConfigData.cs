@@ -37,6 +37,8 @@ static ConfigData() { }
 		private void setDefault()
 		{
 			int i = 0;
+			// 加载日文配置键名作为别名（与 configArray 按顺序对应）
+			var jpNames = LoadJapaneseConfigNames();
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.IgnoreCase, "大文字小文字の違いを無視する", true);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.UseRenameFile, "_Rename.csvを利用する", false);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.UseReplaceFile, "_Replace.csvを利用する", true);
@@ -58,9 +60,9 @@ static ConfigData() { }
 			configArray[i++] = new ConfigItem<int>(ConfigCode.MaxLog, "履歴ログの行数", 5000);
 			configArray[i++] = new ConfigItem<int>(ConfigCode.PrintCPerLine, "PRINTC排列数量", 3);
 			configArray[i++] = new ConfigItem<int>(ConfigCode.PrintCLength, "PRINTC的字符数", 25);
-			configArray[i++] = new ConfigItem<string>(ConfigCode.FontName, "字体名称", "ＭＳ ゴシック");
-			configArray[i++] = new ConfigItem<int>(ConfigCode.FontSize, "字体大小", 18);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.LineHeight, "一行的高度", 19);
+			configArray[i++] = new ConfigItem<string>(ConfigCode.FontName, "字体名称", "フォント名", "ＭＳ ゴシック");
+			configArray[i++] = new ConfigItem<int>(ConfigCode.FontSize, "字体大小", "フォントサイズ", 18);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.LineHeight, "一行的高度", "一行の高さ", 19);
 			configArray[i++] = new ConfigItem<Color>(ConfigCode.ForeColor, "文字色", Color.FromArgb(192, 192, 192));//浅灰色
 			configArray[i++] = new ConfigItem<Color>(ConfigCode.BackColor, "背景色", Color.FromArgb(0, 0, 0));//黑色
 			configArray[i++] = new ConfigItem<Color>(ConfigCode.FocusColor, "選択中文字色", Color.FromArgb(255, 255, 0));//黄色
@@ -140,6 +142,17 @@ static ConfigData() { }
 			replaceArray[i++] = new ConfigItem<List<Int64>>(ConfigCode.PalamLvDef, "PALAMLVの初期値", new List<long>(new Int64[] { 0, 100, 500, 3000, 10000, 30000, 60000, 100000, 150000, 250000 }));
 			replaceArray[i++] = new ConfigItem<Int64>(ConfigCode.pbandDef, "PBAND的初始值", 4);
             replaceArray[i++] = new ConfigItem<Int64>(ConfigCode.RelationDef, "RELATION的初始值", 0);
+			// 将日文别名写入 EngText 字段（GETCONFIG 可用日文键名查询）
+			if (jpNames != null && jpNames.Length > 0)
+			{
+				int idx = 0;
+				foreach (var item in configArray)
+				{
+					if (item != null && idx < jpNames.Length)
+						item.EngText = jpNames[idx];
+					idx++;
+				}
+			}
 		}
 
         public void Clear()
@@ -230,9 +243,16 @@ static ConfigData() { }
 			{
 				if (item == null)
 					continue;
-				if (string.Equals(item.Name, key, StringComparison.OrdinalIgnoreCase) || string.Equals(item.Name, normKey, StringComparison.OrdinalIgnoreCase))
+				// 匹配内部枚举名（如 FontSize）
+				if (string.Equals(item.Name, key, StringComparison.OrdinalIgnoreCase)
+				 || string.Equals(item.Name, normKey, StringComparison.OrdinalIgnoreCase))
 					return item;
+				// 匹配中文名（如 字体大小）
 				if (string.Equals(item.Text, key, StringComparison.OrdinalIgnoreCase))
+					return item;
+				// 匹配日文别名（如 フォントサイズ）
+				if (!string.IsNullOrEmpty(item.EngText)
+				 && string.Equals(item.EngText, key, StringComparison.OrdinalIgnoreCase))
 					return item;
 			}
 			return null;
@@ -673,5 +693,22 @@ static ConfigData() { }
 		}
 
 #endregion
+
+
+		// 从 Resources/Text/emuera_config_utf8.txt 加载日文配置键名
+		private static string[] LoadJapaneseConfigNames()
+		{
+			try
+			{
+				var asset = UnityEngine.Resources.Load<UnityEngine.TextAsset>("Text/emuera_config_utf8");
+				if (asset != null)
+				{
+					var text = asset.text;
+					return text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+				}
+			}
+			catch { }
+			return null;
+		}
 	}
 }
