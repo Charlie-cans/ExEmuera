@@ -19,22 +19,22 @@ namespace MinorShift._Library
         }
         
 		/// <summary>
-		/// 実行ファイルのパス
+		/// 可执行文件的路径
 		/// </summary>
 		//public static readonly string ExePath;
 
 		/// <summary>
-		/// 実行ファイルのディレクトリ。最後に\を付けたstring
+		/// 可执行文件的目录。末尾带\的string
 		/// </summary>
 		public static string ExeDir { get; private set; }
 
 		/// <summary>
-		/// 実行ファイルの名前。ディレクトリなし
+		/// 可执行文件的名称。不含目录
 		/// </summary>
 		//public static readonly string ExeName;
 
 		/// <summary>
-		/// 2重起動防止。既に同名exeが実行されているならばtrueを返す
+		/// 防止双重启动。如果已有同名exe在运行则返回true
 		/// </summary>
 		/// <returns></returns>
 		public static bool PrevInstance()

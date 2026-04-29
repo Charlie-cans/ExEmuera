@@ -4,7 +4,7 @@ using System.IO;
 namespace MinorShift.Emuera.Sub
 {
 	/// <summary>
-	/// 文字列を1文字ずつ評価するためのクラス
+	/// 用于逐字评估字符串的类
 	/// </summary>
 	internal sealed class StringStream
 	{
@@ -60,11 +60,11 @@ namespace MinorShift.Emuera.Sub
 		}
 		
 		/// <summary>
-		/// 文字列終端に達した
+		/// 已到达字符串末尾
 		/// </summary>
 		public bool EOS { get { return pointer >= source.Length; } }
 
-		///変数の区切りである"[["と"]]"の先読みなどに使用
+		///用于变量分隔符"[["和"]]"的预读等
 		public char Next
 		{
 			get
@@ -95,7 +95,7 @@ namespace MinorShift.Emuera.Sub
 
 		internal void Replace(int start, int count, string src)
 		{
-			//引数に正しい数字が送られてくること前提
+			//前提是参数传递了正确的数值
 			source = (source.Remove(start, count)).Insert(start, src);
 			pointer = start;
 		}

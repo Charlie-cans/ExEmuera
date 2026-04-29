@@ -8,7 +8,7 @@ using MinorShift.Emuera.GameData.Function;
 
 namespace MinorShift.Emuera.GameProc.Function
 {
-	//1756 LogicalLineParserから分離。処理をArgumentBuilderに分割
+	//1756 从LogicalLineParser分离。处理分割到ArgumentBuilder
 	internal static partial class ArgumentParser
 	{
 		public static bool SetArgumentTo(InstructionLine line)

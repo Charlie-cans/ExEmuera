@@ -137,7 +137,7 @@ public static class GenericUtils
     }
     /// <summary>
     /// 获得文件名
-    /// ex. FolderA/FolderB/Filename -> Filename
+    /// 例：FolderA/FolderB/Filename -> Filename
     /// </summary>
     /// <param name="fullname"></param>
     /// <returns></returns>

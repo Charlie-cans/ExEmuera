@@ -112,7 +112,7 @@ public class EmueraImage : EmueraBehaviour
         }
         else
         {
-            // Non-button images should still display, just not be clickable
+            // 非按钮图片仍然可以显示，只是不可点击
             image.enabled = true;
             click_handler_.enabled = false;
         }

@@ -10,18 +10,18 @@ namespace MinorShift.Emuera.GameData
 	internal sealed class GameBase
 	{
 		public string ScriptAutherName = "";
-		public string ScriptDetail = "";//詳細な説明
+		public string ScriptDetail = "";// 详细说明
 		public string ScriptYear = "";
 		public string ScriptTitle = "";
 		public Int64 ScriptUniqueCode = 0;
-		//1.713 訂正。eramakerのバージョンの初期値は1000ではなく0だった
-		public Int64 ScriptVersion = 0;//1000;
-		//1.713 上の変更とあわせて。セーブデータのバージョンが1000であり、現在のバージョンが未定義である場合、セーブデータのバージョンを同じとみなす
+		// 1.713 修正。eramaker 版本的初始值是 0 而不是 1000
+		public Int64 ScriptVersion = 0;// 1000;
+		// 1.713 配合上方修改。存档数据版本为 1000，且当前版本未定义时，视为与存档数据版本相同
 		public bool ScriptVersionDefined = false;
 		public Int64 ScriptCompatibleMinVersion = -1;
         public string Compatible_EmueraVer = "0.000.0.0";
 
-		//1.727 追加。Form.Text
+		// 1.727 新增。Form.Text
 		public string ScriptWindowTitle = null;
 		public string ScriptVersionText
 		{
@@ -39,7 +39,7 @@ namespace MinorShift.Emuera.GameData
 		}
 		public bool UniqueCodeEqualTo(Int64 target)
 		{
-			//1804 UniqueCode Int64への拡張に伴い修正
+			// 1804 伴随 UniqueCode 扩展到 Int64 进行修正
 			if (target == 0L)
 				return true;
 			return target == ScriptUniqueCode;
@@ -79,10 +79,10 @@ namespace MinorShift.Emuera.GameData
 		}
 
 		/// <summary>
-		/// GAMEBASE読み込み。GAMEBASE.csvの存在は必須ではないので読み込み失敗したらなかったことにする。
+		/// 读取 GAMEBASE。GAMEBASE.csv 并非必须存在，如果读取失败则视为无此文件。
 		/// </summary>
 		/// <param name="basePath"></param>
-		/// <returns>読み込み続行するなら真、エラー終了なら偽</returns>
+		/// <returns>继续读取则返回 true，错误终止则返回 false</returns>
 		public bool LoadGameBaseCsv(string basePath)
 		{
             if (!File.Exists(basePath))

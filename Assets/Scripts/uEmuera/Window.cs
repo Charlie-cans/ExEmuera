@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using uEmuera.Forms;
 using uEmuera.Drawing;
 using MinorShift.Emuera.GameProc;
@@ -34,13 +35,130 @@ namespace uEmuera.Window
     {
         public static string uEmueraVer = "";
 
-		// EM+EE Sound (no-op on background thread - Unity API not available)
-		public void PlaySound(string filename) { }
-		public void StopSound() { }
-		public void PlayBGM(string filename) { }
-		public void StopBGM() { }
-		public void SetSoundVolume(int vol) { }
-		public void SetBGMVolume(int vol) { }
+		// EM+EE 音频系统（线程安全队列 + 主线程处理）
+		private enum SoundCmdType { PlaySound, StopSound, PlayBGM, StopBGM, SetSoundVolume, SetBGMVolume }
+		private struct SoundCommand { public SoundCmdType Type; public string Filename; public int Volume; }
+		private readonly System.Collections.Concurrent.ConcurrentQueue<SoundCommand> soundQueue = new System.Collections.Concurrent.ConcurrentQueue<SoundCommand>();
+		private UnityEngine.AudioSource soundSource;
+		private UnityEngine.AudioSource bgmSource;
+		private int soundVolume = 100;
+		private int bgmVolume = 100;
+
+		private void EnsureAudioSources()
+		{
+			if (soundSource == null)
+			{
+				var go = new UnityEngine.GameObject("EmueraSound");
+				UnityEngine.Object.DontDestroyOnLoad(go);
+				soundSource = go.AddComponent<UnityEngine.AudioSource>();
+				soundSource.loop = false;
+				soundSource.playOnAwake = false;
+			}
+			if (bgmSource == null)
+			{
+				var go = new UnityEngine.GameObject("EmueraBGM");
+				UnityEngine.Object.DontDestroyOnLoad(go);
+				bgmSource = go.AddComponent<UnityEngine.AudioSource>();
+				bgmSource.loop = true;
+				bgmSource.playOnAwake = false;
+			}
+		}
+
+		private void ProcessSoundQueue()
+		{
+			while (soundQueue.TryDequeue(out var cmd))
+			{
+				try
+				{
+					switch (cmd.Type)
+					{
+						case SoundCmdType.PlaySound:
+							EnsureAudioSources();
+							LoadAndPlay(soundSource, cmd.Filename, false, soundVolume);
+							break;
+						case SoundCmdType.StopSound:
+							if (soundSource != null) soundSource.Stop();
+							break;
+						case SoundCmdType.PlayBGM:
+							EnsureAudioSources();
+							LoadAndPlay(bgmSource, cmd.Filename, true, bgmVolume);
+							break;
+						case SoundCmdType.StopBGM:
+							if (bgmSource != null) bgmSource.Stop();
+							break;
+						case SoundCmdType.SetSoundVolume:
+							soundVolume = cmd.Volume;
+							if (soundSource != null) soundSource.volume = cmd.Volume / 100f;
+							break;
+						case SoundCmdType.SetBGMVolume:
+							bgmVolume = cmd.Volume;
+							if (bgmSource != null) bgmSource.volume = cmd.Volume / 100f;
+							break;
+					}
+				}
+				catch (System.Exception e) { UnityEngine.Debug.Log("[Emuera-Sound] 错误: " + e.Message); }
+			}
+		}
+
+		private void LoadAndPlay(UnityEngine.AudioSource source, string filename, bool loop, int volume)
+		{
+			if (string.IsNullOrEmpty(filename)) return;
+			string path = System.IO.Path.Combine(Sys.ExeDir, filename);
+			if (!System.IO.File.Exists(path))
+				path = System.IO.Path.Combine(Sys.ExeDir, filename);
+			if (!System.IO.File.Exists(path))
+			{
+				// 尝试在 Resources 目录查找
+				var ext = System.IO.Path.GetExtension(filename).ToLower();
+				string nameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(filename);
+				var clip = UnityEngine.Resources.Load<UnityEngine.AudioClip>(nameWithoutExt);
+				if (clip != null)
+				{
+					source.clip = clip;
+					source.loop = loop;
+					source.volume = volume / 100f;
+					source.Play();
+					return;
+				}
+				UnityEngine.Debug.Log("[Emuera-Sound] 文件未找到: " + filename);
+				return;
+			}
+			// 使用协程加载音频（由 EmueraMain 驱动）
+			GenericUtils.StartCoroutine(LoadAudioCoroutine(source, path, loop, volume));
+		}
+
+		private System.Collections.IEnumerator LoadAudioCoroutine(UnityEngine.AudioSource source, string path, bool loop, int volume)
+		{
+			var ext = System.IO.Path.GetExtension(path).ToLower();
+			UnityEngine.AudioType audioType = ext == ".ogg" ? UnityEngine.AudioType.OGGVORBIS
+				: ext == ".wav" ? UnityEngine.AudioType.WAV
+				: ext == ".mp3" ? UnityEngine.AudioType.MPEG
+				: UnityEngine.AudioType.UNKNOWN;
+			using (var www = UnityEngine.Networking.UnityWebRequestMultimedia.GetAudioClip("file://" + path, audioType))
+			{
+				yield return www.SendWebRequest();
+				if (www.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
+				{
+					var clip = UnityEngine.Networking.DownloadHandlerAudioClip.GetContent(www);
+					if (clip != null)
+					{
+						source.clip = clip;
+						source.loop = loop;
+						source.volume = volume / 100f;
+						source.Play();
+					}
+				}
+				else UnityEngine.Debug.Log("[Emuera-Sound] 加载失败: " + path + " - " + www.error);
+			}
+		}
+
+		// 后台线程调用 - 添加命令到队列
+		public void PlaySound(string filename) { soundQueue.Enqueue(new SoundCommand { Type = SoundCmdType.PlaySound, Filename = filename }); }
+		public void StopSound() { soundQueue.Enqueue(new SoundCommand { Type = SoundCmdType.StopSound }); }
+		public void PlayBGM(string filename) { soundQueue.Enqueue(new SoundCommand { Type = SoundCmdType.PlayBGM, Filename = filename }); }
+		public void StopBGM() { soundQueue.Enqueue(new SoundCommand { Type = SoundCmdType.StopBGM }); }
+		public void SetSoundVolume(int vol) { soundQueue.Enqueue(new SoundCommand { Type = SoundCmdType.SetSoundVolume, Volume = vol }); }
+		public void SetBGMVolume(int vol) { soundQueue.Enqueue(new SoundCommand { Type = SoundCmdType.SetBGMVolume, Volume = vol }); }
 
         public MainWindow()
         {}
@@ -100,6 +218,8 @@ namespace uEmuera.Window
         }
         public void Update()
         {
+            // 处理音频命令队列（主线程）
+            ProcessSoundQueue();
             //uEmuera.Logger.Info("MainWindow.Update");
             if(console_ == null)
                 return;

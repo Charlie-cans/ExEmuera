@@ -52,10 +52,10 @@ namespace MinorShift.Emuera.GameProc
 						break;
 					//System.Windows.Forms.//Application.DoEvents();
 				}
-				//エラーが起きてる場合でも読み込めてる分だけはチェックする
+				//即使发生错误，也检查已成功读取的部分
 				if (dimlines.Count > 0)
 				{
-					//&=でないと、ここで起きたエラーをキャッチできない
+					//如果不是&=，这里发生的错误无法被捕获
 					noError &= analyzeSharpDimLines();
 				}
 
@@ -74,8 +74,8 @@ namespace MinorShift.Emuera.GameProc
 			StringStream st = null;
 			ScriptPosition position = null;
 			//EraStreamReader eReader = new EraStreamReader(false);
-			//1815修正 _rename.csvの適用
-			//eramakerEXの仕様的には.ERHに適用するのはおかしいけど、もうEmueraの仕様になっちゃってるのでしかたないか
+			//1815修正 _rename.csv的应用
+			//从eramakerEX的规范来说应用到.ERH是不合适的，但已经成了Emuera的规范也只能接受
 			EraStreamReader eReader = new EraStreamReader(true);
 
 			if (!eReader.Open(filepath, filename))
@@ -114,7 +114,7 @@ namespace MinorShift.Emuera.GameProc
 							break;
 						case "DIM":
 						case "DIMS":
-							//1822 #DIMは保留しておいて後でまとめてやる
+							//1822 #DIM暂时保留，稍后批量处理
 							{
 								WordCollection wc = LexicalAnalyzer.Analyse(st, LexEndWith.EoL, LexAnalyzeFlag.AllowAssignment);
 								dimlines.Enqueue(new DimLineWC(wc, sharpID == "DIMS", false, position));
@@ -149,14 +149,14 @@ namespace MinorShift.Emuera.GameProc
 
 		private void analyzeSharpDefine(StringStream st, ScriptPosition position)
 		{
-			//LexicalAnalyzer.SkipWhiteSpace(st);呼び出し前に行う。
+			//在调用前执行LexicalAnalyzer.SkipWhiteSpace(st)。
 			string srcID = LexicalAnalyzer.ReadSingleIdentifier(st);
 			if (srcID == null)
 				throw new CodeEE("置換元の識別子がありません", position);
 			if (Config.ICVariable)
 				srcID = srcID.ToUpper();
 
-            //ここで名称重複判定しないと、大変なことになる
+            //如果不在这里进行名称重复检查，会导致严重后果
             string errMes = "";
             int errLevel = -1;
             idDic.CheckUserMacroName(ref errMes, ref errLevel, srcID);
@@ -170,22 +170,22 @@ namespace MinorShift.Emuera.GameProc
                 }
             }
             
-            bool hasArg = st.Current == '(';//引数を指定する場合には直後に(が続いていなければならない。ホワイトスペースも禁止。
-			//1808a3 代入演算子許可（関数宣言用）
+            bool hasArg = st.Current == '(';//指定参数时，后面必须紧跟(。空格也不允许。
+			//1808a3 允许赋值运算符（用于函数声明）
 			WordCollection wc = LexicalAnalyzer.Analyse(st, LexEndWith.EoL, LexAnalyzeFlag.AllowAssignment);
 			if (wc.EOL)
 			{
 				//throw new CodeEE("置換先の式がありません", position);
-				//1808a3 空マクロの許可
+				//1808a3 允许空宏
 				DefineMacro nullmac = new DefineMacro(srcID, new WordCollection(), 0);
 				idDic.AddMacro(nullmac);
 				return;
 			}
 
 			List<string> argID = new List<string>();
-			if (hasArg)//関数型マクロの引数解析
+			if (hasArg)//函数型宏的参数解析
 			{
-				wc.ShiftNext();//'('を読み飛ばす
+				wc.ShiftNext();//跳过'('
 				if (wc.Current.Type == ')')
 					throw new CodeEE("関数型マクロの引数を0個にすることはできません", position);
 				while (!wc.EOL)
@@ -221,7 +221,7 @@ namespace MinorShift.Emuera.GameProc
 				destWc.Add(wc.Current);
 				wc.ShiftNext();
 			}
-			if (hasArg)//関数型マクロの引数セット
+			if (hasArg)//函数型宏的参数设置
 			{
 				while (!destWc.EOL)
 				{
@@ -244,7 +244,7 @@ namespace MinorShift.Emuera.GameProc
 				}
 				destWc.Pointer = 0;
 			}
-			if (hasArg)//1808a3 関数型マクロの封印
+			if (hasArg)//1808a3 禁用函数型宏
 				throw new CodeEE("関数型マクロは宣言できません", position);
 			DefineMacro mac = new DefineMacro(srcID, destWc, argID.Count);
 			idDic.AddMacro(mac);
@@ -264,7 +264,7 @@ namespace MinorShift.Emuera.GameProc
 		//	//idDic.AddUseDefinedVariable(var);
 		//}
 
-		//1822 #DIMだけまとめておいて後で処理
+		//1822 仅汇总#DIM，稍后处理
 		private bool analyzeSharpDimLines()
 		{
 			bool noError = true;
@@ -289,7 +289,7 @@ namespace MinorShift.Emuera.GameProc
 					}
 					catch (IdentifierNotFoundCodeEE e)
 					{
-						//繰り返すことで解決する見込みがあるならキューの最後に追加
+						//如果通过重试有希望解决，则添加到队列末尾
 						if (tryAgain)
 						{
 							dimline.WC.Pointer = 0;

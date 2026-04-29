@@ -434,6 +434,7 @@ namespace MinorShift.Emuera.GameProc.Function
 			addFunction(FunctionCode.SETBGIMAGE, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
 			addFunction(FunctionCode.CLEARBGIMAGE, argb[FunctionArgType.VOID], METHOD_SAFE | EXTENDED);
 			addFunction(FunctionCode.REMOVEBGIMAGE, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+				addFunction(FunctionCode.CALLSHARP, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
 			#endregion
 
 			Dictionary<string, FunctionMethod> methodList = FunctionMethodCreator.GetMethodList();

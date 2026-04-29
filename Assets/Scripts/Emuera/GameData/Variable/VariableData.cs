@@ -9,7 +9,7 @@ using MinorShift.Emuera.GameProc;
 namespace MinorShift.Emuera.GameData.Variable
 {
 	/// <summary>
-	/// 変数全部
+	/// 全部变量
 	/// </summary>
 	internal sealed partial class VariableData : IDisposable
 	{
@@ -31,6 +31,8 @@ namespace MinorShift.Emuera.GameData.Variable
 		public Dictionary<string, System.Data.DataTable> DataTables = new Dictionary<string, System.Data.DataTable>();
 		// EM+EE String Maps (MAP_* functions)
 		public Dictionary<string, Dictionary<string, string>> DataStringMaps = new Dictionary<string, Dictionary<string, string>>();
+		// EM+EE XML Documents (XML_* functions)
+		public Dictionary<string, System.Xml.XmlDocument> DataXmlDocument = new Dictionary<string, System.Xml.XmlDocument>();
 		public Int64[] DataInteger { get { return dataInteger; } }
 		public string[] DataString { get { return dataString; } }
 		public Int64[][] DataIntegerArray { get { return dataIntegerArray; } }
@@ -57,23 +59,23 @@ namespace MinorShift.Emuera.GameData.Variable
 		Dictionary<string, VariableLocal> localvarTokenDic = new Dictionary<string, VariableLocal>();
 
 		/// <summary>
-		/// ユーザー変数のうちStaticかつ非Globalなもの。ERHでのDIM(非GLOBAL) と関数でのDIM (STATIC)の両方。ロードやリセットで初期化が必要。キャラクタ変数は除く。
+		/// 用户变量中Static且非Global的。包括ERH中的DIM(非GLOBAL)和函数中的DIM(STATIC)。加载或重置时需要初始化。不含角色变量。
 		/// </summary>
 		List<UserDefinedVariableToken> userDefinedStaticVarList = new List<UserDefinedVariableToken>();
 		/// <summary>
-		/// ユーザー広域変数のうちグローバル属性持ち。
+		/// 用户全局变量中具有全局属性的。
 		/// </summary>
 		List<UserDefinedVariableToken> userDefinedGlobalVarList = new List<UserDefinedVariableToken>();
 		/// <summary>
-		/// ユーザー広域変数のうちセーブされるもの。グローバル、キャラクタ変数は除く。
+		/// 用户全局变量中需要保存的。不含全局变量和角色变量。
 		/// </summary>
 		List<UserDefinedVariableToken>[] userDefinedSaveVarList = new List<UserDefinedVariableToken>[6];
 		/// <summary>
-		/// ユーザー広域変数のうち、グローバルかつセーブされるもの。
+		/// 用户全局变量中，全局且需要保存的。
 		/// </summary>
 		List<UserDefinedVariableToken>[] userDefinedGlobalSaveVarList = new List<UserDefinedVariableToken>[6];
 		/// <summary>
-		/// ユーザー広域変数のうち、キャラクタ変数であるもの。初期化やセーブされるかどうかはCharacterDataの方で判断。
+		/// 用户全局变量中属于角色变量的。初始化以及是否保存由CharacterData判断。
 		/// </summary>
 		public List<UserDefinedCharaVariableToken> UserDefinedCharaVarList = new List<UserDefinedCharaVariableToken>();
 
@@ -531,7 +533,7 @@ namespace MinorShift.Emuera.GameData.Variable
 
 
 		/// <summary>
-		/// ローカルとグローバル以外初期化
+		/// 初始化局部和全局之外的变量
 		/// </summary>
 		public void SetDefaultValue(ConstantData constant)
 		{
@@ -719,7 +721,7 @@ namespace MinorShift.Emuera.GameData.Variable
 			writer.EmuSeparete();
 
 			//dataStringArray2D
-			//StringArray2Dの保存は未実装
+			//StringArray2D的保存尚未实现
 			codeList = VariableIdentifier.GetExtSaveList(VariableCode.__ARRAY_2D__ | VariableCode.__STRING__);
 			foreach (VariableCode code in codeList)
 				writer.WriteExtended(code.ToString(), dataStringArray2D[(int)VariableCode.__LOWERCASE__ & (int)code]);
@@ -732,7 +734,7 @@ namespace MinorShift.Emuera.GameData.Variable
 			writer.EmuSeparete();
 
 			//dataStringArray3D
-			//StringArray3Dの保存は未実装
+			//StringArray3D的保存尚未实现
 			codeList = VariableIdentifier.GetExtSaveList(VariableCode.__ARRAY_3D__ | VariableCode.__STRING__);
 			foreach (VariableCode code in codeList)
 				writer.WriteExtended(code.ToString(), dataStringArray3D[(int)VariableCode.__LOWERCASE__ & (int)code]);
@@ -1026,8 +1028,8 @@ namespace MinorShift.Emuera.GameData.Variable
 		}
 
 		/// <summary>
-		/// 1808 キャラクタ型でない変数を一つ読む
-		/// ファイル終端の場合はfalseを返す
+		/// 1808 读取一个非角色类型的变量
+		/// 如果是文件结尾则返回false
 		/// </summary>
 		/// <param name="reader"></param>
 		public bool LoadVariableBinary(EraBinaryDataReader reader)
@@ -1095,7 +1097,7 @@ namespace MinorShift.Emuera.GameData.Variable
 			}
 			return true;
 		}
-		#region IDisposable メンバ
+		#region IDisposable 成员
 
 		public void Dispose()
 		{
@@ -1112,6 +1114,7 @@ namespace MinorShift.Emuera.GameData.Variable
 				dt.Dispose();
 			DataTables.Clear();
 			DataStringMaps.Clear();
+			DataXmlDocument.Clear();
 		}
 
 		#endregion

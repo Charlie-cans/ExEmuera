@@ -12,9 +12,9 @@ namespace MinorShift.Emuera.GameData.Function
 		protected Type[] argumentTypeArray;
 		protected string Name { get; private set; }
 
-		//引数の数・型が一致するかどうかのテスト
-		//正しくない場合はエラーメッセージを返す。
-		//引数の数が不定である場合や引数の省略を許す場合にはoverrideすること。
+		//参数数量和类型是否匹配的测试
+		//不正确时返回错误消息。
+		//参数数量不定或允许省略参数时需要override。
 		public virtual string CheckArgumentType(string name, IOperandTerm[] arguments)
 		{
 			if (arguments.Length != argumentTypeArray.Length)
@@ -29,13 +29,13 @@ namespace MinorShift.Emuera.GameData.Function
 			return null;
 		}
 		
-		//Argumentが全て定数の時にMethodを解体してよいかどうか。RANDやCharaを参照するものなどは不可
+		//参数全部为常量时是否可以将Method解体。引用RAND或Chara等的情况不可
 		public bool CanRestructure { get; protected set; }
 
-		//FunctionMethodが固有のRestructure()を持つかどうか
+		//FunctionMethod是否拥有固有的Restructure()
 		public bool HasUniqueRestructure { get; protected set; }
 
-		//実際の計算。
+		//实际的计算。
 		public virtual Int64 GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { throw new ExeEE("戻り値の型が違う or 未実装"); }
 		public virtual string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { throw new ExeEE("戻り値の型が違う or 未実装"); }
 		public virtual SingleTerm GetReturnValue(ExpressionMediator exm, IOperandTerm[] arguments)
@@ -47,7 +47,7 @@ namespace MinorShift.Emuera.GameData.Function
 		}
 
 		/// <summary>
-		/// 戻り値は全体をRestructureできるかどうか
+		/// 返回值表示整体是否可以Restructure
 		/// </summary>
 		/// <param name="exm"></param>
 		/// <param name="arguments"></param>

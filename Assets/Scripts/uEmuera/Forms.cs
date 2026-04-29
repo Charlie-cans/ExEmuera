@@ -127,7 +127,7 @@ namespace uEmuera.Forms
         }
         public static DialogResult Show(string text, string caption, MessageBoxButtons buttons)
         {
-            //todo
+            //待办
             uEmuera.Logger.Info(text);
             return DialogResult.None;
         }

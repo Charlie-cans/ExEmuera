@@ -68,12 +68,12 @@ namespace MinorShift.Emuera.GameView
             }
 #endif  
 			int height = 0;
-			if (raw_height == 0)//HTMLで高さが指定されていない又は0が指定された場合、フォントサイズをそのまま高さ(px単位)として使用する。
+			if (raw_height == 0)//如果HTML中未指定高度或指定为0，则直接使用字体大小作为高度（px单位）。
 				height = Config.FontSize;
-			else//HTMLで高さが指定された場合、フォントサイズの100分率と解釈する。
+			else//如果HTML中指定了高度，则解释为字体大小的百分比。
 				height = Config.FontSize * raw_height / 100;
-			//幅が指定されていない又は0が指定された場合、元画像の縦横比を維持するように幅(px単位)を設定する。1未満は端数としてXsubpixelに記録。
-			//負の値が指定される可能性があるが、最終的なWidthは正の値になるようにあとで調整する。
+			//如果未指定宽度或指定为0，则根据原图像的宽高比设置宽度（px单位）。不足1的部分作为小数记录在Xsubpixel中。
+			//可能会指定负值，但最终Width会在之后调整为正值。
 			if (raw_width == 0)
 			{
 				Width = cImage.DestBaseSize.Width * height / cImage.DestBaseSize.Height;
@@ -123,9 +123,9 @@ namespace MinorShift.Emuera.GameView
 		private readonly int top;
 		private readonly int bottom;
 		private readonly Rectangle destRect;
-//#pragma warning disable CS0649 // フィールド 'ConsoleImagePart.ia' は割り当てられません。常に既定値 null を使用します。
+//#pragma warning disable CS0649 // 字段 'ConsoleImagePart.ia' 从未被赋值，将始终使用默认值 null。
 //		private readonly ImageAttributes ia;
-//#pragma warning restore CS0649 // フィールド 'ConsoleImagePart.ia' は割り当てられません。常に既定値 null を使用します。
+//#pragma warning restore CS0649 // 字段 'ConsoleImagePart.ia' 从未被赋值，将始终使用默认值 null。
 		public readonly string ResourceName;
 		public readonly string ButtonResourceName;
 		public override int Top { get { return top; } }

@@ -29,7 +29,7 @@ namespace MinorShift.Emuera.GameProc
 		public bool CharaData = false;
 		public bool Const = false;
 		
-		//1822 Privateの方もDIMだけ遅延させようとしたけどちょっと課題がおおいのでやめとく
+		//1822 也想让Private也仅延迟DIM，但问题较多所以放弃
 		public static UserDefinedVariableData Create(DimLineWC dimline)
 		{
 			return Create(dimline.WC, dimline.Dims, dimline.IsPrivate, dimline.SC);
@@ -52,7 +52,7 @@ namespace MinorShift.Emuera.GameProc
 				keyword = idw.Code;
 				if (Config.ICVariable)
 					keyword = keyword.ToUpper();
-				//TODO ifの数があたまわるい なんとかしたい
+				//TODO if的数量太多了 想想办法
 				switch (keyword)
 				{
 					case "CONST":
@@ -192,22 +192,22 @@ namespace MinorShift.Emuera.GameProc
 
 
 			List<int> sizeNum = new List<int>();
-			if (wc.EOL)//サイズ省略
+			if (wc.EOL)//省略大小
 			{
 				if (ret.Const)
 					throw new CodeEE("CONSTキーワードが指定されていますが初期値が設定されていません");
 				sizeNum.Add(1);
 			}
-			else if (wc.Current.Type == ',')//サイズ指定
+			else if (wc.Current.Type == ',')//指定大小
 			{
 				while (!wc.EOL)
 				{
-					if (wc.Current.Type == '=')//サイズ指定解読完了＆初期値指定
+					if (wc.Current.Type == '=')//指定大小解読完了＆初期値指定
 						break;
 					if (wc.Current.Type != ',')
 						throw new CodeEE("書式が間違っています", sc);
 					wc.ShiftNext();
-					if (ret.Reference)//参照型の場合は要素数不要
+					if (ret.Reference)//引用类型时不需要元素数量
 					{
 						sizeNum.Add(0);
 						if (wc.EOL)
@@ -221,7 +221,7 @@ namespace MinorShift.Emuera.GameProc
 					SingleTerm sizeTerm = arg.Restructure(null) as SingleTerm;
 					if ((sizeTerm == null) || (sizeTerm.GetOperandType() != typeof(Int64)))
 						throw new CodeEE("カンマの後に有効な定数式が指定されていません", sc);
-					if (ret.Reference)//参照型には要素数指定不可(0にするか書かないかどっちか
+					if (ret.Reference)//引用类型不可指定元素数量（用0或不写）
 					{
 						if (sizeTerm.Int != 0)
 							throw new CodeEE("参照型変数にはサイズを指定できません(サイズを省略するか0を指定してください)", sc);
@@ -235,12 +235,12 @@ namespace MinorShift.Emuera.GameProc
 			}
 
 
-			if (wc.Current.Type != '=')//初期値指定なし
+			if (wc.Current.Type != '=')//无初始值指定
 			{
 				if (ret.Const)
 					throw new CodeEE("CONSTキーワードが指定されていますが初期値が設定されていません");
 			}
-			else//初期値指定あり
+			else//有初始值指定
 			{
 				if (((OperatorWord)wc.Current).Code != OperatorCode.Assignment)
 					throw new CodeEE("予期しない演算子を発見しました");

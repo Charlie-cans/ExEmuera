@@ -19,7 +19,7 @@ namespace MinorShift.Emuera.GameData
 		private const int SQLITE_OPEN_MEMORY = 128;
 		private static readonly IntPtr SQLITE_TRANSIENT = new IntPtr(-1);
 
-		// .NET Standard 2.0 doesn't have PtrToStringUTF8 / LPUTF8Str. Use byte[] for inputs, manual decode for outputs.
+		// .NET Standard 2.0 没有 PtrToStringUTF8 / LPUTF8Str 方法。使用 byte[] 作为输入，手动解码输出。
 		[DllImport(SQLITE_DLL, CallingConvention = CallingConvention.Cdecl)]
 		private static extern int sqlite3_open_v2(byte[] filename, out IntPtr db, int flags, byte[] zVfs);
 
@@ -75,9 +75,13 @@ namespace MinorShift.Emuera.GameData
 		{
 			if (databases.ContainsKey(dbName))
 				Disconnect(dbName);
-			int rc = sqlite3_open_v2(U8(":memory:"), out IntPtr db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_MEMORY, null);
+			// 持久化文件数据库，路径为 <游戏目录>/dat/<dbName>.db
+			string dir = Path.Combine(_Library.Sys.ExeDir, "dat");
+			Directory.CreateDirectory(dir);
+			string dbPath = Path.Combine(dir, dbName + ".db");
+			int rc = sqlite3_open_v2(U8(dbPath), out IntPtr db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, null);
 			if (rc != SQLITE_OK)
-				throw new CodeEE($"SQL_CONNECT '{dbName}' failed (code {rc})");
+				throw new CodeEE($"SQL_CONNECT '{dbName}' failed to open {dbPath} (code {rc})");
 			sqlite3_exec(db, U8("PRAGMA journal_mode=OFF"), IntPtr.Zero, IntPtr.Zero, out _);
 			databases[dbName] = db;
 		}

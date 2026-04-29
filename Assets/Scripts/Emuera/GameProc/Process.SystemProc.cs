@@ -77,17 +77,17 @@ namespace MinorShift.Emuera.GameProc
 		Int64 systemResult = 0;
 		int lastCalledComable = -1;
 		int lastAddCom = -1;
-		//(Train.csv中の値・定義されていなければ-1) == comAble[(表示されている値)];
+		//(Train.csv中的值·未定义时为-1) == comAble[(显示的值)];
 		int[] comAble;//
 
 
 		private void runSystemProc()
 		{
-			//スクリプト実行中にここには来ないはず
+			//脚本执行中不应该到这里来
 			//if (!state.ScriptEnd)
 			//    throw new ExeEE("不正な呼び出し");
 
-			//ない物を渡す処理は現状ない
+			//目前没有传递不存在内容的处理
 			//if (systemProcessDictionary.ContainsKey(state.SystemState))
 			systemProcessDictionary[state.SystemState]();
 			//else
@@ -121,18 +121,18 @@ namespace MinorShift.Emuera.GameProc
 					return false;
 				else
 					throw new CodeEE("関数\"@" + functionName + "\"が見つかりません");
-			//そもそも非イベント関数では関数1個分しか与えないので条件を満たすわけがない
+			//本来非事件函数只会给出一个函数，所以不可能满足条件
 			//if ((!isEvent) && (call.Count > 1))
 			//    throw new ExeEE("イベント関数でない関数\"@" + functionName + "\"の候補が複数ある");
 			state.IntoFunction(call, null, null);
 			return true;
 		}
 
-		//CheckState()から呼ばれる関数群。ScriptEndに達したときの処理。
+		//从CheckState()调用的函数群。到达ScriptEnd时的处理。
 
 		void beginTitle()
 		{
-			//連続調教コマンド処理中の状態が持ち越されていたらここで消しておく
+			//如果连续调教命令处理中的状态被遗留下来，在这里清除
 			if (isCTrain)
 				if (ClearCommands())
 					return;
@@ -162,11 +162,11 @@ namespace MinorShift.Emuera.GameProc
 				return;
 			}
 			if (callFunction("SYSTEM_TITLE", false, false))
-			{//独自定義
+			{//自定义
 				state.SystemState = SystemStateCode.Normal;
 				return;
 			}
-			//標準のタイトル画面
+			//标准的标题画面
 			console.PrintBar();
 			console.NewLine();
 			console.Alignment = GameView.DisplayLineAlignment.CENTER;
@@ -197,7 +197,7 @@ namespace MinorShift.Emuera.GameProc
 		void endOpenning()
 		{
 			if (systemResult == 0)
-			{//[0] 最初からはじめる
+			{//[0] 从头开始
 				vEvaluator.ResetData();
 				//vEvaluator.AddCharacter(0, false);
 				vEvaluator.AddCharacterFromCsvNo(0);
@@ -211,16 +211,16 @@ namespace MinorShift.Emuera.GameProc
 			else if (systemResult == 1)
 			{
 				if (callFunction("TITLE_LOADGAME", false, false))
-				{//独自定義
+				{//自定义
 					state.SystemState = SystemStateCode.Openning_TitleLoadgame;
 				}
 				else
-				{//標準のLOADGAME
+				{//标准的LOADGAME
 					beginLoadGameOpening();
 				}
 			}
-			else//入力が正しくないならもう一回選択肢を書き直し、正しい選択を要求する。
-			{//RESUELASTLINEと同様の処理を行うように変更
+			else//输入不正确则重写选择项，要求正确选择。
+			{//改为与RESUELASTLINE相同的处理
 				console.deleteLine(1);
 				console.PrintTemporaryLine("無効な値です");
 				console.updatedGeneration = true;
@@ -233,7 +233,7 @@ namespace MinorShift.Emuera.GameProc
 		void beginFirst()
 		{
 			state.SystemState = SystemStateCode.Normal;
-			//連続調教コマンド処理中の状態が持ち越されていたらここで消しておく
+			//如果连续调教命令处理中的状态被遗留下来，在这里清除
 			if (isCTrain)
 				if (ClearCommands())
 					return;
@@ -250,10 +250,10 @@ namespace MinorShift.Emuera.GameProc
 		{
 			vEvaluator.UpdateInBeginTrain();
 			state.SystemState = SystemStateCode.Train_CallEventTrain;
-			//EVENTTRAINを呼び出してTrain_CallEventTrainへ移行。
+			//调用EVENTTRAIN后转移到Train_CallEventTrain。
 			if (!callFunction("EVENTTRAIN", false, true))
 			{
-				//存在しなければスキップしてTrain_CallEventTrainが終わったことにする。
+				//如果不存在则跳过，视为Train_CallEventTrain已完成。
 				endCallEventTrain();
 			}
 		}
@@ -266,11 +266,11 @@ namespace MinorShift.Emuera.GameProc
 		void endCallEventTrain()
 		{
 			if (vEvaluator.NEXTCOM >= 0)
-			{//NEXTCOMの処理
+			{//NEXTCOM的处理
 				state.SystemState = SystemStateCode.Train_CallEventCom;
 				vEvaluator.SELECTCOM = vEvaluator.NEXTCOM;
 				vEvaluator.NEXTCOM = 0;
-				//-1ではなく0を代入するのでERB側で変更しない限り無限にはまることになるがeramakerからの仕様である。
+				//由于代入的是0而非-1，所以除非ERB侧修改否则会无限循环，但这是eramaker以来的规范。
 				callEventCom();
 				return;
 			}
@@ -278,7 +278,7 @@ namespace MinorShift.Emuera.GameProc
 			{
 				//if (!isCTrain)
 				//{
-				//SHOW_STATUSを呼び出してTrain_CallShowStatusへ移行。
+				//调用SHOW_STATUS后转移到Train_CallShowStatus。
 				if (isCTrain)
 					skipPrint = true;
 				callFunction("SHOW_STATUS", true, false);
@@ -286,7 +286,7 @@ namespace MinorShift.Emuera.GameProc
 				//}
 				//else
 				//{
-				//連続調教モードならCOMABLE処理へ
+				//如果是连续调教模式则进入COMABLE处理
 				//	endCallShowStatus();
 				//}
 			}
@@ -294,7 +294,7 @@ namespace MinorShift.Emuera.GameProc
 
 		void endCallShowStatus()
 		{
-			//SHOW_STATUSが終わったらComAbleXXの呼び出し状態をリセットしてTrain_CallComAbleXXへ移行。
+			//SHOW_STATUS结束后重置ComAbleXX的调用状态，然后转移到Train_CallComAbleXX。
 			state.SystemState = SystemStateCode.Train_CallComAbleXX;
 			lastCalledComable = -1;
 			lastAddCom = -1;
@@ -313,7 +313,7 @@ namespace MinorShift.Emuera.GameProc
 		int printComCount = 0;
 		void endCallComAbleXX()
 		{
-			//選択肢追加。RESULTが0の場合は選択肢の番号のみ増やして追加はしない。
+			//添加选项。如果RESULT为0则只增加选项编号而不添加。
 			if ((lastCalledComable >= 0) && (TrainName[lastCalledComable] != null))
 			{
 				lastAddCom++;
@@ -330,7 +330,7 @@ namespace MinorShift.Emuera.GameProc
 					console.RefreshStrings(false);
 				}
 			}
-			//ComAbleXXの呼び出し。train.csvに定義されていないものはスキップ、ComAbleXXが見つからなければREUTRN 1と同様に扱う。
+			//ComAbleXX的调用。跳过train.csv中未定义的，如果找不到ComAbleXX则按RETURN 1处理。
 			while (++lastCalledComable < TrainName.Length)
 			{
 				if (TrainName[lastCalledComable] == null)
@@ -354,7 +354,7 @@ namespace MinorShift.Emuera.GameProc
 				console.RefreshStrings(false);
 				return;
 			}
-			//全部検索したら終了し、SHOW_USERCOMを呼び出す。
+			//全部搜索完毕后结束，调用SHOW_USERCOM。
 			if (lastCalledComable >= TrainName.Length)
 			{
 				state.SystemState = SystemStateCode.Train_CallShowUserCom;
@@ -376,7 +376,7 @@ namespace MinorShift.Emuera.GameProc
 			vEvaluator.UpdateAfterShowUsercom();
 			if (!isCTrain)
 			{
-				//数値入力待ち状態にしてTrain_WaitInputへ移行。
+				//设为等待数值输入状态并转移到Train_WaitInput。
 				setWaitInput();
 
 				state.SystemState = SystemStateCode.Train_WaitInput;
@@ -409,20 +409,20 @@ namespace MinorShift.Emuera.GameProc
 				}
 				console.PrintSingleLine(string.Format("＜コマンド連続実行：{0}/{1}＞", count, coms.Count));
 			}
-			//TrainNameが定義されていて使用可能(COMABLEが非0を返した)である
+			//TrainName已定义且可用（COMABLE返回了非0）
 			if (selectCom >= 0)
 			{
 				vEvaluator.SELECTCOM = selectCom;
 				callEventCom();
 			}
 			else
-			{//されていない。
+			{//未被定义或不可用。
 				if (isCTrain)
 					console.PrintSingleLine("コマンドを実行できませんでした");
 				vEvaluator.RESULT = systemResult;
 				state.SystemState = SystemStateCode.Train_CallEventComEnd;
 				callFunction("USERCOM", true, false);
-				//COM中の必要なことは全部USERCOM内でやる。
+				//COM中需要的操作全部在USERCOM内完成。
 			}
 		}
 
@@ -453,14 +453,14 @@ namespace MinorShift.Emuera.GameProc
 
 		void endCallComXX()
 		{
-			//実行に失敗した
+			//执行失败
 			if (vEvaluator.RESULT == 0)
 			{
-				//Com終了。
+				//Com结束。
 				endCallEventComEnd();
 			}
 			else
-			{//成功したならSOURCE_CHECKへ移行。
+			{//如果成功则转移到SOURCE_CHECK。
 				state.SystemState = SystemStateCode.Train_CallSourceCheck;
 				callFunction("SOURCE_CHECK", true, false);
 			}
@@ -468,15 +468,15 @@ namespace MinorShift.Emuera.GameProc
 
 		void endCallSourceCheck()
 		{
-			//SOURCEはここでリセット
+			//SOURCE在这里重置
 			vEvaluator.UpdateAfterSourceCheck();
-			//EVENTCOMENDを呼び出してTrain_CallEventComEndへ移行。
+			//调用EVENTCOMEND后转移到Train_CallEventComEnd。
 			state.SystemState = SystemStateCode.Train_CallEventComEnd;
-			//EVENTCOMENDが存在しない、またはEVENTCOMEND内でWAIT系命令が行われない場合、EVENTCOMEND後にWAITを追加する。
+			//如果EVENTCOMEND不存在，或EVENTCOMEND内没有执行WAIT系命令，则在EVENTCOMEND后添加WAIT。
 			NeedWaitToEventComEnd = true;
 			if (!callFunction("EVENTCOMEND", false, true))
 			{
-				//見つからないならスキップしてTrain_CallEventComEndが終了したとみなす。
+				//如果找不到则跳过，视为Train_CallEventComEnd已结束。
 				endCallEventComEnd();
 			}
 		}
@@ -509,66 +509,66 @@ namespace MinorShift.Emuera.GameProc
 					}
 				}
 				needCheck = true;
-				////1.701	ここでWAITは不要だった。
+				////1.701	这里不需要WAIT。
 				////setWait();
-				//1.703 やはり必要な場合もあった
+				//1.703 果然还是有需要的情况
 				if (NeedWaitToEventComEnd)
 					setWait();
 				NeedWaitToEventComEnd = false;
-				//SHOW_STATUSからやり直す。
-				//処理はTrain_CallEventTrainと同じ。
+				//从SHOW_STATUS重新开始。
+				//处理与Train_CallEventTrain相同。
 				endCallEventTrain();
 			}
 		}
 
 		void beginAfterTrain()
 		{
-			//連続調教モード中にここに来る場合があるので、ここで解除
+			//因为在连续调教模式中可能会到这里，所以在这里解除
 			if (isCTrain)
 				if (ClearCommands())
 					return;
 			skipPrint = false;
 			state.SystemState = SystemStateCode.Normal;
-			//EVENTENDを呼び出す。exe側が状態を把握する必要が無くなるのでNormalへ移行。
+			//调用EVENTEND。因为exe侧不需要再掌握状态，所以转移到Normal。
 			callFunction("EVENTEND", true, true);
 		}
 
 		void beginAblup()
 		{
-			//連続調教コマンド処理中の状態が持ち越されていたらここで消しておく
+			//如果连续调教命令处理中的状态被遗留下来，在这里清除
 			if (isCTrain)
 				if (ClearCommands())
 					return;
 			skipPrint = false;
 			state.SystemState = SystemStateCode.Ablup_CallShowJuel;
-			//SHOW_JUELを呼び出しAblup_CallShowJuelへ移行。
+			//调用SHOW_JUEL后转移到Ablup_CallShowJuel。
 			callFunction("SHOW_JUEL", true, false);
 		}
 
 		void endCallShowJuel()
 		{
 			state.SystemState = SystemStateCode.Ablup_CallShowAblupSelect;
-			//SHOW_ABLUP_SELECTを呼び出しAblup_CallAblupSelectへ移行。
+			//调用SHOW_ABLUP_SELECT后转移到Ablup_CallAblupSelect。
 			callFunction("SHOW_ABLUP_SELECT", true, false);
 		}
 
 		void endCallShowAblupSelect()
 		{
-			//数値入力待ち状態にしてAblup_WaitInputへ移行。
+			//设为等待数值输入状态并转移到Ablup_WaitInput。
 			setWaitInput();
 			state.SystemState = SystemStateCode.Ablup_WaitInput;
 		}
 
 		void ablupWaitInput()
 		{
-			//定義されていなくても100未満ならABLUPが呼ばれ、USERABLUPは呼ばれない。そうしないと[99]反発刻印とかが出来ない。
+			//即使未定义，若小于100则调用ABLUP，不调用USERABLUP。否则[99]反弹刻印等功能就无法实现。
 			if ((systemResult >= 0) && (systemResult < 100))
 			{
 				state.SystemState = SystemStateCode.Ablup_CallAblupXX;
 				string ablName = string.Format("ABLUP{0}", systemResult);
 				if (!callFunction(ablName, false, false))
 				{
-					//見つからなければ終了
+					//如果找不到则结束
 					console.deleteLine(1);
 					console.PrintTemporaryLine("無効な値です");
 					console.updatedGeneration = true;
@@ -601,28 +601,28 @@ namespace MinorShift.Emuera.GameProc
 
 		void beginTurnend()
 		{
-			//連続調教コマンド処理中の状態が持ち越されていたらここで消しておく
+			//如果连续调教命令处理中的状态被遗留下来，在这里清除
 			if (isCTrain)
 				if (ClearCommands())
 					return;
 			skipPrint = false;
-			//EVENTTURNENDを呼び出しNormalへ移行
+			//调用EVENTTURNEND后转移到Normal
 			callFunction("EVENTTURNEND", true, true);
 			state.SystemState = SystemStateCode.Normal;
 		}
 
 		void beginShop()
 		{
-			//連続調教コマンド処理中の状態が持ち越されていたらここで消しておく
+			//如果连续调教命令处理中的状态被遗留下来，在这里清除
 			if (isCTrain)
 				if (ClearCommands())
 					return;
 			skipPrint = false;
 			state.SystemState = SystemStateCode.Shop_CallEventShop;
-			//EVENTSHOPを呼び出してShop_CallEventShopへ移行。
+			//调用EVENTSHOP后转移到Shop_CallEventShop。
 			if (!callFunction("EVENTSHOP", false, true))
 			{
-				//存在しなければスキップしてShop_CallEventShopが終わったことにする。
+				//如果不存在则跳过，视为Shop_CallEventShop已结束。
 				endCallEventShop();
 			}
 		}
@@ -642,7 +642,7 @@ namespace MinorShift.Emuera.GameProc
 		void beginAutoSave()
 		{
 			if (callFunction("SYSTEM_AUTOSAVE", false, false))
-			{//@SYSTEM_AUTOSAVEが存在するならそれを使う。
+			{//如果@SYSTEM_AUTOSAVE存在则使用它。
 				state.SystemState = SystemStateCode.AutoSave_CallUniqueAutosave;
 				return;
 			}
@@ -650,7 +650,7 @@ namespace MinorShift.Emuera.GameProc
 			vEvaluator.SAVEDATA_TEXT = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + " ";
 			state.SystemState = SystemStateCode.AutoSave_CallSaveInfo;
 			if (!callFunction("SAVEINFO", false, false))
-				endAutoSaveCallSaveInfo();//存在しなければスキップ
+				endAutoSaveCallSaveInfo();//如果不存在则跳过
 		}
 
 		void endAutoSaveCallSaveInfo()
@@ -675,19 +675,19 @@ namespace MinorShift.Emuera.GameProc
 				return;
 			}
 			state.SystemState = SystemStateCode.Shop_CallShowShop;
-			//SHOW_SHOPを呼び出しShop_CallShowShopへ移行
+			//调用SHOW_SHOP后转移到Shop_CallShowShop
 			callFunction("SHOW_SHOP", true, false);
 		}
 
 		void endCallShowShop()
 		{
-			//数値入力待ち状態にしてShop_WaitInputへ移行。
+			//设为等待数值输入状态并转移到Shop_WaitInput。
 			setWaitInput();
 			state.SystemState = SystemStateCode.Shop_WaitInput;
 		}
 
-		//PRINT_SHOPITEMとは独立している。
-		//BOUGHTが100以上のアイテムが有り、ITEMSALESがTRUEだとしても強制的に@USERSHOP行き。
+		//与PRINT_SHOPITEM是独立的。
+		//即使有BOUGHT为100以上的道具且ITEMSALES为TRUE，也强制进入@USERSHOP。
 		void shopWaitInput()
 		{
 			if ((systemResult >= 0) && (systemResult < Config.MaxShopItem))
@@ -697,7 +697,7 @@ namespace MinorShift.Emuera.GameProc
 					if (vEvaluator.BuyItem(systemResult))
 					{
 						state.SystemState = SystemStateCode.Shop_CallEventBuy;
-						//EVENTBUYを呼び出しShop_CallEventBuyへ移行
+						//调用EVENTBUY后转移到Shop_CallEventBuy
 						if (!callFunction("EVENTBUY", false, true))
 							endCallEventBuy();
 						return;
@@ -717,17 +717,17 @@ namespace MinorShift.Emuera.GameProc
 					console.deleteLine(1);
 					console.PrintTemporaryLine("売っていません。");
 				}
-				//購入に失敗した場合、endCallEventShop()に戻す。
+				//购买失败时，返回endCallEventShop()。
 				//endCallEventShop();
 				endCallShowShop();
 				return;
 			}
 			else
 			{
-				//RESULTを更新
+				//更新RESULT
 				vEvaluator.RESULT = systemResult;
 
-				//USERSHOPを呼び出しShop_CallEventBuyへ移行
+				//调用USERSHOP后转移到Shop_CallEventBuy
 				callFunction("USERSHOP", true, false);
 				state.SystemState = SystemStateCode.Shop_CallEventBuy;
 				return;
@@ -748,7 +748,7 @@ namespace MinorShift.Emuera.GameProc
 			}
 			else
 			{
-				//最初に戻る
+				//回到开头
 				endAutoSave();
 			}
 		}
@@ -759,23 +759,23 @@ namespace MinorShift.Emuera.GameProc
 			state.SystemState = SystemStateCode.LoadData_CallSystemLoad;
 			
 			if (!callFunction("SYSTEM_LOADEND", false, false))
-				endSystemLoad();//存在しなければスキップ
+				endSystemLoad();//如果不存在则跳过
 		}
 		void endSystemLoad()
 		{
 			state.SystemState = SystemStateCode.LoadData_CallEventLoad;
-			//EVENTLOADを呼び出してLoadData_CallEventLoadへ移行。
+			//调用EVENTLOAD后转移到LoadData_CallEventLoad。
 			if (!callFunction("EVENTLOAD", false, true))
 			{
-				//存在しなければスキップしてTrain_CallEventTrainが終わったことにする。
+				//如果不存在则跳过，视为Train_CallEventTrain已完成。
 				endAutoSave();
 			}
 		}
 
 		void endEventLoad()
 		{
-			//@EVENTLOAD中にBEGIN命令が行われればここには来ない。
-			//ここに来たらBEGIN SHOP扱い。オートセーブはしない。
+			//如果在@EVENTLOAD中执行了BEGIN命令，就不会到这里来。
+			//如果到了这里，则视为BEGIN SHOP。不进行自动存档。
 			endAutoSave();
 		}
 
@@ -834,7 +834,7 @@ namespace MinorShift.Emuera.GameProc
 				console.PrintFlush(false);
 				console.Print(string.Format("[{0, 2}] セーブデータ{0, 2}～{1, 2}を表示", (i + 1) * 20, (i + 1) * 20 + 19));
 			}
-			//オートセーブの処理は別途切り出し（表示処理の都合上）
+			//自动存档的处理另外分离（出于显示处理的需要）
 			dataIsAvailable[dataIsAvailable.Length - 1] = false;
 			if (state.SystemState != SystemStateCode.SaveGame_Begin)
 			{
@@ -845,7 +845,7 @@ namespace MinorShift.Emuera.GameProc
 					dataIsAvailable[dataIsAvailable.Length - 1] = true;
 			}
 			console.RefreshStrings(false);
-			//描画全部終わり
+			//绘制全部结束
 			console.PrintSingleLine("[100] 戻る");
 			setWaitInput();
 			if (state.SystemState == SystemStateCode.SaveGame_Begin)
@@ -854,7 +854,7 @@ namespace MinorShift.Emuera.GameProc
 				state.SystemState = SystemStateCode.LoadGame_WaitInput;
 			else// if (state.SystemState == SystemStateCode.LoadGameOpenning_Begin)
 				state.SystemState = SystemStateCode.LoadGameOpenning_WaitInput;
-			//きちんと処理されてるので、ここには来ない
+			//因为已被正确处理，所以不会到这里
 			//else
 			//    throw new ExeEE("異常な状態");
 		}
@@ -864,7 +864,7 @@ namespace MinorShift.Emuera.GameProc
 		{
 			if (systemResult == 100)
 			{
-				//キャンセルなら直前の状態を呼び戻す
+				//如果是取消则恢复之前的状态
 				loadPrevState();
 				return;
 			}
@@ -879,7 +879,7 @@ namespace MinorShift.Emuera.GameProc
 			if ((systemResult >= 0) && (systemResult < dataIsAvailable.Length - 1))
 				available = dataIsAvailable[systemResult];
 			else
-			{//入力しなおし
+			{//重新输入
 				console.deleteLine(1);
 				console.PrintTemporaryLine("無効な値です");
 				console.updatedGeneration = true;
@@ -887,30 +887,30 @@ namespace MinorShift.Emuera.GameProc
 				return;
 			}
 			saveTarget = (int)systemResult;
-			//既存データがあるなら選択肢を表示してSaveGame_WaitInputOverwriteへ移行。
+			//如果有已有数据则显示选项并转移到SaveGame_WaitInputOverwrite。
 			if (available)
 			{
 				console.PrintSingleLine("既にデータが存在します。上書きしますか？");
 				console.PrintC("[0] はい", false);
-				console.PrintC("[1] いいえ", false);
+				console.PrintC("[1] 否", false);
 				setWaitInput();
 				state.SystemState = SystemStateCode.SaveGame_WaitInputOverwrite;
 				return;
 			}
-			//既存データがないなら「はい」を選んだことにして直接ジャンプ
+			//如果没有已有数据则视为选择了"是"并直接跳转
 			systemResult = 0;
 			saveGameWaitInputOverwrite();
 		}
 
 		void saveGameWaitInputOverwrite()
 		{
-			if (systemResult == 1)//いいえ
+			if (systemResult == 1)//否
 			{
 				beginSaveGame();
 				return;
 			}
-			else if (systemResult != 0)//「はい」でもない
-			{//入力しなおし
+			else if (systemResult != 0)//也不是"是"
+			{//重新输入
 				console.deleteLine(1);
 				console.PrintTemporaryLine("無効な値です");
 				console.updatedGeneration = true;
@@ -920,7 +920,7 @@ namespace MinorShift.Emuera.GameProc
 			vEvaluator.SAVEDATA_TEXT = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + " ";
 			state.SystemState = SystemStateCode.SaveGame_CallSaveInfo;
 			if (!callFunction("SAVEINFO", false, false))
-				endCallSaveInfo();//存在しなければスキップ
+				endCallSaveInfo();//如果不存在则跳过
 		}
 
 		void endCallSaveInfo()
@@ -936,14 +936,14 @@ namespace MinorShift.Emuera.GameProc
 		void loadGameWaitInput()
 		{
 			if (systemResult == 100)
-			{//キャンセルなら
-				//オープニングならオープニングへ戻る
+			{//如果是取消
+				//如果是开场则返回开场
 				if (state.SystemState == SystemStateCode.LoadGameOpenning_WaitInput)
 				{
 					beginTitle();
 					return;
 				}
-				//それ以外から来たなら直前の状態を呼び戻す
+				//如果从其他地方来则恢复之前的状态
 				loadPrevState();
 				return;
 			}
@@ -963,7 +963,7 @@ namespace MinorShift.Emuera.GameProc
 			else if (systemResult == AutoSaveIndex)
 				available = dataIsAvailable[dataIsAvailable.Length - 1];
 			else
-			{//入力しなおし
+			{//重新输入
 				console.deleteLine(1);
 				console.PrintTemporaryLine("無効な値です");
 				console.updatedGeneration = true;
@@ -1009,7 +1009,7 @@ namespace MinorShift.Emuera.GameProc
 			return result.State == EraDataState.OK;
 		}
 
-		//1808 vEvaluator.SaveTo()などに移動
+		//1808 移动到vEvaluator.SaveTo()等处
 		//private bool loadFrom(int dataIndex)
 		//private bool saveTo(int saveIndex, string saveText)
 		//private string getSaveDataPath(int index)

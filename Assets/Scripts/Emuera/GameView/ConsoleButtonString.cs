@@ -8,7 +8,7 @@ using uEmuera.Drawing;
 namespace MinorShift.Emuera.GameView
 {
 	/// <summary>
-	/// ボタン。1つ以上の装飾付文字列（ConsoleStyledString）からなる。
+	/// 按钮。由一个或多个带装饰的字符串（ConsoleStyledString）组成。
 	/// </summary>
 	internal sealed class ConsoleButtonString
 	{
@@ -105,7 +105,7 @@ namespace MinorShift.Emuera.GameView
 			RelativePointX = rel_px;
 		}
 
-		//indexの文字数の前方文字列とindex以降の後方文字列に分割
+		//按index的字符数分割为前方字符串和index之后的后方字符串
 		public ConsoleButtonString DivideAt(int divIndex, StringMeasure sm)
 		{
 			if (divIndex <= 0)
@@ -189,7 +189,7 @@ namespace MinorShift.Emuera.GameView
 		}
 
 		/// <summary>
-		/// 先にCalcWidthすること。
+		/// 需要先调用CalcWidth。
 		/// </summary>
 		/// <param name="sm"></param>
 		public void CalcPointX(int pointx)

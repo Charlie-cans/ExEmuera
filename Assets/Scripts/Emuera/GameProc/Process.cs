@@ -25,14 +25,14 @@ namespace MinorShift.Emuera.GameProc
         public LogicalLine getCurrentLine { get { return state.CurrentLine; } }
 
 		/// <summary>
-		/// @~~と$~~を集めたもの。CALL命令などで使う
-		/// 実行順序はLogicalLine自身が保持する。
+		/// 收集@~~和$~~的集合。供CALL命令等使用
+		/// 执行顺序由LogicalLine自身保持。
 		/// </summary>
 		LabelDictionary labelDic;
 		public LabelDictionary LabelDictionary { get { return labelDic; } }
 
 		/// <summary>
-		/// 変数全部。スクリプト中で必要になる変数は（ユーザーが直接触れないものも含め）この中にいれる
+		/// 所有变量。脚本中需要的变量（包括用户无法直接接触的）都放在这里面
 		/// </summary>
 		private VariableEvaluator vEvaluator;
 		public VariableEvaluator VEvaluator { get { return vEvaluator; } }
@@ -41,9 +41,9 @@ namespace MinorShift.Emuera.GameProc
 		readonly EmueraConsole console;
 		private IdentifierDictionary idDic;
 		ProcessState state;
-		ProcessState originalState;//リセットする時のために
+		ProcessState originalState;//用于重置时
         bool noError = false;
-        //色々あって復活させてみる
+        //因种种原因尝试恢复
         bool initialiing;
         public bool inInitializeing { get { return initialiing;  } }
         // EM+EE
@@ -58,7 +58,7 @@ namespace MinorShift.Emuera.GameProc
             try
             {
 				ParserMediator.Initialize(console);
-				//コンフィグファイルに関するエラーの処理（コンフィグファイルはこの関数に入る前に読込済み）
+				//关于配置文件错误的处理（配置文件在进入此函数前已读取完毕）
 				if (ParserMediator.HasWarning)
 				{
 					ParserMediator.FlushWarningList();
@@ -108,7 +108,7 @@ namespace MinorShift.Emuera.GameProc
 					}
                 }
                 Config.SetReplace(ConfigData.Instance);
-                //ここでBARを設定すれば、いいことに気づいた予感
+                //在这里设置BAR，感觉是个好主意
                 console.setStBar(Config.DrawLineString);
 
 				//_rename.csv読み込み
@@ -310,14 +310,14 @@ namespace MinorShift.Emuera.GameProc
 
 		private void checkInfiniteLoop()
 		{
-			//うまく動かない。BEEP音が鳴るのを止められないのでこの処理なかったことに（1.51）
-			////フリーズ防止。処理中でも履歴を見たりできる
+			//无法正常工作。无法停止BEEP音，所以当这个处理不存在（1.51）
+			////防止冻结。即使在处理中也可以查看历史记录
 			//System.Windows.Forms.Application.DoEvents();
 			////System.Threading.Thread.Sleep(0);
 
 			//if (!console.Enabled)
 			//{
-			//    //DoEvents()の間にウインドウが閉じられたらおしまい。
+			//    //如果在DoEvents()期间窗口被关闭就结束了。
 			//    console.ReadAnyKey();
 			//    return;
 			//}
@@ -326,10 +326,10 @@ namespace MinorShift.Emuera.GameProc
 				return;
 			LogicalLine currentLine = state.CurrentLine;
 			if ((currentLine == null) || (currentLine is NullLine))
-				return;//現在の行が特殊な状態ならスルー
+				return;//当前行处于特殊状态时跳过
 			if (!console.Enabled)
 				return;
-			// Unity: reset timer instead of showing MessageBox (not available on background threads)
+			// Unity：重置计时器而非显示MessageBox（后台线程不可用）
 			UnityEngine.Debug.LogWarning("[Emuera] Infinite loop check triggered, resetting timer");
 			state.lineCount = 0;
 			startTime = _Library.WinmmTimer.TickCount;
@@ -341,9 +341,9 @@ namespace MinorShift.Emuera.GameProc
 			methodStack++;
             if (methodStack > 100)
             {
-                //StackOverflowExceptionはcatchできない上に再現性がないので発生前に一定数で打ち切る。
-                //環境によっては100以前にStackOverflowExceptionがでるかも？
-                throw new CodeEE("関数の呼び出しスタックが溢れました(無限に再帰呼び出しされていませんか？)");
+                //StackOverflowException无法被catch且没有可重现性，因此在发生前以固定次数终止。
+                //根据环境不同，可能在100之前就出现StackOverflowException？
+                throw new CodeEE("函数调用栈溢出（是否进行了无限递归调用？）");
             }
             SingleTerm ret = null;
             int temp_current = state.currentMin;
@@ -352,8 +352,8 @@ namespace MinorShift.Emuera.GameProc
             try
             {
 				state.IntoFunction(udmt.Call, udmt.Argument, exm);
-                //do whileの中でthrow されたエラーはここではキャッチされない。
-				//#functionを全て抜けてDoScriptでキャッチされる。
+                //在do while中抛出的错误不会在此处被捕获。
+				//将跳出所有#function，在DoScript中被捕获。
     			runScriptProc();
                 ret = state.MethodReturnValue;
 			}
@@ -361,7 +361,7 @@ namespace MinorShift.Emuera.GameProc
 			{
 				if (udmt.Call.TopLabel.hasPrivDynamicVar)
 					udmt.Call.TopLabel.Out();
-                //1756beta2+v3:こいつらはここにないとデバッグコンソールで式中関数が事故った時に大事故になる
+                //1756beta2+v3:这些如果不放在这里，在调试控制台中表达式中函数出错时会酿成大事故
                 state.currentMin = temp_current;
                 methodStack--;
             }

@@ -8,7 +8,7 @@ using MinorShift.Emuera.GameData.Variable;
 
 namespace MinorShift.Emuera.GameData
 {
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	// 混淆用属性。如果进行 enum.ToString() 或 enum.Parse() 操作，应设置 (Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude = false)]
 	internal enum CharacterStrData
 	{
@@ -19,7 +19,7 @@ namespace MinorShift.Emuera.GameData
 		CSTR = 4,
 	}
 	
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	// 混淆用属性。如果进行 enum.ToString() 或 enum.Parse() 操作，应设置 (Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude = false)]
 	internal enum CharacterIntData
 	{
@@ -255,7 +255,7 @@ namespace MinorShift.Emuera.GameData
 				ParserMediator.Warn("二つ目の値を整数値として認識できません", position, 1);
 				return;
 			}
-            //1820a16 変数禁止指定 負の値を指定する
+            // 1820a16 变量禁止指定：指定负值表示禁止使用
 			if (length <= 0)
 			{
 				if (length == 0)
@@ -355,7 +355,7 @@ namespace MinorShift.Emuera.GameData
 					ParserMediator.Warn("配列サイズを1未満にはできません", position, 1);
 					return;
 				}
-				//1802 サイズ保存の都合上、2^20超えるとバグる
+				// 1802 由于尺寸保存的限制，超过 2^20 会出 bug
 				if ((length > 1000000) || (length2 > 1000000) || (length3 > 1000000))
 				{
 					ParserMediator.Warn("配列サイズを1000000より大きくすることはできません", position, 1);
@@ -370,8 +370,8 @@ namespace MinorShift.Emuera.GameData
 check1break:
 			switch (id.Code)
 			{
-				//1753a PALAMだけ仕様が違うのはかえって問題なので、変数と要素文字列配列数の同期は全部バックアウト
-				//基本的には旧来の処理に戻しただけ
+				// 1753a 只有 PALAM 规格不同反而会出问题，所以变量与元素字符串数组数量的同步全部回退
+				// 基本上只是恢复了原来的处理方式
 				case VariableCode.ITEMNAME:
 				case VariableCode.ITEMPRICE:
 					VariableIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.ITEMPRICE)] = length;
@@ -454,7 +454,7 @@ check1break:
 					}
 					break;
 			}
-			//1803beta004 二重定義を警告対象に
+			// 1803beta004 将重复定义设为警告对象
 			if (changedCode.Contains(id.Code))
 				ParserMediator.Warn(id.Code.ToString() + "の要素数は既に定義されています（上書きします）", position, 1);
 			else
@@ -472,7 +472,7 @@ check1break:
 					int i = Math.Max(MaxDataList[nameIndex], arraylength[mainLengthIndex]);
 					arraylength[mainLengthIndex] = i;
 					MaxDataList[nameIndex] = i;
-					//1803beta004 不適切な指定として警告Lv1の対象にする
+					// 1803beta004 作为不恰当的指定，设为警告等级1
 					if (MaxDataList[nameIndex] == 0 || arraylength[mainLengthIndex] == 0)
 						ParserMediator.Warn(mainCode.ToString() +"と" + nameCode.ToString() + "の禁止設定が異なります（使用禁止を解除します）", position, 1);
 					else
@@ -509,20 +509,20 @@ check1break:
 			_decideActualArraySize_sub(VariableCode.GLOBALS, VariableCode.GLOBALSNAME, VariableStrArrayLength, position);
 
 
-			//PALAM(JUEL込み)
-			//PALAMNAMEが変わっていてかつPALAMかJUELが変わっているとき、
+			// PALAM（包含 JUEL）
+			// PALAMNAME 已更改，且 PALAM 或 JUEL 也已更改时，
 			if ((changedCode.Contains(VariableCode.PALAMNAME)) && (changedCode.Contains(VariableCode.PALAM) || changedCode.Contains(VariableCode.JUEL)))
 			{
 				int palamJuelMax = Math.Max(CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.PALAM)]
 						, CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.JUEL)]);
 			
 			}
-			//PALAMかJUELが変わっていれば、そのうち大きい方にPALAMNAMEをあわせる
+			// 如果 PALAM 或 JUEL 已更改，将 PALAMNAME 匹配为其中较大的那个
 			if (changedCode.Contains(VariableCode.PALAM) || changedCode.Contains(VariableCode.JUEL))
 			{
 				int palamJuelMax = Math.Max(CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.PALAM)]
 						, CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.JUEL)]);
-				//PALAMNAMEが変わっている
+				// PALAMNAME 已更改
 				if(changedCode.Contains(VariableCode.PALAMNAME))
 				{
 					if (MaxDataList[paramIndex] != palamJuelMax)
@@ -533,19 +533,19 @@ check1break:
 							CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.PALAM)] = i;
 						if(CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.JUEL)] == palamJuelMax)
 							CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.JUEL)] = i;
-						//1803beta004 不適切な指定として警告Lv1の対象にする
+						// 1803beta004 作为不恰当的指定，设为警告等级1
 						ParserMediator.Warn("PALAMとJUELとPALAMNAMEの要素数が不適切です", position, 1);
 					}
 				}
-				else//PALAMNAMEの指定がないなら大きい方にPALAMNAMEをあわせる
+				else// 如果没有指定 PALAMNAME，则将 PALAMNAME 匹配为较大的一方
 					MaxDataList[paramIndex] = palamJuelMax;
 			}
-			//PALAMとJUEL不変でPALAMNAMEが変わっている場合
+			// PALAM 和 JUEL 不变，但 PALAMNAME 更改了的情况下
 			else if (changedCode.Contains(VariableCode.PALAMNAME))
 			{
-				//PALAMを指定のPALAMNAMEにあわせる
+				// 将 PALAM 匹配为指定的 PALAMNAME
 				CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.PALAM)] = MaxDataList[paramIndex];
-				//指定のPALAMNAMEがJUELより小さければ警告出してJUELにあわせる
+				// 如果指定的 PALAMNAME 小于 JUEL，则发出警告并匹配为 JUEL
 				if (MaxDataList[paramIndex] < CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.JUEL)])
 				{
 					ParserMediator.Warn("PALAMNAMEの要素数がJUELより少なくなっています（JUELに合わせます）", position, 1);
@@ -553,7 +553,7 @@ check1break:
 				}
 			}
 			//CDFLAG
-			//一部変更されたら双方変更されたと扱う
+			// 如果只更改了一部分，也视为双方都已更改
 			bool cdflagNameLengthChanged = changedCode.Contains(VariableCode.CDFLAGNAME1) || changedCode.Contains(VariableCode.CDFLAGNAME2);
 			int mainLengthIndex = (int)(VariableCode.__LOWERCASE__ & VariableCode.CDFLAG);
 			Int64 length64 = CharacterIntArray2DLength[mainLengthIndex];
@@ -561,7 +561,7 @@ check1break:
 			int length2 = (int)(length64 & 0x7FFFFFFF);
 			if (changedCode.Contains(VariableCode.CDFLAG) && cdflagNameLengthChanged)
 			{
-				//調整が面倒なので投げる
+				// 调整很麻烦，直接抛出异常
 				if ((length1 != MaxDataList[cdflag1Index]) || (length2 != MaxDataList[cdflag2Index]))
 					throw new CodeEE("CDFLAGの要素数とCDFLAGNAME1及びCDFLAGNAME2の要素数が一致していません", position);
 			}
@@ -571,7 +571,7 @@ check1break:
 				length2 = MaxDataList[cdflag2Index];
 				if (length1 * length2 > 1000000)
 				{
-					//調整が面倒なので投げる
+					// 调整很麻烦，直接抛出异常
 					throw new CodeEE("CDFLAGの要素数が多すぎます（CDFLAGNAME1とCDFLAGNAME2の要素数の積が100万を超えています）", position);
 				}
 				CharacterIntArray2DLength[mainLengthIndex] = (((Int64)length1) << 32) + ((Int64)length2);
@@ -581,7 +581,7 @@ check1break:
 				MaxDataList[cdflag1Index] = length1;
 				MaxDataList[cdflag2Index] = length2;
 			}
-			//もう使わないのでデータ破棄
+			// 不再使用，销毁数据
 			changedCode.Clear();
 		}
 
@@ -623,10 +623,10 @@ check1break:
 			loadDataTo(csvDir + "SAVESTR.CSV", savestrnameIndex, null, disp);
 			loadDataTo(csvDir + "GLOBAL.CSV", globalIndex, null, disp);
 			loadDataTo(csvDir + "GLOBALS.CSV", globalsIndex, null, disp);
-			//逆引き辞書を作成
+			// 创建反向查找字典
 			for (int i = 0; i < names.Length; i++)
 			{
-				if (i == 10)//Strは逆引き無用
+				if (i == 10)// Str 不需要反向查找
 					continue;
 				string[] nameArray = names[i];
 				for (int j = 0; j < nameArray.Length; j++)
@@ -634,7 +634,7 @@ check1break:
 					if (!string.IsNullOrEmpty(nameArray[j]) && !nameToIntDics[i].ContainsKey(nameArray[j]))
 						nameToIntDics[i].Add(nameArray[j], j);
 				}
-				//Add CSV Aliases
+				// 添加 CSV 别名
 				Dictionary<string, int> aliasDict = aliases[i];
 				if (aliasDict != null)
 				{
@@ -648,7 +648,7 @@ check1break:
 			//if (!Program.AnalysisMode)
 			loadCharacterData(csvDir, disp);
 
-			//逆引き辞書を作成2 (RELATION)
+			// 创建反向查找字典2 (RELATION)
 			for (int i = 0; i < CharacterTmplList.Count; i++)
 			{
 				CharacterTemplate tmpl = CharacterTmplList[i];
@@ -723,23 +723,23 @@ check1break:
 			switch (code)
 			{
 				case VariableCode.ABL:
-					ret = nameToIntDics[ablIndex];//AblName;
+					ret = nameToIntDics[ablIndex];// 能力名称数组
 					errPos = "abl.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.EXP:
-					ret = nameToIntDics[expIndex];//ExpName;
+					ret = nameToIntDics[expIndex];// 经验名称数组
 					errPos = "exp.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.TALENT:
-					ret = nameToIntDics[talentIndex];//TalentName;
+					ret = nameToIntDics[talentIndex];// 天赋名称数组
 					errPos = "talent.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.UP:
 				case VariableCode.DOWN:
-					ret = nameToIntDics[paramIndex];//ParamName　１;
+					ret = nameToIntDics[paramIndex];// 参数名称数组　１;
 					errPos = "palam.csv";
 					allowIndex = 0;
 					break;
@@ -748,91 +748,91 @@ check1break:
 				case VariableCode.GOTJUEL:
 				case VariableCode.CUP:
 				case VariableCode.CDOWN:
-					ret = nameToIntDics[paramIndex];//ParamName　２;
+					ret = nameToIntDics[paramIndex];// 参数名称数组　２;
 					errPos = "palam.csv";
 					allowIndex = 1;
 					break;
 
 				case VariableCode.TRAINNAME:
-					ret = nameToIntDics[trainIndex];//TrainName;
+					ret = nameToIntDics[trainIndex];// 训练名称数组
 					errPos = "train.csv";
 					allowIndex = 0;
 					break;
 				case VariableCode.MARK:
-					ret = nameToIntDics[markIndex];//MarkName;
+					ret = nameToIntDics[markIndex];// 印记名称数组
 					errPos = "mark.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.ITEM:
 				case VariableCode.ITEMSALES:
 				case VariableCode.ITEMPRICE:
-					ret = nameToIntDics[itemIndex];//ItemName;
+					ret = nameToIntDics[itemIndex];// 物品名称数组
 					errPos = "Item.csv";
 					allowIndex = 0;
 					break;
 				case VariableCode.LOSEBASE:
-					ret = nameToIntDics[baseIndex];//BaseName;
+					ret = nameToIntDics[baseIndex];// 基础值名称数组
 					errPos = "base.csv";
 					allowIndex = 0;
 					break;
 				case VariableCode.BASE:
 				case VariableCode.MAXBASE:
 				case VariableCode.DOWNBASE:
-					ret = nameToIntDics[baseIndex];//BaseName;
+					ret = nameToIntDics[baseIndex];// 基础值名称数组
 					errPos = "base.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.SOURCE:
-					ret = nameToIntDics[sourceIndex];//SourceName;
+					ret = nameToIntDics[sourceIndex];// 来源名称数组
 					errPos = "source.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.EX:
 				case VariableCode.NOWEX:
-					ret = nameToIntDics[exIndex];//ExName;
+					ret = nameToIntDics[exIndex];// 扩展名称数组
 					errPos = "ex.csv";
 					allowIndex = 1;
 					break;
 
 
 				case VariableCode.EQUIP:
-					ret = nameToIntDics[equipIndex];//EquipName;
+					ret = nameToIntDics[equipIndex];// 装备名称数组
 					errPos = "equip.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.TEQUIP:
-					ret = nameToIntDics[tequipIndex];//TequipName;
+					ret = nameToIntDics[tequipIndex];// 角色装备名称数组
 					errPos = "tequip.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.FLAG:
-					ret = nameToIntDics[flagIndex];//FlagName;
+					ret = nameToIntDics[flagIndex];// 标志名称数组
 					errPos = "flag.csv";
 					allowIndex = 0;
 					break;
 				case VariableCode.TFLAG:
-					ret = nameToIntDics[tflagIndex];//TFlagName;
+					ret = nameToIntDics[tflagIndex];// 全局标志名称数组
 					errPos = "tflag.csv";
 					allowIndex = 0;
 					break;
 				case VariableCode.CFLAG:
-					ret = nameToIntDics[cflagIndex];//CFlagName;
+					ret = nameToIntDics[cflagIndex];// 角色标志名称数组
 					errPos = "cflag.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.TCVAR:
-					ret = nameToIntDics[tcvarIndex];//TCVarName;
+					ret = nameToIntDics[tcvarIndex];// 角色变量名称数组
 					errPos = "tcvar.csv";
 					allowIndex = 1;
 					break;
 				case VariableCode.CSTR:
-					ret = nameToIntDics[cstrIndex];//CStrName;
+					ret = nameToIntDics[cstrIndex];// 角色字符串名称数组
 					errPos = "cstr.csv";
 					allowIndex = 1;
 					break;
 
 				case VariableCode.STAIN:
-					ret = nameToIntDics[stainIndex];//StainName;
+					ret = nameToIntDics[stainIndex];// 污渍名称数组
 					errPos = "stain.csv";
 					allowIndex = 1;
 					break;
@@ -850,12 +850,12 @@ check1break:
 				{
 					if (index == 1)
 					{
-						ret = nameToIntDics[cdflag1Index];//CDFlagName1
+						ret = nameToIntDics[cdflag1Index];// 自定义标志名称1数组
 						errPos = "cdflag1.csv";
 					}
 					else if (index == 2)
 					{
-						ret = nameToIntDics[cdflag2Index];//CDFlagName2
+						ret = nameToIntDics[cdflag2Index];// 自定义标志名称2数组
 						errPos = "cdflag2.csv";
 					}
 					else if (index >= 0)
@@ -907,7 +907,7 @@ check1break:
 				throw new CodeEE("配列変数" + code.ToString() + "の要素を文字列で指定することはできません");
 			if ((index != allowIndex))
 			{
-				if (allowIndex < 0)//GETNUM専用
+				if (allowIndex < 0)// GETNUM 专用
 					throw new CodeEE("配列変数" + code.ToString() + "の要素を文字列で指定することはできません");
 				throw new CodeEE("配列変数" + code.ToString() + "の" + (index + 1).ToString() + "番目の要素を文字列で指定することはできません");
 			}
@@ -1194,7 +1194,7 @@ check1break:
 				sign = -1;
 				st.ShiftNext();
 			}
-			//1803beta005 char.IsDigitは全角数字とかまでひろってしまうので･･･
+			// 1803beta005 char.IsDigit 会匹配到全角数字等，所以...
 			//if (!char.IsDigit(st.Current))
 			// return false;
 			switch (st.Current)
@@ -1267,28 +1267,28 @@ check1break:
 				case "経験":
 					length = CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.EXP)];
 					intArray = chara.Exp;
-					namearray = nameToIntDics[expIndex];//ExpName;
+					namearray = nameToIntDics[expIndex];// 经验名称数组
 					errPos = "exp.csv";
 					break;
 				case "ABL":
 				case "能力":
 					length = CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.ABL)];
 					intArray = chara.Abl;
-					namearray = nameToIntDics[ablIndex];//AblName;
+					namearray = nameToIntDics[ablIndex];// 能力名称数组
 					errPos = "abl.csv";
 					break;
 				case "BASE":
 				case "基礎":
 					length = CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.MAXBASE)];
 					intArray = chara.Maxbase;
-					namearray = nameToIntDics[baseIndex];//BaseName;
+					namearray = nameToIntDics[baseIndex];// 基础值名称数组
 					errPos = "base.csv";
 					break;
 				case "TALENT":
 				case "素質":
 					length = CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.TALENT)];
 					intArray = chara.Talent;
-					namearray = nameToIntDics[talentIndex];//TalentName;
+					namearray = nameToIntDics[talentIndex];// 天赋名称数组
 					errPos = "talent.csv";
 					break;
 				case "RELATION":
@@ -1301,27 +1301,27 @@ check1break:
 				case "フラグ":
 					length = CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.CFLAG)];
 					intArray = chara.CFlag;
-					namearray = nameToIntDics[cflagIndex];//CFlagName;
+					namearray = nameToIntDics[cflagIndex];// 角色标志名称数组
 					errPos = "cflag.csv";
 					break;
 				case "EQUIP":
 				case "装着物":
 					length = CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.EQUIP)];
 					intArray = chara.Equip;
-					namearray = nameToIntDics[equipIndex];//EquipName;
+					namearray = nameToIntDics[equipIndex];// 装备名称数组
 					errPos = "equip.csv";
 					break;
 				case "JUEL":
 				case "珠":
 					length = CharacterIntArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.JUEL)];
 					intArray = chara.Juel;
-					namearray = nameToIntDics[paramIndex];//ParamName;
+					namearray = nameToIntDics[paramIndex];// 参数名称数组;
 					errPos = "palam.csv";
 					break;
 				case "CSTR":
 					length = CharacterStrArrayLength[(int)(VariableCode.__LOWERCASE__ & VariableCode.CSTR)];
 					strArray = chara.CStr;
-					namearray = nameToIntDics[cstrIndex];//CStrName;
+					namearray = nameToIntDics[cstrIndex];// 角色字符串名称数组
 					errPos = "cstr.csv";
 					break;
 				default:

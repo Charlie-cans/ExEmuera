@@ -65,7 +65,7 @@ namespace MinorShift.Emuera.GameData.Variable
                     else
 						ParserMediator.Warn("システム関数" + func.LabelName + "中で\"" + varCode + "\"が使われています(関数の引数以外の用途に使うことは推奨されません。代わりに#DIMの使用を検討してください)", line, 1, false, false);
                 }
-				//throw new CodeEE("この関数に引数変数\"" + varCode + "\"は定義されていません");
+				//throw new CodeEE("è¿ä¸ªå½æ°ä¸­\"" + varCode + "\"æ²¡æå®ä¹");
 			}
             localVarTokens.Add(subKey, ret);
             return ret;

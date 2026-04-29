@@ -12,39 +12,39 @@ namespace MinorShift.Emuera.GameData.Expression
 	{
 		None,
 		EoL,
-		RightParenthesis,//)終端
-		RightBracket,//]終端
+		RightParenthesis,//)结束
+		RightBracket,//]结束
 	}
 
 	internal enum TermEndWith
 	{
 		None = 0x0000,
 		EoL = 0x0001,
-		Comma = 0x0002,//','終端
-		RightParenthesis = 0x0004,//')'終端
-		RightBracket = 0x0008,//')'終端
-		Assignment = 0x0010,//')'終端
+		Comma = 0x0002,//','结束
+		RightParenthesis = 0x0004,//')'结束
+		RightBracket = 0x0008,//')'结束
+		Assignment = 0x0010,//')'结束
 
-		RightParenthesis_Comma = RightParenthesis | Comma,//',' or ')'終端
-		RightBracket_Comma = RightBracket | Comma,//',' or ']'終端
-		Comma_Assignment = Comma | Assignment,//',' or '='終端
-		RightParenthesis_Comma_Assignment = RightParenthesis | Comma | Assignment,//',' or ')' or '='終端
-		RightBracket_Comma_Assignment = RightBracket | Comma | Assignment,//',' or ']' or '='終端
+		RightParenthesis_Comma = RightParenthesis | Comma,//',' or ')'结束
+		RightBracket_Comma = RightBracket | Comma,//',' or ']'结束
+		Comma_Assignment = Comma | Assignment,//',' or '='结束
+		RightParenthesis_Comma_Assignment = RightParenthesis | Comma | Assignment,//',' or ')' or '='结束
+		RightBracket_Comma_Assignment = RightBracket | Comma | Assignment,//',' or ']' or '='结束
 	}
 
     internal static class ExpressionParser
 	{
 		#region public Reduce
 		/// <summary>
-		/// カンマで区切られた引数を一括して取得。
-		/// return時にはendWithの次の文字がCurrentになっているはず。終端の適切さの検証はExpressionParserがが行う。
-		/// 呼び出し元はCodeEEを適切に処理すること
+		/// 批量获取以逗号分隔的参数。
+		/// 返回时endWith的下一个字符应为Current。终端的适当性验证由ExpressionParser进行。
+		/// 调用方应妥善处理CodeEE
 		/// </summary>
 		/// <returns></returns>
 		public static IOperandTerm[] ReduceArguments(WordCollection wc, ArgsEndWith endWith, bool isDefine)
 		{
 			if(wc == null)
-				throw new ExeEE("空のストリームを渡された");
+				throw new ExeEE("传入了空流");
 			List<IOperandTerm> terms = new List<IOperandTerm>();
 			TermEndWith termEndWith = TermEndWith.EoL;
 			switch (endWith)
@@ -67,9 +67,9 @@ namespace MinorShift.Emuera.GameData.Expression
 				{
 					case '\0':
                         if (endWith == ArgsEndWith.RightBracket)
-                            throw new CodeEE("'['に対応する']'が見つかりません");
+                            throw new CodeEE("找不到与'['对应的']'");
 						if (endWith == ArgsEndWith.RightParenthesis)
-							throw new CodeEE("'('に対応する')'が見つかりません");
+							throw new CodeEE("找不到与'('对应的')'");
 						goto end;
 					case ')':
 						if (endWith == ArgsEndWith.RightParenthesis)
@@ -77,14 +77,14 @@ namespace MinorShift.Emuera.GameData.Expression
 							wc.ShiftNext();
 							goto end;
 						}
-						throw new CodeEE("構文解析中に予期しない')'を発見しました");
+						throw new CodeEE("语法解析中发现意外的')'");
                     case ']':
                         if (endWith == ArgsEndWith.RightBracket)
                         {
                             wc.ShiftNext();
                             goto end;
                         }
-                        throw new CodeEE("構文解析中に予期しない']'を発見しました");
+                        throw new CodeEE("语法解析中发现意外的']'");
 				}
 				if(!isDefine)
 					terms.Add(ReduceExpressionTerm(wc, termEndWith));
@@ -92,15 +92,15 @@ namespace MinorShift.Emuera.GameData.Expression
 				{
 					terms.Add(ReduceExpressionTerm(wc, termEndWith_Assignment));
                     if (terms[terms.Count - 1] == null)
-                        throw new CodeEE("関数定義の引数は省略できません");
+                        throw new CodeEE("函数定义的参数不能省略");
 					if (wc.Current is OperatorWord)
-					{//=がある
+					{//存在=
 						wc.ShiftNext();
 						IOperandTerm term = reduceTerm(wc, false, termEndWith, VariableCode.__NULL__);
 						if (term == null)
-							throw new CodeEE("'='の後に式がありません");
+							throw new CodeEE("'='后面没有表达式");
 						if (term.GetOperandType() != terms[terms.Count - 1].GetOperandType())
-							throw new CodeEE("'='の前後で型が一致しません");
+							throw new CodeEE("'='前后类型不匹配");
 						terms.Add(term);
 					}
 					else
@@ -122,8 +122,8 @@ namespace MinorShift.Emuera.GameData.Expression
 
 
 		/// <summary>
-		/// 数式または文字列式。CALLの引数などを扱う。nullを返すことがある。
-		/// return時にはendWithの文字がCurrentになっているはず。終端の適切さの検証は呼び出し元が行う。
+		/// 数值表达式或字符串表达式。处理CALL的参数等。可能返回null。
+		/// 返回时endWith的字符应为Current。终端的适当性验证由调用方进行。
 		/// </summary>
 		/// <param name="st"></param>
 		/// <returns></returns>
@@ -135,8 +135,8 @@ namespace MinorShift.Emuera.GameData.Expression
 
 
 		///// <summary>
-		///// 単純文字列、書式付文字列、文字列式のうち、文字列式を取り扱う。
-		///// 終端記号が正しいかどうかは呼び出し元で調べること
+		///// 处理纯字符串、格式字符串、字符串表达式中的字符串表达式。
+		///// 结束符号是否正确由调用方检查
 		///// </summary>
 		///// <param name="st"></param>
 		///// <returns></returns>
@@ -144,7 +144,7 @@ namespace MinorShift.Emuera.GameData.Expression
 		//{
 		//    IOperandTerm term = reduceTerm(wc, false, endWith, VariableCode.__NULL__);
 		//    if (term.GetOperandType() != typeof(string))
-		//        throw new CodeEE("式の結果が文字列ではありません");
+		//        throw new CodeEE("表达式的结果不是字符串");
 		//    return term;
 		//}
 
@@ -152,15 +152,15 @@ namespace MinorShift.Emuera.GameData.Expression
 		{
 			IOperandTerm term = reduceTerm(wc, false, endwith, VariableCode.__NULL__);
             if (term == null)
-                throw new CodeEE("構文を式として解釈できません");
+                throw new CodeEE("无法将语法解析为表达式");
 			if (term.GetOperandType() != typeof(Int64))
-				throw new CodeEE("式の結果が数値ではありません");
+				throw new CodeEE("表达式的结果不是数值");
 			return term;
 		}
 
 		
         /// <summary>
-        /// 結果次第ではSingleTermを返すことがある。
+        /// 根据结果可能会返回SingleTerm。
         /// </summary>
         /// <returns></returns>
 		public static IOperandTerm ToStrFormTerm(StrFormWord sfw)
@@ -172,7 +172,7 @@ namespace MinorShift.Emuera.GameData.Expression
 		}
 
 		/// <summary>
-		/// カンマで区切られたCASEの引数を一括して取得。行端で終わる。
+		/// 批量获取以逗号分隔的CASE参数。以行尾结束。
 		/// </summary>
 		/// <param name="st"></param>
 		/// <returns></returns>
@@ -193,7 +193,7 @@ namespace MinorShift.Emuera.GameData.Expression
 		{
 			IOperandTerm ret = reduceTerm(wc, false, TermEndWith.EoL, varCode);
 			if(ret == null)
-                throw new CodeEE("変数の:の後に引数がありません");
+                throw new CodeEE("变量的:后面没有参数");
 			return ret;
 		}
 
@@ -205,7 +205,7 @@ namespace MinorShift.Emuera.GameData.Expression
 				wc.ShiftNext();
 				IdentifierWord subidWT = wc.Current as IdentifierWord;
 				if (subidWT == null)
-					throw new CodeEE("@の使い方が不正です");
+					throw new CodeEE("@的使用方式不正确");
 				wc.ShiftNext();
 				subId = subidWT.Code;
 			}
@@ -214,26 +214,26 @@ namespace MinorShift.Emuera.GameData.Expression
 
 
 		/// <summary>
-		/// 識別子一つを解決
+		/// 解析一个标识符
 		/// </summary>
 		/// <param name="wc"></param>
-		/// <param name="idStr">識別子文字列</param>
-		/// <param name="varCode">変数の引数の場合はその変数のCode。連想配列的につかう</param>
+		/// <param name="idStr">标识符字符串</param>
+		/// <param name="varCode">如果是变量的参数则为该变量的Code。按关联数组方式使用</param>
 		/// <returns></returns>
 		private static IOperandTerm reduceIdentifier(WordCollection wc, string idStr, VariableCode varCode)
 		{
 			wc.ShiftNext();
 			SymbolWord symbol = wc.Current as SymbolWord;
 			if (symbol != null && symbol.Type == '.')
-			{//名前空間
+			{//命名空间
 				throw new NotImplCodeEE();
 			}
 			else if (symbol != null && (symbol.Type == '(' || symbol.Type == '['))
-			{//関数
+			{//函数
 				wc.ShiftNext();
-				if (symbol.Type == '[')//1810 多分永久に実装されない
-					throw new CodeEE("[]を使った機能はまだ実装されていません");
-				//引数を処理
+				if (symbol.Type == '[')//1810 大概永远不会实现
+					throw new CodeEE("使用[]的功能尚未实现");
+				//处理参数
 				IOperandTerm[] args = ReduceArguments(wc, ArgsEndWith.RightParenthesis, false);
 				IOperandTerm mToken = GlobalStatic.IdentifierDictionary.GetFunctionMethod(GlobalStatic.LabelDictionary, idStr, args, false);
 				if (mToken == null)
@@ -253,24 +253,24 @@ namespace MinorShift.Emuera.GameData.Expression
 				return mToken;
 			}
 			else
-			{//変数 or キーワード
+			{//变量或关键字
 				VariableToken id = ReduceVariableIdentifier(wc, idStr);
-				if (id != null)//idStrが変数名の場合、
+				if (id != null)//如果idStr是变量名，
 				{
-					if (varCode != VariableCode.__NULL__)//変数の引数が引数を持つことはない
+					if (varCode != VariableCode.__NULL__)//变量的参数不会再有参数
 						return VariableParser.ReduceVariable(id, null, null, null);
 					else
 						return VariableParser.ReduceVariable(id, wc);
 				}
-				//idStrが変数名でない場合、
+				//如果idStr不是变量名，
 				IOperandTerm refToken = GlobalStatic.IdentifierDictionary.GetFunctionMethod(GlobalStatic.LabelDictionary, idStr, null, false);
-				if (refToken != null)//関数参照と名前が一致したらそれを返す。実際に使うとエラー
+				if (refToken != null)//如果函数引用名匹配则返回该引用。实际使用时会报错
 					return refToken;
-				if (varCode != VariableCode.__NULL__ && GlobalStatic.ConstantData.isDefined(varCode, idStr))//連想配列的な可能性アリ
+				if (varCode != VariableCode.__NULL__ && GlobalStatic.ConstantData.isDefined(varCode, idStr))//存在关联数组可能性
 					return new SingleTerm(idStr);
 				GlobalStatic.IdentifierDictionary.ThrowException(idStr, false);
 			}
-			throw new ExeEE("エラー投げ損ねた");//ここまででthrowかreturnのどちらかをするはず。
+			throw new ExeEE("未能抛出错误");//到此为止应该要么throw要么return。
 		}
 
 		#endregion
@@ -286,22 +286,22 @@ namespace MinorShift.Emuera.GameData.Expression
 				ret.CaseType = CaseExpressionType.Is;
 				OperatorWord opWT = wc.Current as OperatorWord;
 				if (opWT == null)
-					throw new CodeEE("ISキーワードの後に演算子がありません");
+					throw new CodeEE("IS关键字后面没有运算符");
 
 				OperatorCode op = opWT.Code;
 				if (!OperatorManager.IsBinary(op))
-					throw new CodeEE("ISキーワードの後の演算子が2項演算子ではありません");
+					throw new CodeEE("IS关键字后面的运算符不是二元运算符");
 				wc.ShiftNext();
 				ret.Operator = op;
 				ret.LeftTerm = reduceTerm(wc, false, TermEndWith.Comma, VariableCode.__NULL__);
 				if (ret.LeftTerm == null)
-					throw new CodeEE("ISキーワードの後に式がありません");
+					throw new CodeEE("IS关键字后面没有表达式");
 				Type type = ret.LeftTerm.GetOperandType();
 				return ret;
 			}
 			ret.LeftTerm = reduceTerm(wc, true, TermEndWith.Comma, VariableCode.__NULL__);
 			if (ret.LeftTerm == null)
-				throw new CodeEE("CASEの引数は省略できません");
+				throw new CodeEE("CASE的参数不能省略");
 			id = wc.Current as IdentifierWord;
 			if ((id != null) && (id.Code.Equals("TO", Config.SCVariable)))
 			{
@@ -309,12 +309,12 @@ namespace MinorShift.Emuera.GameData.Expression
 				wc.ShiftNext();
 				ret.RightTerm = reduceTerm(wc, true, TermEndWith.Comma, VariableCode.__NULL__);
 				if (ret.RightTerm == null)
-					throw new CodeEE("TOキーワードの後に式がありません");
+					throw new CodeEE("TO关键字后面没有表达式");
 				id = wc.Current as IdentifierWord;
 				if ((id != null) && (id.Code.Equals("TO", Config.SCVariable)))
-					throw new CodeEE("TOキーワードが2度使われています");
+					throw new CodeEE("TO关键字被使用了两次");
 				if (ret.LeftTerm.GetOperandType() != ret.RightTerm.GetOperandType())
-					throw new CodeEE("TOキーワードの前後の型が一致していません");
+					throw new CodeEE("TO关键字前后类型不匹配");
 				return ret;
 			}
 			ret.CaseType = CaseExpressionType.Normal;
@@ -323,11 +323,11 @@ namespace MinorShift.Emuera.GameData.Expression
 
 
 		/// <summary>
-		/// 解析器の本体
+		/// 解析器主体
 		/// </summary>
 		/// <param name="wc"></param>
-		/// <param name="allowKeywordTo">TOキーワードが見つかっても良いか</param>
-		/// <param name="endWith">終端記号</param>
+		/// <param name="allowKeywordTo">是否允许找到TO关键字</param>
+		/// <param name="endWith">结束記号</param>
 		/// <returns></returns>
         private static IOperandTerm reduceTerm(WordCollection wc, bool allowKeywordTo, TermEndWith endWith, VariableCode varCode)
         {
@@ -360,10 +360,10 @@ namespace MinorShift.Emuera.GameData.Expression
 								if (allowKeywordTo)
 									goto end;
 								else
-									throw new CodeEE("TOキーワードはここでは使用できません");
+									throw new CodeEE("TO关键字不能在此处使用");
 							}
 							else if (idStr.Equals("IS", Config.SCVariable))
-								throw new CodeEE("ISキーワードはここでは使用できません");
+								throw new CodeEE("IS关键字不能在此处使用");
 							stack.Add(reduceIdentifier(wc, idStr, varCode));
 							continue;
 						}
@@ -371,13 +371,13 @@ namespace MinorShift.Emuera.GameData.Expression
 					case '='://OperatorWT
 						{
 							if (varArg)
-								throw new CodeEE("変数の引数の読み取り中に予期しない演算子を発見しました");
+								throw new CodeEE("在读取变量参数时发现了意外的运算符");
 							OperatorCode op = ((OperatorWord)token).Code;
 							if (op == OperatorCode.Assignment)
 							{
 								if ((endWith & TermEndWith.Assignment) == TermEndWith.Assignment)
 									goto end;
-								throw new CodeEE("式中で代入演算子'='が使われています(等価比較には'=='を使用してください)");
+								throw new CodeEE("表达式中使用了赋值运算符'='(请使用'=='进行等价比较)");
 							}
 
 							if (formerOp == OperatorCode.Equal || formerOp == OperatorCode.Greater || formerOp == OperatorCode.Less
@@ -442,13 +442,13 @@ namespace MinorShift.Emuera.GameData.Expression
 		#endregion
 
 		/// <summary>
-        /// 式解決用クラス
+        /// 表达式解析用类
         /// </summary>
         private class TermStack
         {
             /// <summary>
-            /// 次に来るべきものの種類。
-            /// (前置)単項演算子か値待ちなら0、二項・三項演算子待ちなら1、値待ちなら2、++、--、!に対応する値待ちの場合は3。
+            /// 接下来应出现的内容的类型。
+            /// 如果是(前置)一元运算符或等待值则为0，等待二元/三元运算符则为1，等待值则为2，等待与++、--、!对应的值则为3。
             /// </summary>
             int state = 0;
             bool hasBefore = false;
@@ -472,7 +472,7 @@ namespace MinorShift.Emuera.GameData.Expression
                 }
                 if (state == 1)
                 {
-                    //後置単項演算子の場合は特殊処理へ
+                    //如果是一元后置运算符则进入特殊处理
                     if (OperatorManager.IsUnaryAfter(op))
                     {
                         if (hasAfter)
@@ -487,7 +487,7 @@ namespace MinorShift.Emuera.GameData.Expression
                         }
                         stack.Push(op);
                         reduceUnaryAfter();
-                        //前置単項演算子が処理を待っている場合はここで解決
+                        //如果一元前置运算符在等待处理，在此处解决
                         if (waitAfter)
                             reduceUnary();
                         hasBefore = false;
@@ -497,11 +497,11 @@ namespace MinorShift.Emuera.GameData.Expression
                     }
                     if (!OperatorManager.IsBinary(op) && !OperatorManager.IsTernary(op))
                         throw new CodeEE("式が異常です");
-                    //先に未解決の前置演算子解決
+                    //先解决未解决的前置运算符
                     if (waitAfter)
                         reduceUnary();
                     int priority = OperatorManager.GetPriority(op);
-                    //直前の計算の優先度が同じか高いなら還元。
+                    //如果前一个计算的优先级相同或更高，则进行归约。
                     while (lastPriority() >= priority)
                     {
                         this.reduceLastThree();
@@ -551,7 +551,7 @@ namespace MinorShift.Emuera.GameData.Expression
                     return null;
                 if (state != 1)
                     throw new CodeEE("式が異常です");
-                //単項演算子の待ちが未解決の時はここで解決
+                //一元运算符的等待未解决时在此处解决
                 if (waitAfter)
                     reduceUnary();
                 waitAfter = false;
@@ -568,7 +568,7 @@ namespace MinorShift.Emuera.GameData.Expression
             private void reduceUnary()
             {
                 //if (stack.Count < 2)
-                //    throw new ExeEE("不正な時期の呼び出し");
+                //    throw new ExeEE("不合时宜的调用");
                 IOperandTerm operand = (IOperandTerm)stack.Pop();
                 OperatorCode op = (OperatorCode)stack.Pop();
                 IOperandTerm newTerm = OperatorMethodManager.ReduceUnaryTerm(op, operand);
@@ -578,7 +578,7 @@ namespace MinorShift.Emuera.GameData.Expression
             private void reduceUnaryAfter()
             {
                 //if (stack.Count < 2)
-                //    throw new ExeEE("不正な時期の呼び出し");
+                //    throw new ExeEE("不合时宜的调用");
                 OperatorCode op = (OperatorCode)stack.Pop();
                 IOperandTerm operand = (IOperandTerm)stack.Pop();
                 
@@ -589,7 +589,7 @@ namespace MinorShift.Emuera.GameData.Expression
             private void reduceLastThree()
             {
                 //if (stack.Count < 2)
-                //    throw new ExeEE("不正な時期の呼び出し");
+                //    throw new ExeEE("不合时宜的调用");
                 IOperandTerm right = (IOperandTerm)stack.Pop();//後から入れたほうが右側
                 OperatorCode op = (OperatorCode)stack.Pop();
                 IOperandTerm left = (IOperandTerm)stack.Pop();

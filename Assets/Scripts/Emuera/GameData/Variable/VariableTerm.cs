@@ -236,14 +236,14 @@ namespace MinorShift.Emuera.GameData.Variable
 				}
 				else
 				{
-					//キャラクターデータの第1引数はこの時点でチェックしても意味がないのと
-					//ARG系は限界超えてても必要な数に拡張されるのでチェックしなくていい
+					//角色数据的第1参数在此时检查没有意义
+					//ARG系即使超出上限也会扩展到所需数量，因此无需检查
 					if ((i == 0 && Identifier.IsCharacterData) || Identifier.Name == "ARG" || Identifier.Name == "ARGS")
 						canCheck[i] = false;
 					else
 						canCheck[i] = true;
-					//if (allArgIsConst)
-					//チェックのために値が必要
+					
+					//检查需要值
 					transporter[i] = arguments[i].GetIntValue(exm);
 				}
 			}
@@ -256,10 +256,10 @@ namespace MinorShift.Emuera.GameData.Variable
 			return this;
 		}
 
-        //以下添え字解析用の追加関数
+        //以下为下标解析用的附加函数
         public bool checkSameTerm(VariableTerm term)
         {
-            //添え字が全部定数があることがこの関数の前提(そもそもそうでないと使い道がない)
+            //下标全部为常数是此函数的前提（本来若不是这样就没有用处）
             if (!allArgIsConst)
                 return false;
             if (this.Identifier.Name != term.Identifier.Name)
@@ -277,7 +277,7 @@ namespace MinorShift.Emuera.GameData.Variable
 
         public string GetFullString()
         {
-            //添え字が全部定数があることがこの関数の前提(IOperandTermから変数名を取れないため)
+            //下标全部为常数是此函数的前提（因为无法从IOperandTerm获取变量名）
             if (!allArgIsConst)
                 return "";
             if (Identifier.IsArray1D)
@@ -401,7 +401,7 @@ namespace MinorShift.Emuera.GameData.Variable
 
 
 	/// <summary>
-	/// 引数がない変数。値を参照、代入できない
+	/// 没有参数的变量。无法引用或赋值。
 	/// </summary>
 	internal sealed class VariableNoArgTerm : VariableTerm
 	{

@@ -8,8 +8,8 @@ namespace MinorShift.Emuera.Sub
 
 
 	/// <summary>
-	/// 1808追加 新しいデータ保存形式
-	/// Reader と違ってWriterは最新の書き込み方式だけ知っていればよい
+	/// 1808添加 新的数据保存格式
+	/// 与Reader不同，Writer只需知道最新的写入方式
 	/// WriteHeader -> WriteFileType -> ... -> WriteEFO
 	/// </summary>
 	internal sealed class EraBinaryDataWriter : IDisposable
@@ -38,16 +38,16 @@ namespace MinorShift.Emuera.Sub
 
 
 		/// <summary>
-		/// システム用。keyなしでInt64を保存
+		/// 系统用。无key保存Int64
 		/// </summary>
 		/// <param name="v"></param>
 		public void WriteInt64(Int64 v)
 		{
-			//圧縮しない
+			//不压缩
 			writer.Write(v);
 		}
 		/// <summary>
-		/// システム用。keyなしでstringを保存
+		/// 系统用。无key保存string
 		/// </summary>
 		/// <param name="s"></param>
 		public void WriteString(string s)
@@ -125,10 +125,10 @@ namespace MinorShift.Emuera.Sub
 
 		private void m_WriteInt(Int64 v)
 		{
-			//セーブデータ容量の爆発を避けるためにできるだけWrite(Int64)はしない
-			if (v >= 0 && v <= Ebdb.Byte)//0～207まではそのままbyteに詰め込む
+			//为避免存档数据容量膨胀，尽量避免Write(Int64)
+			if (v >= 0 && v <= Ebdb.Byte)//0～207之间直接塞入byte
 				writer.Write((byte)v);
-			else if (v >= Int16.MinValue && v <= Int16.MaxValue)//整数の範囲に応じて適当に
+			else if (v >= Int16.MinValue && v <= Int16.MaxValue)//根据整数范围适当处理
 			{
 				writer.Write(Ebdb.Int16);
 				writer.Write((Int16)v);
@@ -152,9 +152,9 @@ namespace MinorShift.Emuera.Sub
 
 		private void writeData(Int64[] array)
 		{
-			//配列の記憶。0が連続する場合には圧縮を試みる。
+			//数组的存储。在0连续的情况下尝试压缩。
 			writer.Write((Int32)array.Length);
-			int countZero = 0;//0については0が連続する数を記憶する。その他の数はそのまま記憶する。
+			int countZero = 0;//对于0，记忆0连续的数量。其他数值直接记忆。
 			for(int x = 0; x < array.Length; x++)
 			{
 				if (array[x] == 0)

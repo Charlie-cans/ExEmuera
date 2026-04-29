@@ -12,18 +12,18 @@ namespace MinorShift.Emuera.GameData
 	internal sealed class StrForm
 	{
 		private StrForm() { }
-		string[] strs = null;//terms.Length + 1
+		string[] strs = null;//terms 长度 + 1
 		IOperandTerm[] terms = null;
 
 		#region static
 		static FormattedStringMethod formatCurlyBrace = null;
 		static FormattedStringMethod formatPercent = null;
 		static FormattedStringMethod formatYenAt = null;
-		static FunctionMethodTerm NameTarget = null;// "***"
-		static FunctionMethodTerm CallnameMaster = null;// "+++"
-		static FunctionMethodTerm CallnamePlayer = null;// "==="
-		static FunctionMethodTerm NameAssi = null;// "///"
-		static FunctionMethodTerm CallnameTarget = null;// "$$$"
+		static FunctionMethodTerm NameTarget = null;// 对应 "***"
+		static FunctionMethodTerm CallnameMaster = null;// 对应 "+++"
+		static FunctionMethodTerm CallnamePlayer = null;// 对应 "==="
+		static FunctionMethodTerm NameAssi = null;// 对应 "///"
+		static FunctionMethodTerm CallnameTarget = null;// 对应 "$$$"
 		public static void Initialize()
 		{
 			formatCurlyBrace = new FormatCurlyBrace();
@@ -125,7 +125,7 @@ namespace MinorShift.Emuera.GameData
                         IdentifierWord id = wc.Current as IdentifierWord;
                         if (id == null)
                             throw new CodeEE("','の後にRIGHT又はLEFTがありません");
-                        if (string.Equals(id.Code, "LEFT", Config.SCVariable))//標準RIGHT
+                        if (string.Equals(id.Code, "LEFT", Config.SCVariable))// 标准左对齐
                             third = new SingleTerm(1);
                         else if (!string.Equals(id.Code, "RIGHT", Config.SCVariable))
                             throw new CodeEE("','の後にRIGHT又はLEFT以外の単語があります");
@@ -216,7 +216,7 @@ namespace MinorShift.Emuera.GameData
 			return builder.ToString();
 		}
 
-		#region FormattedStringMethod 書式付文字列の内部
+		#region FormattedStringMethod 格式化字符串的内部实现
 		private abstract class FormattedStringMethod : FunctionMethod
 		{
 			public FormattedStringMethod()
@@ -254,19 +254,19 @@ namespace MinorShift.Emuera.GameData
 					return ret;
 				int totalLength = (int)arguments[1].GetIntValue(exm);
 				int currentLength = LangManager.GetStrlenLang(ret);
-				totalLength -= currentLength - ret.Length;//全角文字の数だけマイナス。タブ文字？ゼロ幅文字？知るか！
+				totalLength -= currentLength - ret.Length;// 减去全角字符数量。制表符？零宽字符？谁知道呢！
 				if (totalLength < ret.Length)
-					return ret;//PadLeftは0未満を送ると例外を投げる
+					return ret;// PadLeft 传入负数会抛出异常
 				if (arguments[2] != null)
-					ret = ret.PadRight(totalLength, ' ');//LEFT
+					ret = ret.PadRight(totalLength, ' ');// 左对齐
 				else
-					ret = ret.PadLeft(totalLength, ' ');//RIGHT
+					ret = ret.PadLeft(totalLength, ' ');// 右对齐
 				return ret;
 			}
 		}
 
 		private sealed class FormatYenAt : FormattedStringMethod
-		{//Operator のTernaryIntStrStrとやってることは同じ
+		{// 功能与 TernaryIntStrStr 运算符相同
 			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
 			{
 				return (arguments[0].GetIntValue(exm) != 0) ? arguments[1].GetStrValue(exm) : arguments[2].GetStrValue(exm);

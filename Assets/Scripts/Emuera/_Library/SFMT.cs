@@ -35,17 +35,17 @@ using System;
 namespace MinorShift._Library{
 
     /// <summary>
-    /// SFMTの擬似乱数ジェネレータークラス。
+    /// SFMT的伪随机数生成器类。
     /// </summary>
     public sealed class MTRandom {
 
         /// <summary>
-        /// 現在時刻を種とした、(2^19937-1)周期のSFMT擬似乱数ジェネレーターを初期化します。
+        /// 以当前时间为种子，初始化周期为(2^19937-1)的SFMT伪随机数生成器。
         /// </summary>
         public MTRandom() : this(Environment.TickCount) { }
 
         /// <summary>
-        /// seedを種とした、(2^MEXP-1)周期の擬似乱数ジェネレーターを初期化します。
+        /// 以seed为种子，初始化周期为(2^MEXP-1)的伪随机数生成器。
         /// </summary>
 		public MTRandom(Int64 seed)
         {
@@ -56,7 +56,7 @@ namespace MinorShift._Library{
         }
         
         
-        //maxが2^nでない大きい値であると値が偏る。
+        //如果max不是2^n这样的大值，则值会产生偏差。
         public Int64 NextInt64(Int64 max)
         {
 			if(max <= 0)
@@ -77,7 +77,7 @@ namespace MinorShift._Library{
 		}
         
         /// <summary>
-		/// [0,1) 範囲で乱数生成 ←0は含む,1は含まないの意味
+		/// 在[0,1)范围内生成随机数 ←包含0但不包含1的意思
 		/// </summary>
 		/// <returns></returns>
 		public double NextDouble()
@@ -269,16 +269,16 @@ namespace MinorShift._Library{
         private const int SR2_ix8 = 64 - SR2 * 8;
         
         /// <summary>
-        /// 内部状態ベクトル。
+        /// 内部状态向量。
         /// </summary>
         private UInt32[] sfmt;
         /// <summary>
-        /// 内部状態ベクトルのうち、次に乱数として使用するインデックス。
+        /// 内部状态向量中，下次作为随机数使用的索引。
         /// </summary>
 		private int idx;
         
         /// <summary>
-        /// 符号なし32bitの擬似乱数を取得します。
+        /// 获取无符号32位伪随机数。
         /// </summary>
 		private UInt32 NextUInt32()
 		{
@@ -290,7 +290,7 @@ namespace MinorShift._Library{
         }
 
         /// <summary>
-        /// ジェネレーターを初期化します。
+        /// 初始化生成器。
         /// </summary>
         /// <param name="seed"></param>
 		private void init_gen_rand(UInt32 seed)
@@ -309,7 +309,7 @@ namespace MinorShift._Library{
         }
 
         /// <summary>
-        /// 内部状態ベクトルが適切か確認し、必要であれば調節します。
+        /// 确认内部状态向量是否适当，必要时进行调整。
         /// </summary>
 		private void period_certification()
 		{
@@ -337,7 +337,7 @@ namespace MinorShift._Library{
         }
 
         /// <summary>
-        /// 内部状態ベクトルを更新します。
+        /// 更新内部状态向量。
         /// </summary>
 		private void gen_rand_all()
 		{
@@ -375,7 +375,7 @@ namespace MinorShift._Library{
 		}
 
         /// <summary>
-        /// gen_rand_allの(2^19937-1)周期用。
+        /// gen_rand_all的(2^19937-1)周期用。
         /// </summary>
 		private void gen_rand_all_19937()
 		{

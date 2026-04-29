@@ -16,7 +16,7 @@ namespace MinorShift.Emuera.GameView
 	*/
 
 	/// <summary>
-	/// PRINT命令を貯める＆最終的に解決するクラス
+	/// 存储PRINT命令并最终解析的类
 	/// </summary>
 	internal sealed class PrintStringBuffer
 	{
@@ -192,7 +192,7 @@ namespace MinorShift.Emuera.GameView
 			for (int i = 0; i < buttonList.Count; i++)
 			{
 				if (buttonList[i] == null)
-				{//強制改行フラグ
+				{//强制换行标志
 					lineList.Add(m_buttonsToDisplayLine(lineButtonList, firstLine, temporary));
 					firstLine = false;
 					buttonList.RemoveAt(i);
@@ -200,15 +200,15 @@ namespace MinorShift.Emuera.GameView
 					continue;
 				}
 				if (nobr || ((buttonList[i].PointX + buttonList[i].Width <= windowWidth)))
-				{//改行不要モードであるか表示可能領域に収まるならそのままでよい
+				{//如果是无需换行模式，或可容纳于显示区域内，则保持原样即可
 					lineButtonList.Add(buttonList[i]);
 					continue;
 				}
-				//新しい表示行を作る
+				//创建新的显示行
 
-				//ボタンを分割するか？
-				//「ボタンの途中で行を折りかえさない」がfalseなら分割する
-				//このボタンが単体で表示可能領域を上回るなら分割必須
+				//是否分割按钮？
+				//如果「不在按钮中间换行」为false则分割
+				//如果该按钮单独超出可显示区域，则必须分割
 				//クリック可能なボタンでないなら分割する。ただし「ver1739以前の非ボタン折り返しを再現する」ならクリックの可否を区別しない
 				if ((!Config.ButtonWrap) || (lineButtonList.Count == 0) || (!buttonList[i].IsButton && !Config.CompatiLinefeedAs1739))
 				{//ボタン分割する

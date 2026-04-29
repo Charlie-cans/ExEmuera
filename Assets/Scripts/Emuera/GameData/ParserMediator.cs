@@ -11,13 +11,13 @@ using System.Text.RegularExpressions;
 
 namespace MinorShift.Emuera
 {
-	//1756 新設。ParserやLexicalAnalyzerなどが知りたい情報をまとめる
-	//本当は引数として渡すべきなのかもしれないが全てのParserの引数を書きなおすのが面倒なのでstatic
+	// 1756 新增。汇总 Parser、LexicalAnalyzer 等需要的信息
+	// 本来或许应该作为参数传递，但修改所有 Parser 的参数很麻烦，所以设为 static
 	internal static class ParserMediator
 	{
 		/// <summary>
-		/// emuera.config等で発生した警告
-		/// Initializeより前に発生する
+		/// 在 emuera.config 等中产生的警告
+		/// 在 Initialize 之前发生
 		/// </summary>
 		/// <param name="str"></param>
 		/// <param name="?"></param>
@@ -36,12 +36,12 @@ namespace MinorShift.Emuera
 
 		#region Rename
 		public static Dictionary<string, string> RenameDic { get; private set; }
-		//1756 Process.Load.csより移動
+		// 1756 从 Process.Load.cs 移入
 		public static void LoadEraExRenameFile(string filepath)
 		{
 			if (RenameDic != null)
 				RenameDic.Clear();
-			//とにかく辞書を作る。辞書がnullのときは UseRenameFileがNOの時のみ
+			// 无论如何先创建字典。字典为 null 时仅在使用 UseRenameFile 为 NO 时发生
 			RenameDic = new Dictionary<string, string>();
 			EraStreamReader eReader = new EraStreamReader(false);
 			if ((!File.Exists(filepath)) || (!eReader.Open(filepath)))
@@ -69,7 +69,7 @@ namespace MinorShift.Emuera
 					tokens[0] = string.Join(",", baseTokens);
 					tokens[1] = last[1];
 					pos = new ScriptPosition(eReader.Filename, eReader.LineNo, line);
-					//右がERB中の表記、左が変換先になる。
+					// 右侧为 ERB 中的标记，左侧为转换目标。
 					string value = tokens[0].Trim();
 					string key = string.Format("[[{0}]]", tokens[1].Trim());
 					RenameDic[key] = value;
@@ -106,11 +106,11 @@ namespace MinorShift.Emuera
 		}
 
 		/// <summary>
-		/// Parser中での警告出力
+		/// Parser 中的警告输出
 		/// </summary>
 		/// <param name="str"></param>
 		/// <param name="line"></param>
-		/// <param name="level">警告レベル.0:軽微なミス.1:無視できる行.2:行が実行されなければ無害.3:致命的</param>
+		/// <param name="level">警告级别。0:轻微错误。1:可忽略的行。2:该行不执行则无害。3:致命</param>
 		public static void Warn(string str, LogicalLine line, int level, bool isError, bool isBackComp)
 		{
             Warn(str, line, level, isError, isBackComp, null);

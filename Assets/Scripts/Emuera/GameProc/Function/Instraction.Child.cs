@@ -2640,6 +2640,7 @@ namespace MinorShift.Emuera.GameProc.Function
 			public FORCE_BEGIN_Instruction() { ArgBuilder = null; flag = METHOD_SAFE | EXTENDED | FLOW_CONTROL; }
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.Process.Initialize(); }
 		}
+		#endregion
 		#region SQL Instructions
 		private sealed class SQL_Instruction : AbstractInstruction
 		{

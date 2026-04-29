@@ -97,7 +97,7 @@ public class FirstWindow : MonoBehaviour
             scroll_rect_ = null;
             item_ = null;
             GameObject.Destroy(gameObject);
-            //Start Game
+            //开始游戏
             GenericUtils.StartCoroutine(Run(workspace, folder));
         });
 

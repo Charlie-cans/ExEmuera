@@ -9,7 +9,7 @@ using MinorShift.Emuera.GameData.Variable;
 namespace MinorShift.Emuera.GameData.Expression
 {
 	/// <summary>
-	/// 引数のチェック、戻り値の型チェック等は全て呼び出し元が責任を負うこと。
+	/// 参数检查、返回值类型检查等全部由调用方负责。
 	/// </summary>
 	internal abstract class OperatorMethod : FunctionMethod
 	{
@@ -17,7 +17,7 @@ namespace MinorShift.Emuera.GameData.Expression
 		{
 			argumentTypeArray = null;
 		}
-		public override string CheckArgumentType(string name, IOperandTerm[] arguments) { throw new ExeEE("型チェックは呼び出し元が行うこと"); }
+		public override string CheckArgumentType(string name, IOperandTerm[] arguments) { throw new ExeEE("类型检查由调用方进行"); }
 	}
 
 	internal static class OperatorMethodManager

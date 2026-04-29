@@ -16,29 +16,29 @@ namespace MinorShift.Emuera
 	public static class Program
 	{
 		/*
-		コードの開始地点。
-		ここでMainWindowを作り、
-		MainWindowがProcessを作り、
-		ProcessがGameBase・ConstantData・Variableを作る。
+		代码起始点。
+		在这里创建MainWindow，
+		MainWindow创建Process，
+		Process创建GameBase、ConstantData、Variable。
 		
 		
-		*.ERBの読み込み、実行、その他の処理をProcessが、
-		入出力をMainWindowが、
-		定数の保存をConstantDataが、
-		変数の管理をVariableが行う。
+		*.ERB的读取、执行及其他处理由Process负责，
+		输入输出由MainWindow负责，
+		常量的保存由ConstantData负责，
+		变量的管理由Variable负责。
 		 
-		と言う予定だったが改変するうちに境界が曖昧になってしまった。
+		原本是这样规划的，但在修改过程中边界变得模糊了。
 		 
-		後にEmueraConsoleを追加し、それに入出力を担当させることに。
+		后来添加了EmueraConsole，让它负责输入输出。
         
-        1750 DebugConsole追加
-         Debugを全て切り離すことはできないので一部EmueraConsoleにも担当させる
+        1750 添加DebugConsole
+         由于无法将Debug完全分离，部分也由EmueraConsole负责
 		
-		TODO: 1819 MainWindow & Consoleの入力・表示組とProcess&Dataのデータ処理組だけでも分離したい
+		TODO: 1819 至少想把MainWindow & Console的输入/显示组与Process & Data的数据处理组分离开
 
 		*/
 		/// <summary>
-		/// アプリケーションのメイン エントリ ポイントです。
+		/// 应用程序的主入口点。
 		/// </summary>
 		//[STAThread]
 		public static void Main(string[] args)
@@ -48,9 +48,9 @@ namespace MinorShift.Emuera
 #if UEMUERA_DEBUG
 			//debugMode = true;
 
-			//ExeDirにバリアントのパスを代入することでテスト実行するためのコード。
-			//ローカルパスの末尾には\必須。
-			//ローカルパスを記載した場合は頒布前に削除すること。
+			//通过向ExeDir赋值变体路径来进行测试运行的代码。
+			//本地路径末尾必须加\。
+			//记载了本地路径时，发布前必须删除。
 			ExeDir = @"";
 			
 #endif
@@ -74,14 +74,14 @@ namespace MinorShift.Emuera
 			if (!Directory.Exists(ContentDir)){
 				ContentDir = ExeDir + "RESOURCES/";
 			}
-			//エラー出力用
-			//1815 .exeが東方板のNGワードに引っかかるそうなので除去
+			//用于错误输出
+			//1815 .exe会被东方版的NG词拦截，因此移除
 			//ExeName = Path.GetFileNameWithoutExtension(Sys.ExeName);
 
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			ConfigData.Instance.LoadConfig();
-            //二重起動の禁止かつ二重起動
+            //禁止双重启动且检测双重启动
 			//if ((!Config.AllowMultipleInstances) && (Sys.PrevInstance()))
 			//{
 			//	MessageBox.Show("多重起動を許可する場合、emuera.configを書き換えて下さい", "既に起動しています");
@@ -100,7 +100,7 @@ namespace MinorShift.Emuera
             int argsStart = 0;
             if ((args.Length > 0)&&(args[0].Equals("-DEBUG", StringComparison.CurrentCultureIgnoreCase)))
             {
-                argsStart = 1;//デバッグモードかつ解析モード時に最初の1っこ(-DEBUG)を飛ばす
+                argsStart = 1;//调试模式且解析模式时跳过第一个参数(-DEBUG)
 				debugMode = true;
             }
 			if(debugMode)
@@ -172,13 +172,13 @@ namespace MinorShift.Emuera
 				//		RebootClientY = win.ClientSize.Height;
 				//		RebootLocation = win.Location;
 				//	}
-				//	else
+				//else
 				//	{
 				//		RebootClientY = 0;
 				//		RebootLocation = new Point();
 				//	}
 				//}
-				////条件次第ではParserMediatorが空でない状態で再起動になる場合がある
+				////根据条件，有时ParserMediator会在非空状态下重启
 				//ParserMediator.ClearWarningList();
 				//ParserMediator.Initialize(null);
 				//GlobalStatic.Reset();
@@ -189,7 +189,7 @@ namespace MinorShift.Emuera
 		}
 
 		/// <summary>
-		/// 実行ファイルのディレクトリ。最後に\を付けたstring
+		/// 可执行文件的目录。末尾带\的string
 		/// </summary>
 		public static string ExeDir { get; private set; }
 		public static string CsvDir { get; private set; }

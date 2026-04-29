@@ -29,12 +29,12 @@ namespace MinorShift.Emuera.Content
 		public abstract Color SpriteGetColor(int x, int y);
         public abstract Bitmap Bitmap { get; }
         /// <summary>
-        /// 出力される標準のサイズ。正の値のみ。
+        /// 输出的标准尺寸。仅正值。
         /// </summary>
         public readonly Size DestBaseSize;
 
 		/// <summary>
-		/// 出力時の位置調整。拡大縮小して出力する場合には同じ比率で調整する。
+		/// 输出时的位置调整。缩放输出时以相同比例调整。
 		/// </summary>
 		public Point DestBasePosition;
 
@@ -57,7 +57,7 @@ namespace MinorShift.Emuera.Content
 		public AbstractImage BaseImage;
 
 		/// <summary>
-		/// ソース画像上の位置を指定する四角形。Width, Heightは負の値をとり得る
+		/// 指定源图像上位置的四方形。Width、Height可以取负值
 		/// </summary>
 		public readonly Rectangle SrcRectangle;
 		public override Bitmap Bitmap
@@ -114,14 +114,14 @@ namespace MinorShift.Emuera.Content
 				destRect.X = destRect.X + DestBasePosition.X * destRect.Width / SrcRectangle.Width;
 				destRect.Y = destRect.Y + DestBasePosition.Y * destRect.Height / SrcRectangle.Height;
 			}
-			//g.DrawImage(Bitmap, destRect, SrcRectangle, GraphicsUnit.Pixel, attr);←このパターンがない
+			//g.DrawImage(Bitmap, destRect, SrcRectangle, GraphicsUnit.Pixel, attr);←没有此模式
 			g.DrawImage(Bitmap, destRect, SrcRectangle.X, SrcRectangle.Y, SrcRectangle.Width, SrcRectangle.Height, GraphicsUnit.Pixel, attr);
 		}
 
 	}
 
 	/// <summary>
-	/// ERB中で作るGを元にしたSprite。GDI非対応
+	/// 基于ERB中创建的G的Sprite。不支持GDI
 	/// </summary>
 	internal sealed class SpriteG : ASpriteSingle
 	{
@@ -133,7 +133,7 @@ namespace MinorShift.Emuera.Content
 	}
 
 	/// <summary>
-	/// ConstImage(csvから作るファイル占有型ベースイメージ)をもとにしたSprite
+	/// 基于ConstImage（从csv创建的文件占有型基础图像）的Sprite
 	/// </summary>
 	internal sealed class SpriteF : ASpriteSingle
 	{
@@ -145,7 +145,7 @@ namespace MinorShift.Emuera.Content
 	}
 
 	/// <summary>
-	/// AnimeするSprite。中身はほぼSprite
+	/// 动画精灵。内容基本为Sprite
 	/// </summary>
 	internal sealed class SpriteAnime : ASprite
 	{
@@ -200,7 +200,7 @@ namespace MinorShift.Emuera.Content
 		}
 		
 		/// <summary>
-		/// アニメの経過時間を削除して最初からやり直す
+		/// 删除动画的经过时间，从头开始重播
 		/// </summary>
 		internal void ResetTime()
 		{
@@ -210,7 +210,7 @@ namespace MinorShift.Emuera.Content
 		}
 
 		/// <summary>
-		/// 開始時間調整用の値。ミリ秒でUInt32の範囲まで想定。
+		/// 用于调整开始时间的值。以毫秒为单位，假定在UInt32范围内。
 		/// </summary>
 		Int64 StartTime = -1;
 		uint lastFrameTime = 0;
@@ -225,19 +225,19 @@ namespace MinorShift.Emuera.Content
 			if (lastFrame >= FrameList.Count)
 				throw new ExeEE("SpriteAnime:最終フレームが範囲外");
 #endif
-			//一度もフレーム取得したことがない場合は現在時間を記録して最初のフレームを返す。
+			//如果从未获取过帧，则记录当前时间并返回第一帧。
 			if (StartTime < 0)
 			{
 				StartTime = MinorShift._Library.WinmmTimer.CurrentFrameTime;
 				lastFrame = 0;
 				return FrameList[0];
 			}
-			//時間経過なしに複数回呼ばれた場合はさっき返したフレームをもう一度返す。
+			//如果没有时间经过而多次调用，则再次返回刚才返回的帧。
 			if (MinorShift._Library.WinmmTimer.CurrentFrameTime == lastFrameTime && lastFrame >= 0)
 				return FrameList[lastFrame];
-			//StartTimeからの経過時間をtotaltimeで剰余計算
+			//用totaltime对从StartTime开始的经过时间进行取模计算
 			Int64 time = (MinorShift._Library.WinmmTimer.CurrentFrameTime - StartTime) % totaltime;
-			//winmmtimerは一周して0になることがあり得るのでその場合の対策。C#の剰余の結果の符号は左辺値の符号に等しい。
+			//winmmtimer可能会归零，针对此情况的处理。C#取模结果的符号与左操作数的符号相同。
 			if (time < 0)
 				time += totaltime;
 			foreach(AnimeFrame frame in FrameList)
@@ -249,7 +249,7 @@ namespace MinorShift.Emuera.Content
 					return frame;
 				}
 			}
-			//ここまでこないはず
+			//理论上不会到达此处
 			throw new ExeEE("SpriteAnime:時間外参照");
 		}
 
@@ -326,7 +326,7 @@ namespace MinorShift.Emuera.Content
 			destRect.Y = destRect.Y + (DestBasePosition.Y + frame.Offset.Y) * destRect.Height / DestBaseSize.Height;
 			destRect.Width = frame.SrcRectangle.Width * destRect.Width / DestBaseSize.Width;
 			destRect.Height = frame.SrcRectangle.Height * destRect.Height / DestBaseSize.Height;
-			//g.DrawImage(frame.BaseImage.Bitmap, destRect, SrcRectangle, GraphicsUnit.Pixel, attr);←このパターンがない
+			//g.DrawImage(frame.BaseImage.Bitmap, destRect, SrcRectangle, GraphicsUnit.Pixel, attr);âæ²¡ææ­¤æ¨¡å¼
 			g.DrawImage(frame.BaseImage.Bitmap, destRect, frame.SrcRectangle.X, frame.SrcRectangle.Y, frame.SrcRectangle.Width, frame.SrcRectangle.Height, GraphicsUnit.Pixel, attr);
 		}
 

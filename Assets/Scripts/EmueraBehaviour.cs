@@ -23,7 +23,7 @@ public abstract class EmueraBehaviour : MonoBehaviour
     }
     public class UnitDesc
     {
-        //Text
+        //文本
         public string content
         {
             get { return resource_content; }
@@ -34,7 +34,7 @@ public abstract class EmueraBehaviour : MonoBehaviour
             get { return resource_name; }
             set { resource_name = value; }
         }
-        //internal
+        //内部
         string resource_content;
         string resource_name;
 

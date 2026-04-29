@@ -30,24 +30,24 @@ namespace MinorShift.Emuera.GameData.Variable
 		}
 
 		///// <summary>
-		///// まだ最初の識別子を読んでいない状態から決め打ちで変数を解読する
+		///// 从尚未读取首个标识符的状态开始，按既定方式解读变量
 		///// </summary>
-		///// <param name="st"></param>
-		///// <returns></returns>
-		//public static VariableTerm ReduceVariable(WordCollection wc)
-		//{
-		//    IdentifierWord id = wc.Current as IdentifierWord;
-		//    if (id == null)
-		//        return null;
-		//    wc.ShiftNext();
-		//    VariableToken vid = ExpressionParser.ReduceVariableIdentifier(wc, id.Code);
-		//    if (vid == null)
-		//        throw new CodeEE("\"" + id.Code + "\"は解釈できない識別子です");
-		//    return ReduceVariable(vid, wc);
-		//}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 
 		/// <summary>
-		/// 識別子を読み終えた状態からの解析
+		/// 从已读取完标识符的状态开始解析
 		/// </summary>
 		/// <param name="st"></param>
 		/// <returns></returns>
@@ -87,7 +87,7 @@ namespace MinorShift.Emuera.GameData.Variable
 			IOperandTerm op1 = p1;
 			IOperandTerm op2 = p2;
 			IOperandTerm op3 = p3;
-			//引数の推測
+			//参数的推断
 			if (id.IsCharacterData)
 			{
 				if (id.IsArray2D)
@@ -191,11 +191,11 @@ namespace MinorShift.Emuera.GameData.Variable
 					terms[i] = new VariableStrArgTerm(id.Code, terms[i], i);
 			return new VariableTerm(id, terms);
 		}
-		//public static string ErrorMes = null;
-		//public static void ResetError()
-		//{
-		//    ErrorMes = null;
-		//}
+		
+		
+		
+		
+		
 
 	}
 }

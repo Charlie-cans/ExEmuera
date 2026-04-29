@@ -20,20 +20,20 @@ using uEmuera.Window;
 
 namespace MinorShift.Emuera.GameView
 {
-	//入出力待ちの状況。
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	//输入输出等待状态。
+	//混淆用属性。如果使用enum.ToString()或enum.Parse()，则需设置为(Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude=false)]
 	internal enum ConsoleState
 	{
 		Initializing = 0,
 		Quit = 5,//QUIT
-		Error = 6,//Exceptionによる強制終了
+		Error = 6,//由Exception导致的强制终止
 		Running = 7,
 		WaitInput = 20,
         Sleep = 21,//DoEvents
 
         //WaitKey = 1,//WAIT
-        //WaitSystemInteger = 2,//Systemが要求するInput
+        //WaitSystemInteger = 2,//System要求的输入
         //WaitInteger = 3,//INPUT
         //WaitString = 4,//INPUTS
         //WaitIntegerWithTimer = 8,
@@ -50,7 +50,7 @@ namespace MinorShift.Emuera.GameView
 
     }
 
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	//混淆用属性。如果使用enum.ToString()或enum.Parse()，则需设置为(Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude=false)]
 	internal enum ConsoleRedraw
 	{
@@ -125,7 +125,7 @@ namespace MinorShift.Emuera.GameView
 		{
 			window = parent;
 
-			//1.713 この段階でsetStBarを使用してはいけない
+			//1.713 在此阶段不得使用setStBar
 			//setStBar(StaticConfig.DrawLineString);
 			state = ConsoleState.Initializing;
 			if (Config.FPS > 0)
@@ -153,14 +153,14 @@ namespace MinorShift.Emuera.GameView
 			timer.Enabled = false;
 			timer.Tick += new EventHandler(tickTimer);
 			timer.Interval = 10;
-			CBG_Clear();//文字列描画用ダミー追加
+			CBG_Clear();//添加字符串绘制用占位符
 
 			redrawTimer = new Timer();
-			redrawTimer.Enabled = false;//TODO:1824アニメ用再描画タイマー有効化関数の追加
+			redrawTimer.Enabled = false;//TODO:1824 添加动画用重绘定时器启用函数
 			redrawTimer.Tick += new EventHandler(tickRedrawTimer);
 			redrawTimer.Interval = 10;
         }
-#region 1823 cbg関連
+#region 1823 cbg相关
 		private readonly List<ClientBackGroundImage> cbgList = new List<ClientBackGroundImage>();
 		private GraphicsImage cbgButtonMap = null;
 		private int selectingCBGButtonInt = -1;
@@ -170,7 +170,7 @@ namespace MinorShift.Emuera.GameView
 		class ClientBackGroundImage : IComparable<ClientBackGroundImage>
 		{
 			/// <summary>
-			/// zdepth == 0は文字列用ダミーなので他で使ってはいけない
+			/// zdepth == 0是字符串用占位符，不得在其他地方使用
 			/// </summary>
 			/// <param name="zdepth"></param>
 			internal ClientBackGroundImage(int zdepth)
@@ -187,7 +187,7 @@ namespace MinorShift.Emuera.GameView
 			{
 				if (other == null)
 					return -1;
-				//逆順でSort
+				//按逆序排序
 				return -zdepth.CompareTo(other.zdepth);
 			}
 		}
@@ -196,7 +196,7 @@ namespace MinorShift.Emuera.GameView
 			for(var i=0; i<cbgList.Count; ++i)
 			{
                 ClientBackGroundImage cimg = cbgList[i];
-                //使い捨て無名Imageを一応disposeしておく
+                //将一次性匿名Image予以dispose
                 if (cimg.Img != null && cimg.Img.Name.Length == 0)
 					cimg.Img.Dispose();
 			}
@@ -212,10 +212,10 @@ namespace MinorShift.Emuera.GameView
 			for (int i = 0; i < cbgList.Count;i++)
 			{
 				ClientBackGroundImage cimg = cbgList[i];
-				if (cimg.zdepth < zmin || cimg.zdepth > zmax || cimg.zdepth == 0)//0はダミーなので削除しない
+				if (cimg.zdepth < zmin || cimg.zdepth > zmax || cimg.zdepth == 0)//0是占位符，因此不删除
 					continue;
 
-				//使い捨て無名Imageを一応disposeしておく
+				//将一次性匿名Image予以dispose
 				if (cimg.Img != null && cimg.Img.Name.Length == 0)
 					cimg.Img.Dispose();
 				cbgList.RemoveAt(i);
@@ -231,7 +231,7 @@ namespace MinorShift.Emuera.GameView
 				if (!cimg.isButton)
 					continue;
 
-				//使い捨て無名Imageを一応disposeしておく
+				//将一次性匿名Image予以dispose
 				if (cimg.Img != null && cimg.Img.Name.Length == 0)
 					cimg.Img.Dispose();
 				cbgList.RemoveAt(i);
@@ -310,7 +310,7 @@ namespace MinorShift.Emuera.GameView
 		public bool Enabled { get { return window.Created; } }
 
 		/// <summary>
-		/// 現在、Emueraがアクティブかどうか
+		/// 当前Emuera是否处于活动状态
 		/// </summary>
 		internal bool IsActive
 		{
@@ -325,8 +325,8 @@ namespace MinorShift.Emuera.GameView
         }
 
 		/// <summary>
-		/// スクリプトが継続中かどうか
-		/// 入力系はメッセージスキップやマクロも含めてIsInProcessを参照すべき
+		/// 脚本是否正在继续运行
+		/// 输入相关（包括消息跳过和宏）应参照IsInProcess
 		/// </summary>
 		internal bool IsRunning
 		{
@@ -471,11 +471,11 @@ namespace MinorShift.Emuera.GameView
         public bool byError = false;
         //public ScriptPosition ErrPos = null;
 
-		#region button関連
+		#region button相关
 		bool lastButtonIsInput = true;
         public bool updatedGeneration = false;
-		int lastButtonGeneration = 0;//最後に追加された選択肢の世代。これと世代が一致しない選択肢は選択できない。
-		int newButtonGeneration = 0;//次に追加される選択肢の世代。Input又はInputsごとに増加
+		int lastButtonGeneration = 0;//最后添加的选项的世代。与此世代不一致的选项无法选择。
+		int newButtonGeneration = 0;//下一次添加的选项的世代。每次Input或Inputs递增
 		//public int LastButtonGeneration { get { return lastButtonGeneration; } }
 		public int NewButtonGeneration { get { return newButtonGeneration; } }
         public void UpdateGeneration() { lastButtonGeneration = newButtonGeneration; updatedGeneration = true; }
@@ -484,18 +484,18 @@ namespace MinorShift.Emuera.GameView
 
 		private void newGeneration()
 		{
-            //値の入力を求められない時は更新は必要ないはず
+            //不要求输入值时应该不需要更新
 			if (state != ConsoleState.WaitInput || !inputReq.NeedValue)
 				return;
             if (!updatedGeneration && emuera.getCurrentLine != lastInputLine)
             {
-                //ボタン無しで次の入力に来たなら強制で世代更新
+                //如果在没有按钮的情况下来到下一个输入，则强制更新世代
                 lastButtonGeneration = newButtonGeneration;
             }
             else
                 updatedGeneration = false;
             lastInputLine = emuera.getCurrentLine;
-			//古い選択肢を選択できないように。INPUTで使った選択肢をINPUTSには流用できないように。
+			//防止选择旧选项。使INPUT中使用的选项不能转用于INPUTS。
 			if (inputReq.InputType == InputType.IntValue)
 			{
 				if (lastButtonGeneration == newButtonGeneration)
@@ -515,7 +515,7 @@ namespace MinorShift.Emuera.GameView
 		}
 
 		/// <summary>
-		/// 選択中のボタン。INPUTやINPUTSに対応したものでなければならない
+		/// 选中的按钮。必须与INPUT或INPUTS对应
 		/// </summary>
 		ConsoleButtonString selectingButton = null;
 		ConsoleButtonString lastSelectingButton = null;
@@ -523,18 +523,18 @@ namespace MinorShift.Emuera.GameView
 		public bool ButtonIsSelected(ConsoleButtonString button) { return selectingButton == button; }
 
 		/// <summary>
-		/// ToolTip表示したフラグ
+		/// 已显示ToolTip的标志
 		/// </summary>
 		bool tooltipUsed = false;
 		/// <summary>
-		/// マウスの直下にあるテキスト。ボタンであってもよい。
-		/// ToolTip表示用。世代無視、履歴中も表示
+		/// 鼠标正下方的文本。也可以是按钮。
+		/// 用于ToolTip显示。忽略世代，在历史记录中也显示
 		/// </summary>
 		ConsoleButtonString pointingString = null;
 		ConsoleButtonString lastPointingString = null;
 		#endregion
 
-		#region Input & Timer系
+		#region Input & Timer相关
 
 		//bool hasDefValue = false;
 		//Int64 defNum;
@@ -556,7 +556,7 @@ namespace MinorShift.Emuera.GameView
 			//if (time > 0)
 			//	System.Threading.Thread.Sleep(time);
 
-			////DoEvents()の間にウインドウが閉じられたらおしまい。
+			////如果在DoEvents()期间窗口被关闭就结束了。
 			//if (!Enabled || state != ConsoleState.Sleep)
 			//{
 			//	ReadAnyKey();
@@ -601,7 +601,7 @@ namespace MinorShift.Emuera.GameView
 
 
 		/// <summary>
-		/// INPUT中のアニメーション用タイマー
+		/// INPUT期间的动画用定时器
 		/// </summary>
 		Timer redrawTimer = null;
 
@@ -609,16 +609,16 @@ namespace MinorShift.Emuera.GameView
 		{
 			if (!redrawTimer.Enabled)
 				return;
-			//INPUT待ちでないとき、又はタイマー付きINPUT状態の場合はこれ以外の処理に任せる
+			//不在等待INPUT时，或带有定时器的INPUT状态时，交给其他处理
 			if (state != ConsoleState.WaitInput || timer.Enabled)
 			{
 				return;
 			}
-			window.Refresh();//OnPaint発行
+			window.Refresh();//触发OnPaint
 		}
 
 		/// <summary>
-		/// アニメーション用タイマーの設定。0以下の値を指定するとタイマー停止
+		/// 动画用定时器的设置。指定0以下的值则停止定时器
 		/// </summary>
 		public void setRedrawTimer(uint tickcount)
 		{
@@ -637,15 +637,15 @@ namespace MinorShift.Emuera.GameView
 
 		Timer timer = null;
 		Int64 timerID = -1;
-		Int64 timer_startTime;//現在のタイマーを開始した時のミリ秒数（WinmmTimer.TickCount基準）
-		Int64 timer_nextDisplayTime;//TINPUT系で次に残り時間を表示する時のTickCountミリ秒数
-		Int64 timer_endTime;//現在のタイマーを終了する時のTickCountミリ秒数
+		Int64 timer_startTime;//当前定时器启动时的毫秒数（以WinmmTimer.TickCount为基准）
+		Int64 timer_nextDisplayTime;//TINPUT系列中下次显示剩余时间时的TickCount毫秒数
+		Int64 timer_endTime;//当前定时器结束时的TickCount毫秒数
         bool wait_timeout = false;
         bool isTimeout = false;
         public bool IsTimeOut { get { return isTimeout; } }
 
 		/// <summary>
-		/// 1824 TINPUT時に直接タイマーをセットせずに最初の再描画が終わってからタイマーをセットする（そうしないとTINPUTと再描画だけでループしてしまうので）
+		/// 1824 在TINPUT时不直接设置定时器，而是在第一次重绘完成后设置定时器（否则会陷入TINPUT和重绘的死循环）
 		/// </summary>
 		bool need_settimer = false;
 
@@ -654,7 +654,7 @@ namespace MinorShift.Emuera.GameView
 			need_settimer = true;
 			if (inputReq.DisplayTime)
 			{
-				//100ms未満の場合、一瞬だけ残り0が表示されて終了
+				//如果不足100ms，会瞬间显示剩余0并结束
 				//timer_nextDisplayTime = timer_startTime + 100;
 				long start = inputReq.Timelimit / 100;
 				string timeString1 = "残り ";
@@ -670,7 +670,7 @@ namespace MinorShift.Emuera.GameView
 			timer_startTime = WinmmTimer.TickCount;
 			timer_endTime = timer_startTime + inputReq.Timelimit;
 			//if (inputReq.DisplayTime)
-			//次に残り時間を表示するタイミングの設定。inputReq.DisplayTime==tureでないなら設定するだけで参照はされない（はず
+			//设置下次显示剩余时间的时机。如果inputReq.DisplayTime不为true，则仅设置但不被引用（应该
 			timer_nextDisplayTime = timer_startTime + 100;
 
 		}
@@ -683,7 +683,7 @@ namespace MinorShift.Emuera.GameView
             }
         }
 
-		//汎用
+		//通用
 		private void tickTimer(object sender, EventArgs e)
 		{
 			if (!timer.Enabled)
@@ -705,7 +705,7 @@ namespace MinorShift.Emuera.GameView
 			}
 			if (inputReq.DisplayTime && curtime >= timer_nextDisplayTime)
 			{
-				//表示に時間がかかってタイマーが止まるので次の描画は100ms後。場合によっては表示が0.2一気に飛ぶ。
+				//由于显示耗时导致定时器停止，因此下次绘制在100ms后。某些情况下显示会一跳0.2。
 				timer_nextDisplayTime = curtime + 100;
 				long time = (timer_endTime - curtime) / 100;
 				string timeString1 = "残り ";
@@ -730,7 +730,7 @@ namespace MinorShift.Emuera.GameView
 		}
 
 		/// <summary>
-		/// tickTimerからのみ呼ぶ
+		/// 仅从tickTimer调用
 		/// </summary>
 		private void endTimer()
 		{
@@ -740,7 +740,7 @@ namespace MinorShift.Emuera.GameView
             isTimeout = true;
 			if(IsWaitingPrimitive)
 			{
-				//callEmueraProgramは呼び出し先で行う。
+				//callEmueraProgram在调用方执行。
 				InputMouseKey(4, 0, 0, 0,0);
 				return;
 			}
@@ -748,7 +748,7 @@ namespace MinorShift.Emuera.GameView
 				changeLastLine(inputReq.TimeUpMes);
 			else if (inputReq.TimeUpMes != null)
 				PrintSingleLine(inputReq.TimeUpMes);
-			callEmueraProgram("");//ディフォルト入力の処理はcallEmueraProgram側で
+			callEmueraProgram("");//默认输入的处理在callEmueraProgram侧进行
 			if (state == ConsoleState.WaitInput && inputReq.NeedValue)
 			{
 				Point point = window.MainPicBox.PointToClient(Control.MousePosition);
@@ -767,17 +767,17 @@ namespace MinorShift.Emuera.GameView
         }
 		#endregion
 
-		#region Call系
+		#region Call相关
 		/// <summary>
-		/// スクリプト実行。RefreshStringsはしないので呼び出し側がすること
+		/// 脚本执行。不会调用RefreshStrings，需要调用方执行
 		/// </summary>
 		/// <param name="str"></param>
 		private void callEmueraProgram(string str)
 		{
-			//入力文字列の表示処理を行わない場合はstr == null
+			//不进行输入字符串的显示处理时str == null
 			if (str != null)
 			{
-				//INPUT文字列をPRINTする処理など
+				//将INPUT字符串PRINT的处理等
 				if (!doInputToEmueraProgram(str))
 					return;
 				if (state == ConsoleState.Error)
@@ -786,14 +786,14 @@ namespace MinorShift.Emuera.GameView
 			state = ConsoleState.Running;
 			emuera.DoScript();
 			if (state == ConsoleState.Running)
-			{//RunningならProcessは処理を継続するべき
+			{//如果为Running，则Process应该继续处理
 				state = ConsoleState.Error;
                 PrintError("emueraのエラー：プログラムの状態を特定できません");
 			}
 			if (state == ConsoleState.Error && !noOutputLog)
 				OutputLog(Program.ExeDir + "emuera.log");
 			PrintFlush(false);
-			//1819 Refreshは呼び出し側で行う
+			//1819 Refresh由调用方执行
 			//RefreshStrings(false);
 			newGeneration();
 		}
@@ -822,7 +822,7 @@ namespace MinorShift.Emuera.GameView
 					case InputType.StrValue:
 						if (string.IsNullOrEmpty(str) && inputReq.HasDefValue && !IsRunningTimer)
 							str = inputReq.DefStrValue;
-						//空入力と時間切れ
+						//空输入和超时
 						if (str == null)
 							str = "";
 						emuera.InputString(str);
@@ -836,8 +836,8 @@ namespace MinorShift.Emuera.GameView
 		}
 		#endregion
 
-		#region 入力系
-		readonly string[] spliter = new string[] { "\\n", "\r\n", "\n", "\r" };//本物の改行コードが来ることは無いはずだけど一応
+		#region 输入相关
+		readonly string[] spliter = new string[] { "\\n", "\r\n", "\n", "\r" };//真正的换行符应该不会出现，但以防万一
 
 		public bool MesSkip = false;
 		private bool inProcess = false;
@@ -847,8 +847,8 @@ namespace MinorShift.Emuera.GameView
 		{
 			if (!IsWaitingPrimitive)
 				return;
-			//pointはクライアント左上基準の座標。
-			//clientPointをクライアント左下基準の座標に置き換え
+			//point是以客户端左上角为基准的坐标。
+			//将clientPoint替换为以客户端左下角为基准的坐标
 			Point clientPoint = point;
 			clientPoint.Y = point.Y - ClientHeight;
 			InputMouseKey(2, delta, clientPoint.X, clientPoint.Y, 0);
@@ -858,14 +858,14 @@ namespace MinorShift.Emuera.GameView
 		{
 			if (!IsWaitingPrimitive)
 				return;
-			//pointはクライアント左上基準の座標。
-			//clientPointをクライアント左下基準の座標に置き換え
+			//point是以客户端左上角为基准的坐标。
+			//将clientPoint替换为以客户端左下角为基准的坐标
 			Point clientPoint = point;
 			clientPoint.Y = point.Y - ClientHeight;
 			int buttonNum = -1;
 			if(cbgButtonMap != null && cbgButtonMap.IsCreated)
 			{
-				//マップ画像の左上基準の座標に置き換え
+				//替换为以地图图像左上角为基准的坐标
 				Point mapPoint = clientPoint;
 				mapPoint.Y = clientPoint.Y + cbgButtonMap.Height;
 				if(mapPoint.X >= 0 && mapPoint.Y >= 0 && mapPoint.X < cbgButtonMap.Width && mapPoint.Y < cbgButtonMap.Height)
@@ -881,14 +881,14 @@ namespace MinorShift.Emuera.GameView
 			InputMouseKey(1, (int)button, clientPoint.X, clientPoint.Y, buttonNum);
 		}
 
-		//1823 Key入力を捕まえる
+		//1823 捕获按键输入
 		internal void PressPrimitiveKey(int keycode, int keydata, int keymod)
 		{
 			if (IsWaitingPrimitive)
 				InputMouseKey(3, keycode, keydata, 0, 0);
 		}
 
-		//1823 Key入力を捕まえる
+		//1823 捕获按键输入
 		internal void InputMouseKey(int type, int result1, int result2, int result3, int result4)
 		{
 			emuera.InputResult5(type, result1, result2, result3, result4);
@@ -896,7 +896,7 @@ namespace MinorShift.Emuera.GameView
 			inProcess = true;
 			try
 			{
-				//1823 Escキーもマクロも右クリックも不可。単純に押されたキーを送るのみ。
+				//1823 Esc键、宏、右键均不可用。仅发送按下的键。
 				callEmueraProgram(null);
 				if (state == ConsoleState.WaitInput && inputReq.NeedValue)
 				{
@@ -940,7 +940,7 @@ namespace MinorShift.Emuera.GameView
 			try
 			{
 				string[] text;
-				if(changedByMouse)//1823 マウスによって入力されたならマクロ解析を行わない
+				if(changedByMouse)//1823 如果是通过鼠标输入的，则不进行宏解析
 				{ text = new string[] { str }; }
 				else
 				{
@@ -966,14 +966,14 @@ namespace MinorShift.Emuera.GameView
 					string inputs = text[i];
 					if (inputs.IndexOf("\\e") >= 0)
 					{
-						inputs = inputs.Replace("\\e", "");//\eの除去
+						inputs = inputs.Replace("\\e", "");//去除\e
 						MesSkip = true;
 					}
 
 					if (inputReq.OneInput && (!Config.AllowLongInputByMouse || !changedByMouse) && inputs.Length > 1)
 						inputs = inputs.Remove(1);
-					//1819 TODO:入力無効系（強制待ちTWAIT）でスキップとマクロを止めるかそのままか
-					//現在はそのまま。強制待ち中はスキップの開始もできないのにスキップ中なら飛ばせる。
+					//1819 TODO:在输入无效类（强制等待TWAIT）中，是停止跳过和宏还是保持原样
+					//目前保持原样。虽然在强制等待中无法开始跳过，但如果已在跳过状态则可以跳过。
 					if (inputReq.InputType == InputType.Void)
 					{
 						i--;
@@ -983,23 +983,23 @@ namespace MinorShift.Emuera.GameView
 					RefreshStrings(false);
 					while (MesSkip && state == ConsoleState.WaitInput)
 					{
-						//TODO:入力無効を通していいか？スキップ停止をマクロでは飛ばせていいのか？
+						//TODO:可以允许输入无效吗？可以在宏中跳过停止吗？
 						if (inputReq.NeedValue)
 							break;
 						if (inputReq.StopMesskip)
 							break;
 						callEmueraProgram("");
 						RefreshStrings(false);
-						//DoEventを呼ばないと描画処理すらまったく行われない
+						//如果不调用DoEvent，甚至连绘制处理都不会执行
 						//Application.DoEvents();
-						//EscがマクロストップかつEscがスキップ開始だからEscでスキップを止められても即開始しちゃったりするからあんまり意味ないよね
+						//Esc同时是宏停止和跳过开始键，因此即使通过Esc停止了跳过也会立即重新开始，所以没什么意义
 						//if (KillMacro)
 						//	goto endMacro;
 					}
 					MesSkip = false;
 					if (state != ConsoleState.WaitInput)
 						break;
-					//マクロループ時は待ち処理が起こらないのでここでシステムキューを捌く
+					//在宏循环时不会发生等待处理，因此在此处处理系统队列
 					//Application.DoEvents();
 #if UEMUERA_DEBUG
 					if (state != ConsoleState.WaitInput || inputReq == null)
@@ -1036,7 +1036,7 @@ namespace MinorShift.Emuera.GameView
 			}
 			else
 			{
-				//解析モードの場合は見ているファイルがERB\の下にあるとは限らないかつフルパスを持っているのでこの補正はしなくてよい
+				//在解析模式下，查看的文件不一定在ERB\下，且拥有完整路径，因此不需要进行此修正
 				if (!Program.AnalysisMode)
 				{
 					if (fname.Contains(Program.ErbDir.ToUpper()))
@@ -1152,9 +1152,9 @@ namespace MinorShift.Emuera.GameView
 
 		bool runningERBfromMemory = false;
 		/// <summary>
-		/// 通常コンソールからのDebugコマンド、及びデバッグウインドウの変数ウォッチなど、
-		/// *.ERBファイルが存在しないスクリプトを実行中
-		/// 1750 IsDebugから改名
+		/// 来自普通控制台的Debug命令，以及调试窗口的变量监视等，
+		/// 正在执行不存在*.ERB文件的脚本
+		/// 1750 从IsDebug改名
 		/// </summary>
 		public bool RunERBFromMemory { get { return runningERBfromMemory; } set { runningERBfromMemory = value; } }
 		void doSystemCommand(string command)
@@ -1162,7 +1162,7 @@ namespace MinorShift.Emuera.GameView
 			if(timer.Enabled)
 			{
 				PrintError("タイマー系命令の待ち時間中はコマンドを入力できません");
-				PrintError("");//タイマー表示処理に消されちゃうかもしれないので
+				PrintError("");//可能会被定时器显示处理清除
 				RefreshStrings(true);
 				return;
 			}
@@ -1217,7 +1217,7 @@ namespace MinorShift.Emuera.GameView
 					RefreshStrings(true);
 					return;
 				}
-				//処理をDebugMode系へ移動
+				//将处理移至DebugMode相关
 				DebugCommand(com, Config.ChangeMasterNameIfDebug, false);
 				PrintFlush(false);
 			}
@@ -1265,46 +1265,46 @@ namespace MinorShift.Emuera.GameView
 
 
 		/// <summary>
-		/// 1818以前のRefreshStringsからselectingButton部分を抽出
-		/// ここでOnPaintを発行
+		/// 从1818以前的RefreshStrings中提取selectingButton部分
+		/// 在此触发OnPaint
 		/// </summary>
 		public void RefreshStrings(bool force_Paint)
 		{
 			bool isBackLog = window.ScrollBar.Value != window.ScrollBar.Maximum;
-			//ログ表示はREDRAWの設定に関係なく行うようにする
+			//日志显示不受REDRAW设置的影响
 			if ((redraw == ConsoleRedraw.None) && (!force_Paint) && (!isBackLog))
 				return;
-			//選択中ボタンの適性チェック
+			//选中按钮的适应性检查
 			if (selectingButton != null)
 			{
-				//履歴表示中は選択肢無効→画面外に出てしまったボタンも履歴から選択できるように
+				//历史显示中选项无效→使已移出屏幕的按钮也能从历史中选择
 				//if (isBackLog)
 				//	selectingButton = null;
-				//数値か文字列の入力待ち状態でなければ無効
+				//如果不是等待数值或字符串输入的状态则无效
 				if(state != ConsoleState.Error && state != ConsoleState.WaitInput)
 					selectingButton = null;
 				else if((state == ConsoleState.WaitInput) && !inputReq.NeedValue)
 					selectingButton = null;
-				//選択肢が最新でないなら無効
+				//如果选项不是最新的则无效
 				else if (selectingButton.Generation != lastButtonGeneration)
 					selectingButton = null;
 			}
 			if (!force_Paint)
-			{//forceならば確実に再描画。
-				//履歴表示中でなく、最終行を表示済みであり、選択中ボタンが変更されていないなら更新不要
+			{//如果是force则一定重绘。
+				//如果不在历史显示中、已显示最后一行、且选中按钮未更改，则无需更新
 				if ((!isBackLog) && (lastDrawnLineNo == lineNo) && (lastSelectingButton == selectingButton))
 					return;
-				//Environment.TickCountは分解能が悪すぎるのでwinmmのタイマーを呼んで来る
+				//Environment.TickCount分辨率太差，因此调用winmm的定时器
 				uint sec = WinmmTimer.TickCount - lastUpdate;
-				//まだ書き換えるタイミングでないなら次の更新を待ってみる
-				//ただし、入力待ちなど、しばらく更新のタイミングがない場合には強制的に書き換えてみる
+				//如果还未到重写时机，则等待下一次更新
+				//但是，在等待输入等暂时没有更新时机的情况下，尝试强制重写
 				if (sec < msPerFrame && (state == ConsoleState.Running || state == ConsoleState.Initializing))
 					return;
 			}
 			if (forceTextBoxColor)
 			{
 				uint sec = WinmmTimer.TickCount - lastBgColorChange;
-				//色変化が速くなりすぎないように一定時間以内の再呼び出しは強制待ちにする
+				//为防止颜色变化过快，在一定时间内再次调用时强制等待
 				//while (sec < 200)
 				//{
 				//	//Application.DoEvents();
@@ -1314,23 +1314,23 @@ namespace MinorShift.Emuera.GameView
 				lastBgColorChange = WinmmTimer.TickCount;
 			}
 			verticalScrollBarUpdate();
-			window.Refresh();//OnPaint発行
+			window.Refresh();//触发OnPaint
 
 		}
 
 		///// <summary>
-		///// 1818以前のRefreshStringsの後半とm_RefreshStringsを融合
-		///// 全面Clear法のみにしたのでさっぱりした。ダブルバッファリングはOnPaintが勝手にやるはず
+		///// 将1818以前RefreshStrings的后半与m_RefreshStrings融合
+		///// 仅使用全清法，因此变得简洁。双缓冲应由OnPaint自动处理
 		///// </summary>
 		///// <param name="graph"></param>
 		//public void OnPaint(Graphics graph)
 		//{
-		//	//描画中にEmueraが閉じられると廃棄されたPictureBoxにアクセスしてしまったりするので
-		//	//OnPaintからgraphをもらった直後だから大丈夫だとは思うけど一応
+		//	//因为如果在绘制过程中Emuera被关闭，可能会访问已废弃的PictureBox
+		//	//虽然刚收到OnPaint的graph，应该没问题，但以防万一
 		//	if (!this.Enabled)
 		//		return;
 
-		//	//描画命令を発行したRefresh時にすべきか、OnPaintの開始にすべきか、OnPaintの終了にするか
+		//	//应该在发出绘制命令的Refresh时执行，还是在OnPaint开始时执行，还是在OnPaint结束时执行
 		//	lastUpdate = WinmmTimer.TickCount;
 
 		//	bool isBackLog = window.ScrollBar.Value != window.ScrollBar.Maximum;
@@ -1338,7 +1338,7 @@ namespace MinorShift.Emuera.GameView
 
 		//	int bottomLineNo = window.ScrollBar.Value - 1;
 		//	if (displayLineList.Count - 1 < bottomLineNo)
-		//		bottomLineNo = displayLineList.Count - 1;//1820 この処理不要な気がするけどエラー報告があったので入れとく
+		//		bottomLineNo = displayLineList.Count - 1;//1820 虽然觉得这个处理不需要，但因为有错误报告，所以保留
 		//	int topLineNo = bottomLineNo - (pointY / Config.LineHeight + 1);
 		//	if (topLineNo < 0)
 		//		topLineNo = 0;
@@ -1354,7 +1354,7 @@ namespace MinorShift.Emuera.GameView
 		//		//	displayLineList[i].GDIDrawTo(pointY, isBackLog);
 		//		//	pointY -= Config.LineHeight;
 		//		//}
-		//		//1820a12 上から下へ描画する方向へ変更
+		//		//1820a12 改为从上到下绘制
 		//		for (int i =topLineNo ; i <= bottomLineNo; i++)
 		//		{
 		//			displayLineList[i].GDIDrawTo(pointY, isBackLog);
@@ -1370,7 +1370,7 @@ namespace MinorShift.Emuera.GameView
 		//		//	displayLineList[i].DrawTo(graph, pointY, isBackLog, true, Config.TextDrawingMode);
 		//		//	pointY -= Config.LineHeight;
 		//		//}
-		//		//1820a12 上から下へ描画する方向へ変更
+		//		//1820a12 改为从上到下绘制
 		//		for (int i =topLineNo ; i <= bottomLineNo; i++)
 		//		{
 		//			displayLineList[i].DrawTo(graph, pointY, isBackLog, true, Config.TextDrawingMode);
@@ -1379,7 +1379,7 @@ namespace MinorShift.Emuera.GameView
 
 		//	}
 
-		//	//ToolTip描画
+		//	//ToolTip绘制
 
 		//	if (lastPointingString != pointingString)
 		//	{
@@ -1397,7 +1397,7 @@ namespace MinorShift.Emuera.GameView
 		//	else
 		//		lastDrawnLineNo = lineNo;
 		//	lastSelectingButton = selectingButton;
-		//	/*デバッグ用。描画が超重い環境を想定
+		//	/*调试用。假设绘制极其沉重的环境
 		//	System.Threading.Thread.Sleep(50);
 		//	*/
 		//	forceTextBoxColor = false;
@@ -1423,7 +1423,7 @@ namespace MinorShift.Emuera.GameView
 
         //private Graphics getGraphics()
         //{
-        //	//消したいが怖いので残し
+        //	//想删除但怕出问题，所以保留
         //	if (!window.Created)
         //		throw new ExeEE("存在しないウィンドウにアクセスした");
         //	//if (Config.UseImageBuffer)
@@ -1440,9 +1440,9 @@ namespace MinorShift.Emuera.GameView
 		StringBuilder dConsoleLog = new StringBuilder("");
 		public string DebugConsoleLog { get { return dConsoleLog.ToString(); } }
 		List<string> dTraceLogList = new List<string>();
-#pragma warning disable CS0414 // フィールド 'EmueraConsole.dTraceLogChanged' が割り当てられていますが、値は使用されていません。
+#pragma warning disable CS0414 // 字段 'EmueraConsole.dTraceLogChanged' 已被赋值，但值从未被使用。
 		bool dTraceLogChanged = true;
-#pragma warning restore CS0414 // フィールド 'EmueraConsole.dTraceLogChanged' が割り当てられていますが、値は使用されていません。
+#pragma warning restore CS0414 // 字段 'EmueraConsole.dTraceLogChanged' 已被赋值，但值从未被使用。
 		public string GetDebugTraceLog(bool force)
 		{
 			//if (!dTraceLogChanged && !force)
@@ -1512,8 +1512,8 @@ namespace MinorShift.Emuera.GameView
 
 		public void DebugAddTraceLog(string str)
 		{
-			//Emueraがデバッグモードで起動されていないなら無視
-			//ERBファイル以外のもの(デバッグコマンド、変数ウォッチ)を実行中なら無視
+			//如果Emuera未以调试模式启动则忽略
+			//如果正在执行ERB文件以外的内容（调试命令、变量监视）则忽略
 			if (!Program.DebugMode || runningERBfromMemory)
 				return;
 			dTraceLogChanged = true;
@@ -1539,7 +1539,7 @@ namespace MinorShift.Emuera.GameView
 		{
 			ConsoleState temp_state = state;
 			runningERBfromMemory = true;
-            //スクリプト等が失敗した場合に備えて念のための保存
+            //为防脚本等失败而进行的预防性保存
             GlobalStatic.Process.saveCurrentState(false);
             try
 			{
@@ -1577,18 +1577,18 @@ namespace MinorShift.Emuera.GameView
 				InstructionLine func = (InstructionLine)line;
 				if (func.Function.IsFlowContorol())
 					throw new CodeEE("フロー制御命令は使用できません");
-				//__METHOD_SAFE__をみるならいらないかも
+				//如果查看__METHOD_SAFE__的话可能不需要
 				if (func.Function.IsWaitInput())
 					throw new CodeEE(func.Function.Name + "命令は使用できません");
-				//1750 __METHOD_SAFE__とほぼ条件同じだよねってことで
+				//1750 因为和__METHOD_SAFE__条件基本相同
 				if (!func.Function.IsMethodSafe())
 					throw new CodeEE(func.Function.Name + "命令は使用できません");
-				//1756 SIFの次に来てはいけないものはここでも不可。
+				//1756 不能在SIF之后出现的东西在这里也不可用。
 				if (func.Function.IsPartial())
 					throw new CodeEE(func.Function.Name + "命令は使用できません");
 				switch (func.FunctionCode)
-				{//取りこぼし
-					//逆にOUTPUTLOG、QUITはDebugCommandの前に捕まえる
+				{//遗漏处理
+					//相反，OUTPUTLOG、QUIT在DebugCommand之前捕获
 					case FunctionCode.PUTFORM:
 					case FunctionCode.UPCHECK:
 					case FunctionCode.CUPCHECK:
@@ -1603,7 +1603,7 @@ namespace MinorShift.Emuera.GameView
 				{
 					if (!outputDebugConsole)
 						PrintSingleLine(com);
-					//DebugWindowのほうは少しくどくなるのでいらないかな
+					//DebugWindow那边会稍显冗长，可能不需要
 				}
 			}
 			catch (Exception e)
@@ -1619,7 +1619,7 @@ namespace MinorShift.Emuera.GameView
 			}
 			finally
 			{
-                //確実に元の状態に戻す
+                //确实恢复为原始状态
                 GlobalStatic.Process.loadPrevState();
                 runningERBfromMemory = false;
 				state = temp_state;
@@ -1633,30 +1633,30 @@ namespace MinorShift.Emuera.GameView
 		{
             //if (window == null || !window.Created)
             //	return new Point();
-            ////クライアント左上基準の座標取得
+            ////获取以客户端左上角为基准的坐标
             //Point pos = window.MainPicBox.PointToClient(Cursor.Position);
-            ////クライアント左下基準の座標に置き換え
+            ////替换为以客户端左下角为基准的坐标
             //pos.Y = pos.Y - ClientHeight;
             //return pos;
             return Point.Empty;
 		}
 
 		/// <summary>
-		/// マウス位置をボタンの選択状態に反映させる
+		/// 将鼠标位置反映到按钮的选择状态
 		/// </summary>
 		/// <param name="point"></param>
-		/// <returns>この後でRefreshStringsが必要かどうか</returns>
+		/// <returns>此后是否需要RefreshStrings</returns>
 		public bool MoveMouse(Point point)
 		{
             return false;
 		//	if (cbgButtonMap != null && cbgButtonMap.IsCreated)
 		//	{
-		//		//pointはクライアント左上基準の座標。
-		//		//clientPointをクライアント左下基準の座標に置き換え
+		//		//point是以客户端左上角为基准的坐标。
+		//		//将clientPoint替换为以客户端左下角为基准的坐标
 		//		Point clientPoint = point;
 		//		clientPoint.Y = point.Y - ClientHeight;
 		//		int buttonNum = -1;
-		//		//マップ画像の左上基準の座標に置き換え
+		//		//替换为以地图图像左上角为基准的坐标
 		//		Point mapPoint = clientPoint;
 		//		mapPoint.Y = mapPoint.Y + cbgButtonMap.Height;
 		//		if (mapPoint.X >= 0 && mapPoint.Y >= 0 && mapPoint.X < cbgButtonMap.Width && mapPoint.Y < cbgButtonMap.Height)
@@ -1692,10 +1692,10 @@ namespace MinorShift.Emuera.GameView
 		//		canSelect = true;
 		//	else if (state == ConsoleState.WaitInput && inputReq.NeedValue)
 		//		canSelect = true;
-		//	//スクリプト実行中は無視//入力・マクロ処理中は無視
+		//	//脚本执行中忽略//输入・宏处理中忽略
 		//	if(this.IsInProcess)
 		//		goto end;
-		//	//履歴表示中は無視
+		//	//历史显示中忽略
 		//	//if (window.ScrollBar.Value != window.ScrollBar.Maximum)
 		//	//	goto end;
 		//	int pointX = point.X;
@@ -1704,12 +1704,12 @@ namespace MinorShift.Emuera.GameView
 
 		//	int bottomLineNo = window.ScrollBar.Value - 1;
 		//	if (displayLineList.Count - 1 < bottomLineNo)
-		//		bottomLineNo = displayLineList.Count - 1;//1820 この処理不要な気がするけどエラー報告があったので入れとく
+		//		bottomLineNo = displayLineList.Count - 1;//1820 虽然觉得这个处理不需要，但因为有错误报告，所以保留
 		//	int topLineNo = bottomLineNo - (window.MainPicBox.Height/ Config.LineHeight);
 		//	if (topLineNo < 0)
 		//		topLineNo = 0;
 		//	int relPointY = pointY - window.MainPicBox.Height;
-		//	//下から上へ探索し発見次第打ち切り
+		//	//从下向上搜索，一旦发现即停止
 		//	for (int i = bottomLineNo; i >= topLineNo; i--)
 		//	{
 		//		relPointY += Config.LineHeight;
@@ -1747,7 +1747,7 @@ namespace MinorShift.Emuera.GameView
 
 		//	//int posy_bottom2up = window.MainPicBox.Height - pointY;
 		//	//int logNum = window.ScrollBar.Maximum - window.ScrollBar.Value;
-		//	////表示中の一番下の行番号
+		//	////显示中的最下面行号
 		//	//int curBottomLineNo = displayLineList.Count - logNum;
 		//	//int curPointingLineNo = curBottomLineNo - (posy_bottom2up / Config.LineHeight + 1);
 		//	//if ((curPointingLineNo < 0) || (curPointingLineNo >= displayLineList.Count))
@@ -1862,7 +1862,7 @@ namespace MinorShift.Emuera.GameView
 			force_temporary = false;
             PrintSingleLine("再読み込み完了", true);
 			RefreshStrings(true);
-            //強制的にボタン世代が切り替わるのを防ぐ
+            //防止强制切换按钮世代
             updatedGeneration = true;
             if (notRedraw)
                 redraw = ConsoleRedraw.None;
@@ -1912,7 +1912,7 @@ namespace MinorShift.Emuera.GameView
 			force_temporary = false;
             PrintSingleLine("再読み込み完了", true);
 			RefreshStrings(true);
-            //強制的にボタン世代が切り替わるのを防ぐ
+            //防止强制切换按钮世代
             updatedGeneration = true;
             if (notRedraw)
                 redraw = ConsoleRedraw.None;
@@ -1963,7 +1963,7 @@ namespace MinorShift.Emuera.GameView
 			force_temporary = false;
             PrintSingleLine("再読み込み完了", true);
 			RefreshStrings(true);
-            //強制的にボタン世代が切り替わるのを防ぐ
+            //防止强制切换按钮世代
             updatedGeneration = true;
             if (notRedraw)
                 redraw = ConsoleRedraw.None;

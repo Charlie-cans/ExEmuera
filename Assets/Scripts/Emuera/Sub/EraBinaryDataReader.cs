@@ -56,8 +56,8 @@ namespace MinorShift.Emuera.Sub
 	#endregion
 
 	/// <summary>
-	/// 1808追加 新しいデータ保存形式
-	/// 将来形式を変更したときのためにabstractにしておく
+	/// 1808添加 新的数据保存格式
+	/// 为将来格式变更而设为abstract
 	/// </summary>
 	internal abstract class EraBinaryDataReader : IDisposable
 	{

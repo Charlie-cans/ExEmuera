@@ -6,15 +6,15 @@ using System.IO;
 namespace MinorShift.Emuera.Sub
 {
 
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	//混淆用属性。如果使用enum.ToString()或enum.Parse()，则需设置为(Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude = false)]
 	internal enum EraDataState
 	{
-		OK = 0,//ロード可能
-		FILENOTFOUND = 1,//ファイルが存在せず
-		GAME_ERROR = 2,//ゲームが違う
-		VIRSION_ERROR = 3,//バージョンが違う
-		ETC_ERROR = 4,//その他のエラー
+		OK = 0,//可加载
+		FILENOTFOUND = 1,//文件不存在
+		GAME_ERROR = 2,//游戏不同
+		VIRSION_ERROR = 3,//版本不同
+		ETC_ERROR = 4,//其他错误
 
 	}
 
@@ -25,7 +25,7 @@ namespace MinorShift.Emuera.Sub
 	}
 
 	/// <summary>
-	/// セーブデータ読み取り
+	/// 存档数据读取
 	/// </summary>
 	internal sealed class EraDataReader : IDisposable
 	{

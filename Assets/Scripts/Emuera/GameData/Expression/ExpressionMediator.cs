@@ -13,9 +13,9 @@ using uEmuera.VisualBasic;
 
 namespace MinorShift.Emuera.GameData.Expression
 {
-	//1756 元ExpressionEvaluator。GetValueの仕事はなくなったので改名。
-	//IOperandTerm間での通信や共通の処理に使う。
-	//変数が絡む仕事はVariableEvaluatorへ。
+	//1756 原ExpressionEvaluator。因GetValue的工作已取消而改名。
+	//用于IOperandTerm之间的通信和通用处理。
+	//涉及变量的工作交给VariableEvaluator。
 	internal sealed class ExpressionMediator
 	{
 		public ExpressionMediator(Process proc, VariableEvaluator vev, EmueraConsole console)
@@ -88,7 +88,7 @@ namespace MinorShift.Emuera.GameData.Expression
 
 			while (!st.EOS)
 			{
-				//エスケープ文字の使用
+				//转义字符的使用
 				if (st.Current == '\\')
 				{
 					st.ShiftNext();
@@ -125,7 +125,7 @@ namespace MinorShift.Emuera.GameData.Expression
 				throw new CodeEE("BARの最大値が正の値ではありません");
 			if (length <= 0)
 				throw new CodeEE("BARの長さが正の値ではありません");
-			if (length >= 100)//暴走を防ぐため。
+			if (length >= 100)//为防止失控。
 				throw new CodeEE("BARが長すぎます");
 			StringBuilder builder = new StringBuilder();
 			builder.Append('[');

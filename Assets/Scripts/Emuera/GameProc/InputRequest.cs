@@ -6,22 +6,22 @@ namespace MinorShift.Emuera.GameProc
 {
 	enum InputType
 	{
-		EnterKey = 1,//Enterキーかクリック
-		AnyKey = 2,//なんでもいいから入力
-		IntValue = 3,//整数値。OneInputかどうかは別の変数で
-		StrValue = 4,//文字列。
-		Void = 5,//入力不能。待つしかない→スキップ中orマクロ中ならなかったことになる
+		EnterKey = 1,//回车键或点击
+		AnyKey = 2,//任意输入即可
+		IntValue = 3,//整数值。是否OneInput由其他变量决定
+		StrValue = 4,//字符串。
+		Void = 5,//无法输入。只能等待→跳过中或宏执行中时视为未发生
 
 		//1823
 		PrimitiveMouseKey = 11,
 
 	}
-	
 
-	// 1819追加 入力・表示系とData、Process系の結合を弱くしよう計画の一つ
-	// できるだけ間にクッションをおいていきたい。最終的には別スレッドに
 
-	//クラスを毎回使い捨てるのはどうなんだろう 使いまわすべきか
+	// 1819添加 将输入/显示系统与Data/Process系统解耦的计划之一
+	// 尽可能在中间加入缓冲层。最终目标是放到单独线程中
+
+	//每次实例化并丢弃这个类合适吗 是否应该复用
 	internal sealed class InputRequest
 	{
 		public InputRequest()

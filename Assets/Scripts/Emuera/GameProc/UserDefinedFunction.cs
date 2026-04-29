@@ -73,7 +73,7 @@ namespace MinorShift.Emuera.GameProc
 			string errMes = "";
 			int errLevel = -1;
 			GlobalStatic.IdentifierDictionary.CheckUserLabelName(ref errMes, ref errLevel, true, ret.Name);
-			if (errLevel == 0)//関数と変数の両方からチェック エラーメッセージが微妙だがひとまず気にしない
+			if (errLevel == 0)//从函数和变量双方进行检查 错误消息有点微妙但暂且不管
 				GlobalStatic.IdentifierDictionary.CheckUserVarName(ref errMes, ref errLevel, ret.Name);
 			if (errLevel >= 0)
 			{
@@ -85,9 +85,9 @@ namespace MinorShift.Emuera.GameProc
 			UserDifinedFunctionDataArgType argType = UserDifinedFunctionDataArgType.Null;
 
 			int state = 0;
-			//0=初期状態 1=カンマ括弧閉じ待ち 2=カンマ直後
-			//3=REF後INTorSTR待ち 4=':'or','待ち 5=':'or '0'or ','待ち
-			while (true)// REF INT STR 0 '*' ',' ')' のみで構成されるはず
+			//0=初期状態 1=等待逗号或闭括号 2=逗号后紧接着
+			//3=等待REF后的INT或STR 4=':'or','待ち 5=':'or '0'or ','待ち
+			while (true)// 应该仅由 REF INT STR 0 '*' ',' ')' 组成
 			{
 				wc.ShiftNext();
 				switch (wc.Current.Type)

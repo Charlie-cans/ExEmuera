@@ -27,11 +27,11 @@ namespace MinorShift.Emuera.Sub
 
 		public bool Open(string path, string name)
 		{
-			//そんなお行儀の悪いことはしていない
+			//不会做那么不规矩的事情
 			//if (disposed)
-			//    throw new ExeEE("破棄したオブジェクトを再利用しようとした");
+			//    throw new ExeEE("试图重用已废弃的对象");
 			//if ((reader != null) || (stream != null) || (filepath != null))
-			//    throw new ExeEE("使用中のオブジェクトを別用途に再利用しようとした");
+			//    throw new ExeEE("试图将使用中的对象重用于其他用途");
 			filepath = path;
 			filename = name;
 			nextNo = 0;
@@ -57,7 +57,7 @@ namespace MinorShift.Emuera.Sub
 		}
 
         /// <summary>
-        /// 次の有効な行を読む。LexicalAnalyzer経由でConfigを参照するのでConfig完成までつかわないこと。
+        /// 读取下一个有效行。由于通过LexicalAnalyzer引用Config，请在Config完成前不要使用。
         /// </summary>
         public StringStream ReadEnabledLine()
 		{
@@ -93,7 +93,7 @@ namespace MinorShift.Emuera.Sub
 				}
 				return st;
 			}
-			//curNoはこの後加算しない(始端記号の行を行番号とする)
+			//curNo在此后不加算（将起始记号的行作为行号）
 			StringBuilder b = new StringBuilder();
 			while (true)
 			{
@@ -130,7 +130,7 @@ namespace MinorShift.Emuera.Sub
 		}
 
 		/// <summary>
-		/// 直前に読んだ行の行番号
+		/// 最近读取的行的行号
 		/// </summary>
 		public int LineNo
 		{ get { return curNo; } }

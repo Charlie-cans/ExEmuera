@@ -10,7 +10,7 @@ using MinorShift.Emuera.GameProc.Function;
 namespace MinorShift.Emuera.GameProc
 {
 	/// <summary>
-	/// 命令文1行に相当する抽象クラス
+	/// 抽象类，对应一条指令行
 	/// </summary>
 	internal abstract class LogicalLine
 	{
@@ -52,7 +52,7 @@ namespace MinorShift.Emuera.GameProc
 	}
 
 	///// <summary>
-	///// コメント行。
+	///// 注释行。
 	///// </summary>
 	//internal sealed class CommentLine : LogicalLine
 	//{
@@ -69,7 +69,7 @@ namespace MinorShift.Emuera.GameProc
 	//}
 
 	/// <summary>
-	/// 無効な行。
+	/// 无效行。
 	/// </summary>
 	internal sealed class InvalidLine : LogicalLine
 	{
@@ -85,7 +85,7 @@ namespace MinorShift.Emuera.GameProc
 	}
 
 	/// <summary>
-	/// 命令文
+	/// 指令行
 	/// </summary>
 	internal sealed class InstructionLine : LogicalLine
 	{
@@ -133,7 +133,7 @@ namespace MinorShift.Emuera.GameProc
 		}
 
 		/// <summary>
-		/// 繰り返しの終了を記憶する
+		/// 记录循环的结束
 		/// </summary>
 		public Int64 LoopEnd
 		{
@@ -143,7 +143,7 @@ namespace MinorShift.Emuera.GameProc
 
 		VariableTerm cnt;
 		/// <summary>
-		/// 繰り返しにつかう変数を記憶する
+		/// 记录循环中使用的变量
 		/// </summary>
 		public VariableTerm LoopCounter
 		{
@@ -153,7 +153,7 @@ namespace MinorShift.Emuera.GameProc
 
 		Int64 step;
 		/// <summary>
-		/// 繰り返しのたびに増加する値を記憶する
+		/// 记录每次循环增加的值
 		/// </summary>
 		public Int64 LoopStep
 		{
@@ -163,11 +163,11 @@ namespace MinorShift.Emuera.GameProc
 
 		private LogicalLine jumpto = null;
         private LogicalLine jumptoendcatch = null;
-		//IF文とSELECT文のみが使う。
+		//仅IF语句和SELECT语句使用。
 		public List<InstructionLine> IfCaseList = null;
-        //PRINTDATA文のみが使う。
+        //仅PRINTDATA语句使用。
         public List<List<InstructionLine>> dataList = null;
-        //TRYCALLLIST系が使う
+        //TRYCALLLIST系列使用
         public List<InstructionLine> callList = null;
 
 		public LogicalLine JumpTo
@@ -185,12 +185,12 @@ namespace MinorShift.Emuera.GameProc
 	}
 
 	/// <summary>
-	/// ファイルの始端と終端
+	/// 文件的开始和结束
 	/// </summary>
 	internal sealed class NullLine : LogicalLine { }
 	
 	/// <summary>
-	/// ラベルがエラーになっている関数行専用のクラス
+	/// 标签出错时专用的函数行类
 	/// </summary>
 	internal sealed class InvalidLabelLine : FunctionLabelLine
 	{
@@ -212,7 +212,7 @@ namespace MinorShift.Emuera.GameProc
 	}
 
 	/// <summary>
-	/// @で始まるラベル行
+	/// 以@开头的标签行
 	/// </summary>
 	internal class FunctionLabelLine : LogicalLine, IComparable<FunctionLabelLine>
 	{
@@ -267,21 +267,21 @@ namespace MinorShift.Emuera.GameProc
         //public SingleTerm[] SubNames { get; set; }
 		public int Depth { get; set; }
 
-		#region IComparable<FunctionLabelLine> メンバ
-		//ソート用情報
+		#region IComparable<FunctionLabelLine> 成员
+		//排序用信息
 		public int Index { get; set; }
 		public int FileIndex { get; set; }
 		public int CompareTo(FunctionLabelLine other)
 		{
 			if (FileIndex != other.FileIndex)
 				return FileIndex.CompareTo(other.FileIndex);
-			//position == nullであるLine(デバッグコマンドなど)をSortすることはないはず
+			//position == null的Line（调试命令等）不应该被排序
 			if (position.LineNo != other.position.LineNo)
 				return position.LineNo.CompareTo(other.position.LineNo);
 			return Index.CompareTo(other.Index);
 		}
 		#endregion
-		#region private変数
+		#region private变量
 		Dictionary<string, UserDefinedVariableToken> privateVar = new Dictionary<string, UserDefinedVariableToken>();
 		internal bool AddPrivateVariable(UserDefinedVariableData data)
 		{
@@ -289,7 +289,7 @@ namespace MinorShift.Emuera.GameProc
 				return false;
 			UserDefinedVariableToken var = GlobalStatic.VariableData.CreatePrivateVariable(data);
 			privateVar.Add(data.Name, var);
-			//静的な変数のみの場合は関数呼び出し時に何もする必要がない
+			//仅有静态变量的情况下，函数调用时无需做任何处理
 			if (!data.Static)
 				hasPrivDynamicVar = true;
 			return true;
@@ -302,7 +302,7 @@ namespace MinorShift.Emuera.GameProc
 		}
 
 		/// <summary>
-		/// 引数の値の確定後、引数の代入より前に呼ぶこと
+		/// 参数值确定之后、参数赋值之前调用
 		/// </summary>
 		internal void In()
 		{
@@ -327,7 +327,7 @@ namespace MinorShift.Emuera.GameProc
 	}
 
 	/// <summary>
-	/// $で始まるラベル行
+	/// 以$开头的标签行
 	/// </summary>
 	internal sealed class GotoLabelLine : LogicalLine, IEqualityComparer<GotoLabelLine>
 	{
@@ -342,7 +342,7 @@ namespace MinorShift.Emuera.GameProc
 			get { return labelname; }
 		}
 
-		#region IEqualityComparer<GotoLabelLine> メンバ
+		#region IEqualityComparer<GotoLabelLine> 成员
 
 		public bool Equals(GotoLabelLine x, GotoLabelLine y)
 		{

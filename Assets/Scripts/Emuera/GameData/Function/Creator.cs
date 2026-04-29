@@ -14,7 +14,7 @@ namespace MinorShift.Emuera.GameData.Function
 		{
             methodList = new Dictionary<string, FunctionMethod>
             {
-                //キャラクタデータ系
+                //角色数据相关
                 ["GETCHARA"] = new GetcharaMethod(),
                 ["GETSPCHARA"] = new GetspcharaMethod(),
                 ["CSVNAME"] = new CsvStrDataMethod(CharacterStrData.NAME),
@@ -99,9 +99,9 @@ namespace MinorShift.Emuera.GameData.Function
                 ["MINARRAY"] = new MaxArrayMethod(false, false),
                 ["MINCARRAY"] = new MaxArrayMethod(true, false),
                 ["GETBIT"] = new GetbitMethod(),
-                ["SETBIT"] = new SqlStubMethod(2),
-                ["CLEARBIT"] = new SqlStubMethod(2),
-                ["INVERTBIT"] = new SqlStubMethod(2),
+                ["SETBIT"] = new SetBitMethod(),
+                ["CLEARBIT"] = new ClearBitMethod(),
+                ["INVERTBIT"] = new InvertBitMethod(),
                 ["GETNUM"] = new GetnumMethod(),
                 ["GETPALAMLV"] = new GetPalamLVMethod(),
                 ["GETEXPLV"] = new GetExpLVMethod(),
@@ -300,41 +300,41 @@ namespace MinorShift.Emuera.GameData.Function
                 ["MAP_GETKEYS"] = new MapGetStrMethod(MapGetStrMethod.Operation.GetKeys),
 
                 // EM+EE HTML
-                ["HTML_STRINGLEN"] = new HtmlStringLenStub(),
-                ["HTML_SUBSTRING"] = new HtmlSubStringStub(),
-                ["HTML_STRINGLINES"] = new HtmlStringLinesStub(),
+                ["HTML_STRINGLEN"] = new HtmlStringLenMethod(),
+                ["HTML_SUBSTRING"] = new HtmlSubStringMethod(),
+                ["HTML_STRINGLINES"] = new HtmlStringLinesMethod(),
 
-                // EM+EE XML stubs
-                ["XML_DOCUMENT"] = new XmlStubMethod("XML_DOCUMENT"),
-                ["XML_RELEASE"] = new XmlStubMethod("XML_RELEASE"),
-                ["XML_GET"] = new XmlStubMethod("XML_GET"),
-                ["XML_SET"] = new XmlStubMethod("XML_SET"),
-                ["XML_EXIST"] = new XmlStubMethod("XML_EXIST"),
-                ["XML_TOSTR"] = new XmlStubMethod("XML_TOSTR"),
-                ["XML_ADDNODE"] = new XmlStubMethod("XML_ADDNODE"),
-                ["XML_REMOVENODE"] = new XmlStubMethod("XML_REMOVENODE"),
-                ["XML_REMOVENODE_BYNAME"] = new XmlStubMethod("XML_REMOVENODE_BYNAME"),
-                ["XML_REPLACE"] = new XmlStubMethod("XML_REPLACE"),
-                ["XML_REPLACE_BYNAME"] = new XmlStubMethod("XML_REPLACE_BYNAME"),
-                ["XML_ADDATTRIBUTE"] = new XmlStubMethod("XML_ADDATTRIBUTE"),
-                ["XML_ADDATTRIBUTE_BYNAME"] = new XmlStubMethod("XML_ADDATTRIBUTE_BYNAME"),
-                ["XML_REMOVEATTRIBUTE"] = new XmlStubMethod("XML_REMOVEATTRIBUTE"),
-                ["XML_REMOVEATTRIBUTE_BYNAME"] = new XmlStubMethod("XML_REMOVEATTRIBUTE_BYNAME"),
+                // EM+EE XML
+                ["XML_DOCUMENT"] = new XmlDocumentMethod(XmlDocumentMethod.Operation.Create),
+                ["XML_RELEASE"] = new XmlDocumentMethod(XmlDocumentMethod.Operation.Release),
+                ["XML_EXIST"] = new XmlDocumentMethod(XmlDocumentMethod.Operation.Check),
+                ["XML_GET"] = new XmlGetMethod(),
+                ["XML_GET_BYNAME"] = new XmlGetMethod(true),
+                ["XML_SET"] = new XmlSetMethod(),
+                ["XML_SET_BYNAME"] = new XmlSetMethod(true),
+                ["XML_TOSTR"] = new XmlToStrMethod(),
+                ["XML_ADDNODE"] = new XmlAddNodeMethod(XmlAddNodeMethod.Operation.Node),
+                ["XML_ADDNODE_BYNAME"] = new XmlAddNodeMethod(XmlAddNodeMethod.Operation.Node, true),
+                ["XML_REMOVENODE"] = new XmlRemoveNodeMethod(XmlRemoveNodeMethod.Operation.Node),
+                ["XML_REMOVENODE_BYNAME"] = new XmlRemoveNodeMethod(XmlRemoveNodeMethod.Operation.Node, true),
+                ["XML_REPLACE"] = new XmlReplaceMethod(),
+                ["XML_REPLACE_BYNAME"] = new XmlReplaceMethod(true),
+                ["XML_ADDATTRIBUTE"] = new XmlAddNodeMethod(XmlAddNodeMethod.Operation.Attribute),
+                ["XML_ADDATTRIBUTE_BYNAME"] = new XmlAddNodeMethod(XmlAddNodeMethod.Operation.Attribute, true),
+                ["XML_REMOVEATTRIBUTE"] = new XmlRemoveNodeMethod(XmlRemoveNodeMethod.Operation.Attribute),
+                ["XML_REMOVEATTRIBUTE_BYNAME"] = new XmlRemoveNodeMethod(XmlRemoveNodeMethod.Operation.Attribute, true),
                 // EM+EE More
-                ["VARSETEX"] = new SqlStubMethod(2),
-                ["ARRAYMSORTEX"] = new SqlStubMethod(5),
+                ["VARSETEX"] = new VarSetExMethod(),
+                ["ARRAYMSORTEX"] = new ArrayMultiSortExMethod(),
                 ["GDRAWTEXT"] = new SqlStubMethod(5),
                 ["GETMETH"] = new PluginIntStubMethod(),
                 ["GETMETHS"] = new PluginStrStubMethod(),
                 ["EXISTMETH"] = new PluginIntStubMethod(),
-                ["EXISTFUNCTION"] = new ExistFunctionStub(),
+                ["EXISTFUNCTION"] = new ExistFunctionMethod(),
                 ["REGEXPMATCH"] = new RegexStubMethod(),
-                ["ENUMFILES"] = new SqlStubMethod(2),
-                ["EXISTVAR"] = new SqlStubMethod(1),
+                ["ENUMFILES"] = new EnumFilesMethod(),
+                ["EXISTVAR"] = new ExistVarMethod(),
                 ["MOUSEB"] = new SqlStubMethod(0),
-                ["HTML_TOPLAINTEXT"] = new HtmlToPlainTextStub(),
-                ["HTML_GETPRINTEDSTR"] = new HtmlGetPrintedStrStub(),
-                ["HTML_POPPRINTINGSTR"] = new HtmlPopPrintingStrStub(),
                 ["HOTKEY_STATE"] = new SqlStubMethod(1),
                 ["BITMAP_CACHE_ENABLE"] = new SqlStubMethod(1),
                 ["GDRAWLINE"] = new SqlStubMethod(4),
@@ -342,7 +342,7 @@ namespace MinorShift.Emuera.GameData.Function
             };
 
 
-            //1823 自分の関数名を知っていた方が何かと便利なので覚えさせることにした
+            //1823 知道自己的函数名会方便很多，因此让它记住
             foreach (var pair in methodList)
 				pair.Value.SetMethodName(pair.Key);
         }

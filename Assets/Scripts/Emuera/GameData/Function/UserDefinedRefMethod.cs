@@ -26,10 +26,10 @@ namespace MinorShift.Emuera.GameData.Function
 		}
 
 		/// <summary>
-		/// 戻り値と引数の数・型の完全一致が必要
+		/// 需要返回值和参数的数量、类型完全一致
 		/// </summary>
 		/// <param name="call"></param>
-		/// <returns>一致ならtrue</returns>
+		/// <returns>一致则为true</returns>
 		internal bool MatchType(CalledFunction call)
 		{
 			FunctionLabelLine label = call.TopLabel;
@@ -65,10 +65,10 @@ namespace MinorShift.Emuera.GameData.Function
 		}
 
 		/// <summary>
-		/// 戻り値と引数の数・型の完全一致が必要
+		/// 需要返回值和参数的数量、类型完全一致
 		/// </summary>
 		/// <param name="rother"></param>
-		/// <returns>一致ならtrue</returns>
+		/// <returns>一致则为true</returns>
 		internal bool MatchType(UserDefinedRefMethod rother)
 		{
 			if (RetType != rother.RetType)

@@ -98,7 +98,7 @@ namespace MinorShift.Emuera.Content
                 //				bmpfilelist.AddRange(Directory.GetFiles(Program.ContentDir, "*.GIF", SearchOption.TopDirectoryOnly));
                 //#endif
                 //            foreach(var filename in bmpfilelist)
-                //{//リスト化のみ。Loadはまだ
+                //{//仅列表化。Load尚未
                 //	string name = Path.GetFileName(filename).ToUpper();
                 //	resourceDic.Add(name, new BaseImage(name, filename));
                 //}
@@ -153,7 +153,7 @@ namespace MinorShift.Emuera.Content
 			catch(Exception )
 			{
 				return false;
-				//throw new CodeEE("リソースファイルのロード中にエラーが発生しました");
+				//throw new CodeEE("资源文件加载中发生错误");
 			}
 			return true;
 		}
@@ -170,7 +170,7 @@ namespace MinorShift.Emuera.Content
 			gList.Clear();
 		}
 
-		//タイトルに戻る時用（コードの変更はないので、動的に作られた分だけ削除）
+		//返回标题时使用（代码没有变更，仅删除动态创建的部分）
 		static public void UnloadGraphicList()
 		{
 			foreach (var graph in gList.Values)
@@ -179,7 +179,7 @@ namespace MinorShift.Emuera.Content
 		}
 
 		/// <summary>
-		/// resourcesフォルダ中のcsvの1行を読んで新しいリソースを作る(or既存のアニメーションスプライトに1フレーム追加する)
+		/// 读取resources文件夹中csv的一行来创建新资源（或向现有的动画精灵添加1帧）
 		/// </summary>
 		/// <param name="tokens"></param>
 		/// <param name="dir"></param>
@@ -194,7 +194,7 @@ namespace MinorShift.Emuera.Content
 			string arg2 = tokens[1].ToUpper();//画像ファイル名
 			if (name.Length == 0 || arg2.Length == 0)
 				return null;
-			//アニメーションスプライト宣言
+			//动画精灵声明
 			if (arg2 == "ANIME")
 			{
 				if (tokens.Length < 4)
@@ -216,7 +216,7 @@ namespace MinorShift.Emuera.Content
 
 				return anime;
 			}
-			//アニメ宣言以外（アニメ用フレーム含む
+			//动画声明以外（含动画用帧）
 
 			if(arg2.IndexOf('.') < 0)
 			{
@@ -225,7 +225,7 @@ namespace MinorShift.Emuera.Content
 			}
 			string parentName = dir + arg2;
 
-			//親画像のロードConstImage
+			//父图像加载ConstImage
 			if (!resourceDic.ContainsKey(parentName))
 			{
 				string filepath = parentName;
@@ -242,7 +242,7 @@ namespace MinorShift.Emuera.Content
 				}
 				if (bmp.Width > AbstractImage.MAX_IMAGESIZE || bmp.Height > AbstractImage.MAX_IMAGESIZE)
 				{
-					//1824-2 すでに8192以上の幅を持つ画像を利用したバリアントが存在してしまっていたため、警告しつつ許容するように変更
+					//1824-2 由于已经存在使用8192以上宽度图像的变体，改为警告并容许
 					//	bmp.Dispose();
 					ParserMediator.Warn("指定された画像ファイルの大きさが大きすぎます(幅及び高さを"+ AbstractImage.MAX_IMAGESIZE.ToString()+ "以下にすることを強く推奨します):" + arg2, sp, 1);
 					//return null;
@@ -284,7 +284,7 @@ namespace MinorShift.Emuera.Content
                     //uEmuera在此时尚未获取图片尺寸
 					//if (!rect.IntersectsWith(new Rectangle(0,0,parentImage.Bitmap.Width, parentImage.Bitmap.Height)))
 					//{
-					//	ParserMediator.Warn("親画像の範囲外を参照しています:" + name, sp, 1);
+					//	ParserMediator.Warn("引用了父图像范围外:" + name, sp, 1);
 					//	return null;
 					//}
 				}
@@ -306,7 +306,7 @@ namespace MinorShift.Emuera.Content
 					}
 				}
 			}
-			//既存のスプライトに対するフレーム追加
+			//对现有精灵添加帧
 			if (currentAnime != null && currentAnime.Name == name)
 			{
 				if(!currentAnime.AddFrame(parentImage, rect, pos, delay))
@@ -317,7 +317,7 @@ namespace MinorShift.Emuera.Content
 				return null;
 			}
 
-			//新規スプライト定義
+			//新精灵定义
 			ASprite image = new SpriteF(name, parentImage, rect, pos);
 			return image;
 		}

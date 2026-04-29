@@ -10,30 +10,30 @@ using uEmuera.Drawing;
 namespace MinorShift.Emuera.GameView
 {
 	//TODO:1810～
-	/* Emuera用Htmlもどきが実装すべき要素
-	 * (できるだけhtmlとConsoleDisplayLineとの1:1対応を目指す。<b>と<strong>とか同じ結果になるタグを重複して実装しない)
-	 * <p align=""></p> ALIGNMENT命令相当・行頭から行末のみ・行末省略可
-	 * <nobr></nobr> PRINTSINGLE相当・行頭から行末のみ・行末省略可
-	 * <b><i><u><s> フォント各種・オーバーラップ問題は保留
-	 * <button value=""></button> ボタン化・htmlでは明示しない限りボタン化しない
-	 * <font face="" color="" bcolor=""></font> フォント指定 色指定 ボタン選択中色指定
-	 * 追加<!-- --> コメント
-	 * <nonbutton title='～～'> 
-	 * <img src='～～' srcb='～～'> 
-	 * <shape type='rect' param='0,0,0,0'> 
-	 * エスケープ
-	 * &amp; &gt; &lt; &quot; &apos; &<>"' ERBにおける利便性を考えると属性値の指定には"よりも'を使いたい。HTML4.1にはないがaposを入れておく
-	 * &#nn; &#xnn; Unicode参照 #xFFFF以上は却下
+	/* Emuera用伪Html应实现的元素
+	 * (尽可能实现html与ConsoleDisplayLine的1:1对应。不重复实现结果相同的标签如<b>和<strong>)
+	 * <p align=""></p> 相当于ALIGNMENT命令・仅行头到行尾・行尾可省略
+	 * <nobr></nobr> 相当于PRINTSINGLE・仅行头到行尾・行尾可省略
+	 * <b><i><u><s> 各种字体・重叠问题保留
+	 * <button value=""></button> 按钮化・在html中除非明确指定否则不按钮化
+	 * <font face="" color="" bcolor=""></font> 字体指定 颜色指定 按钮选中中颜色指定
+	 * 添加<!-- --> 注释
+	 * <nonbutton title='～～'>
+	 * <img src='～～' srcb='～～'>
+	 * <shape type='rect' param='0,0,0,0'>
+	 * 转义
+	 * &amp; &gt; &lt; &quot; &apos; &<>"' 考虑到ERB中的便利性，属性值的指定更倾向于使用'而非"。虽然在HTML4.1中不存在，但加入apos
+	 * &#nn; &#xnn; Unicode引用 #xFFFF以上则驳回
 	 */
-	/* このクラスがサポートすべきもの
-	 * html から ConsoleDisplayLine[] //主に表示用
-	 * ConsoleDisplayLine[] から html //現在の表示をstr化して保存？
-	 * html から ConsoleDisplayLine[] を経て html //表示を行わずに改行が入る位置のチェックができるかも
-	 * html から PlainText(非エスケープ)//
-	 * Text から エスケープ済Text
+	/* 这个类应该支持的功能
+	 * html 到 ConsoleDisplayLine[] //主要用于显示
+	 * ConsoleDisplayLine[] 到 html //将当前显示转换为字符串进行保存？
+	 * html 通过 ConsoleDisplayLine[] 到 html //也许可以在不显示的情况下检查换行位置
+	 * html 到 PlainText(非转义)//
+	 * Text 到 已转义Text
 	 */
 	/// <summary>
-	/// EmueraConsoleのなんちゃってHtml解決用クラス
+	/// EmueraConsole的伪Html解析用类
 	/// </summary>
 	internal static class HtmlManager
 	{
@@ -70,26 +70,26 @@ namespace MinorShift.Emuera.GameView
 
 		private sealed class HtmlAnalzeState
 		{
-			public bool LineHead = true;//行頭フラグ。一度もテキストが出てきてない状態
+			public bool LineHead = true;//行首标志。尚未出现任何文本的状态
 			public FontStyle FontStyle = FontStyle.Regular;
 			public List<HtmlAnalzeStateFontTag> FonttagList = new List<HtmlAnalzeStateFontTag>();
-			public bool FlagNobr = false;//falseの時に</nobr>するとエラー
-			public bool FlagP = false;//falseの時に</p>するとエラー
-			public bool FlagNobrClosed = false;//trueの時に</nobr>するとエラー
-			public bool FlagPClosed = false;//trueの時に</p>するとエラー
+			public bool FlagNobr = false;//为false时，如果执行</nobr>则出错
+			public bool FlagP = false;//为false时，如果执行</p>则出错
+			public bool FlagNobrClosed = false;//为true时，如果执行</nobr>则出错
+			public bool FlagPClosed = false;//为true时，如果执行</p>则出错
 			public DisplayLineAlignment Alignment = DisplayLineAlignment.LEFT;
 
 			/// <summary>
-			/// 今まで追加された文字列についてのボタンタグ情報
+			/// 关于已添加的字符串的按钮标签信息
 			/// </summary>
 			public HtmlAnalzeStateButtonTag LastButtonTag = null;
 			/// <summary>
-			/// 最新のボタンタグ情報
+			/// 最新的按钮标签信息
 			/// </summary>
 			public HtmlAnalzeStateButtonTag CurrentButtonTag = null;
 
-			public bool FlagBr = false;//<br>による強制改行の予約
-			public bool FlagButton = false;//<button></button>によるボタン化の予約
+			public bool FlagBr = false;//通过<br>预约强制换行
+			public bool FlagButton = false;//通过<button></button>预约按钮化
 
 			public StringStyle GetSS()
 			{
@@ -116,7 +116,7 @@ namespace MinorShift.Emuera.GameView
 		}
 
 		/// <summary>
-		/// 表示行からhtmlへの変換
+		/// 从显示行到html的转换
 		/// </summary>
 		/// <param name="lines"></param>
 		/// <returns></returns>
@@ -258,11 +258,11 @@ namespace MinorShift.Emuera.GameView
 		}
 		
 		/// <summary>
-		/// htmlから表示行の作成
+		/// 从html创建显示行
 		/// </summary>
-		/// <param name="str">htmlテキスト</param>
+		/// <param name="str">html文本</param>
 		/// <param name="sm"></param>
-		/// <param name="console">実際の表示に使わないならnullにする</param>
+		/// <param name="console">如果不用于实际显示则设为null</param>
 		/// <returns></returns>
 		public static ConsoleDisplayLine[] Html2DisplayLine(string str, StringMeasure sm, EmueraConsole console)
 		{
@@ -299,7 +299,7 @@ namespace MinorShift.Emuera.GameView
 					state.LineHead = false;
 					st.CurrentPosition += found;
 				}
-				//コメントタグのみ特別扱い
+				//仅注释标签特殊处理
 				if (hasComment && st.CurrentEqualTo("<!--"))
 				{
 					st.CurrentPosition += 4;
@@ -309,12 +309,12 @@ namespace MinorShift.Emuera.GameView
 					st.CurrentPosition += found + 3;
 					continue;
 				}
-				if (hasReturn && st.Current == '\n')//テキスト中の\nは<br>として扱う
+				if (hasReturn && st.Current == '\n')//文本中的\n视为<br>处理
 				{
 					state.FlagBr = true;
 					st.ShiftNext();
 				}
-				else//タグ解析
+				else//标签解析
 				{
 					st.ShiftNext();
 					AConsoleDisplayPart part = tagAnalyze(state, st);
@@ -340,7 +340,7 @@ namespace MinorShift.Emuera.GameView
 				state.FlagButton = false;
 				state.LastButtonTag = state.CurrentButtonTag;
 			}
-			//</nobr></p>は省略許可
+			//</nobr></p>允许省略
 			if (state.CurrentButtonTag != null || state.FontStyle != FontStyle.Regular || state.FonttagList.Count > 0)
 				throw new CodeEE("閉じられていないタグがあります");
 			if (cssList.Count > 0)
@@ -374,7 +374,7 @@ namespace MinorShift.Emuera.GameView
 
 		public static string Escape(string str)
 		{
-			//Net4.5では便利なクラスがあるらしい
+			//Net4.5中似乎有方便的类
 			//return System.Web.HttpUtility.HtmlEncode(str);
 
 			int index = 0;
@@ -383,12 +383,12 @@ namespace MinorShift.Emuera.GameView
 			while (index < str.Length)
 			{
 				found = str.IndexOfAny(rep, index);
-				if (found < 0)//見つからなければ以降を追加して終了
+				if (found < 0)//如果没找到，则添加后续内容并结束
 				{
 					b.Append(str.Substring(index));
 					break;
 				}
-				if (found > index)//間に非エスケープ文字があるなら追加しておく
+				if (found > index)//如果中间存在非转义字符则加以添加
 					b.Append(str.Substring(index, found - index));
 				string repnew = repDic[str[found]];
 				b.Append(repnew);
@@ -404,16 +404,16 @@ namespace MinorShift.Emuera.GameView
 			if (found < 0)
 				return str;
 			StringBuilder b = new StringBuilder();
-			// &～; をひたすら置換するだけ
+			// 只是不停替换 &～;
 			while (index < str.Length)
 			{
 				found = str.IndexOf('&', index);
-				if (found < 0)//見つからなければ以降を追加して終了
+				if (found < 0)//如果没找到，则添加后续内容并结束
 				{
 					b.Append(str.Substring(index));
 					break;
 				}
-				if (found > index)//間に非エスケープ文字があるなら追加しておく
+				if (found > index)//如果中间存在非转义字符则加以添加
 					b.Append(str.Substring(index, found - index));
 				index = found;
 				found = str.IndexOf(';', index);
@@ -468,7 +468,7 @@ namespace MinorShift.Emuera.GameView
 		}
 
 		/// <summary>
-		/// ここまでのcssをボタン化。発生原因はbrタグ、行末、ボタンタグ
+		/// 将目前为止的css按钮化。触发原因是br标签、行尾、按钮标签
 		/// </summary>
 		/// <param name="cssList"></param>
 		/// <param name="isbutton"></param>
@@ -591,7 +591,7 @@ namespace MinorShift.Emuera.GameView
 				if (found < 0)
 				{
 					st.CurrentPosition = st.RowString.Length;
-					return null;//戻り先でエラーを出す
+					return null;//在返回处抛出错误
 				}
 				tag = st.Substring(st.CurrentPosition, found).Trim();
 				st.CurrentPosition += found;
@@ -640,13 +640,13 @@ namespace MinorShift.Emuera.GameView
 				}
 				//goto error;
 			}
-			//以降は開始タグ
+			//以下为开始标签
 
 			bool tempUseMacro = LexicalAnalyzer.UseMacro;
 			WordCollection wc = null;
 			try
 			{
-				LexicalAnalyzer.UseMacro = false;//一時的にマクロ展開をやめる
+				LexicalAnalyzer.UseMacro = false;//暂时停止宏展开
 				tag = LexicalAnalyzer.ReadSingleIdentifier(st);
 				LexicalAnalyzer.SkipWhiteSpace(st);
 				if (st.Current != '>')
@@ -982,7 +982,7 @@ namespace MinorShift.Emuera.GameView
 								throw new CodeEE("<" + tag + ">タグの属性名" + word.Code + "は解釈できません");
 							}
 						}
-						//他のfontタグの内側であるなら未設定項目については外側のfontタグの設定を受け継ぐ(posは除く)
+						//如果在其他font标签内部，则未设置项目继承外部font标签的设置（pos除外）
 						if (state.FonttagList.Count > 0)
 						{
 							HtmlAnalzeStateFontTag oldFont = state.FonttagList[state.FonttagList.Count - 1];
@@ -1002,7 +1002,7 @@ namespace MinorShift.Emuera.GameView
 
 
 		error:
-			throw new CodeEE("html文字列\"" + st.RowString + "\"のタグ解析中にエラーが発生しました");
+			throw new CodeEE("html文字列\"" + st.RowString + "\"の标签解析中にエラーが発生しました");
 		}
 
 		private static int stringToColorInt32(string str)
@@ -1027,7 +1027,7 @@ namespace MinorShift.Emuera.GameView
 			else
 			{
 				Color color = Color.FromName(str);
-				if (color.A == 0)//色名として解釈失敗 エラー確定
+				if (color.A == 0)//作为颜色名解析失败 确定错误
 				{
 					if(str.Equals("transparent", StringComparison.OrdinalIgnoreCase))
 						throw new CodeEE("無色透明(Transparent)は色として指定できません");
@@ -1035,11 +1035,11 @@ namespace MinorShift.Emuera.GameView
 					{
 						i = Convert.ToInt32(str, 16);
 					}
-					catch//16進数でもない
+					catch//也不是十六进制数
 					{
 						throw new CodeEE("指定された色名\"" + str + "\"は無効な色名です");
 					}
-					//#RRGGBBを意図したのかもしれない
+					//可能意图使用#RRGGBB
 					throw new CodeEE("指定された色名\"" + str + "\"は無効な色名です(16進数で色を指定する場合には数値の前に#が必要です)");
 				}
 				i = color.R * 0x10000 + color.G * 0x100 + color.B;

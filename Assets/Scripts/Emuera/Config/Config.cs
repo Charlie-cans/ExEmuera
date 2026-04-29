@@ -129,7 +129,7 @@ namespace MinorShift.Emuera
             AllowLongInputByMouse = instance.GetConfigValue<bool>(ConfigCode.AllowLongInputByMouse);
 
            TimesNotRigorousCalculation = instance.GetConfigValue<bool>(ConfigCode.TimesNotRigorousCalculation);
-            //一文字変数の禁止オプションを考えた名残
+            //曾经考虑过禁止单字符变量选项的遗迹
 		   //ForbidOneCodeVariable = instance.GetConfigValue<bool>(ConfigCode.ForbidOneCodeVariable);
 		   SystemNoTarget = instance.GetConfigValue<bool>(ConfigCode.SystemNoTarget);
 			
@@ -239,7 +239,7 @@ namespace MinorShift.Emuera
 		}
 
 		/// <summary>
-		/// ディレクトリ作成失敗のExceptionは呼び出し元で処理すること
+		/// 目录创建失败的Exception由调用方处理
 		/// </summary>
 		public static void ForceCreateSavDir()
 		{
@@ -250,7 +250,7 @@ namespace MinorShift.Emuera
 		}
 
 		/// <summary>
-		/// ディレクトリ作成失敗のExceptionは呼び出し元で処理すること
+		/// 目录创建失败的Exception由调用方处理
 		/// </summary>
 		public static void CreateSavDir()
 		{
@@ -278,13 +278,13 @@ namespace MinorShift.Emuera
 			DialogResult result = MessageBox.Show("savフォルダを作成しました\n現在のデータをsavフォルダ内に移動しますか？", "データ移動", MessageBoxButtons.YesNo);
 			if (result != DialogResult.Yes)
 				return;
-			//ダイアログが開いている間にフォルダを消してしまうような邪悪なユーザーがいるかもしれない
+			//可能有邪恶的用户在对话框打开期间删除文件夹
 			if (!Directory.Exists(SavDir))
 			{
 				MessageBox.Show("savフォルダの作成が見当たりません", "フォルダ作成失敗");
 				return;
 			}
-			//ダイアログが開いている間にファイルを変更するような邪悪なユーザーがいるかもしれない
+			//可能有邪恶的用户在对话框打开期间更改文件
 			try
 			{
 				if (File.Exists(Program.ExeDir + "global.sav"))
@@ -298,8 +298,8 @@ namespace MinorShift.Emuera
 				MessageBox.Show("savファイルの移動に失敗しました", "移動失敗");
 			}
 		}
-		//先にSetConfigを呼ぶこと
-		//戻り値はセーブが必要かどうか
+		//请先调用SetConfig
+		//返回值表示是否需要保存
 		public static bool CheckUpdate()
 		{
 			if (ReduceArgumentOnLoad != ReduceArgumentOnLoadFlag.ONCE)
@@ -358,13 +358,13 @@ namespace MinorShift.Emuera
 		}
 		static StrIgnoreCaseComparer ignoreCaseComparer = new StrIgnoreCaseComparer();
 
-		//KeyValuePair<相対パス, 完全パス>のリストを返す。
+		//返回KeyValuePair<相对路径, 完整路径>的列表。
 		private static List<KeyValuePair<string, string>> getFiles(string dir, string rootdir, string pattern, bool toponly, bool sort)
 		{
             StringComparison strComp = StringComparison.OrdinalIgnoreCase;
 			List<KeyValuePair<string, string>> retList = new List<KeyValuePair<string, string>>();
 			if (!toponly)
-			{//サブフォルダ内の検索
+			{//搜索子文件夹内
 				string[] dirList = Directory.GetDirectories(dir, "*", SearchOption.TopDirectoryOnly);
 				if (dirList.Length > 0)
 				{
@@ -374,68 +374,68 @@ namespace MinorShift.Emuera
 						retList.AddRange(getFiles(dirList[i], rootdir, pattern, toponly, sort));
 				}
 			}
-			string RelativePath = "";//相対ディレクトリ名
-			if (string.Equals(dir, rootdir, strComp))//現在のパスが検索ルートパスに等しい
+			string RelativePath = "";//相对目录名
+			if (string.Equals(dir, rootdir, strComp))//当前路径等于搜索根路径
 				RelativePath = "";
 			else
 			{
 				if (!dir.StartsWith(rootdir, strComp))
 					RelativePath = dir;
 				else
-					RelativePath = dir.Substring(rootdir.Length);//前方が検索ルートパスと一致するならその部分を切り取る
+					RelativePath = dir.Substring(rootdir.Length);//如果前方与搜索根路径一致则切掉该部分
 				if (!RelativePath.EndsWith("\\") && !RelativePath.EndsWith("/"))
-					RelativePath += "/";//末尾が\又は/で終わるように。後でFile名を直接加算できるようにしておく
+					RelativePath += "/";//让末尾以\或/结束。便于之后直接追加文件名
 			}
-			//filepathsは完全パスである
+			//filepaths是完整路径
 			string[] filepaths = Directory.GetFiles(dir, pattern, SearchOption.TopDirectoryOnly);
 			if (sort)
 				Array.Sort(filepaths, ignoreCaseComparer);
 			for (int i = 0; i < filepaths.Length; i++)
-				if (Path.GetExtension(filepaths[i]).Length <= 4)//".erb"や".csv"であること。放置すると".erb*"等を拾う。
+				if (Path.GetExtension(filepaths[i]).Length <= 4)//应为".erb"或".csv"。如果不管会捡到".erb*"等。
 					retList.Add(new KeyValuePair<string, string>(RelativePath + Path.GetFileName(filepaths[i]), filepaths[i]));
 			return retList;
 		}
 		
 
 		/// <summary>
-		/// IgnoreCaseはprivateに。代わりにICFunctionかICVariableを使う。
+		/// IgnoreCase设为private。改为使用ICFunction或ICVariable。
 		/// </summary>
 		private static bool IgnoreCase { get; set; }
 		private static bool CompatiFunctionNoignoreCase { get; set; }
 		
 
 		/// <summary>
-		/// 関数名・属性名的な名前のIgnoreCaseフラグ
-		/// 関数・属性・BEGINのキーワード 
-		/// どうせeramaker用の互換処理なのでEmuera専用構文については適当に。
+		/// 函数名、属性名类型的IgnoreCase标志
+		/// 函数、属性、BEGIN的关键词
+		/// 反正这是为了eramaker的兼容处理，Emuera专用语法就随便了。
 		/// </summary>
 		public static bool ICFunction { get; private set; }
 		
 		/// <summary>
-		/// 変数名、命令名的な名前のIgnoreCaseフラグ 
-		/// 変数・命令・$ラベル名、GOTOの引数 
+		/// 变量名、命令名类型的IgnoreCase标志
+		/// 变量、命令、$标签名、GOTO的参数
 		/// </summary>
 		public static bool ICVariable { get; private set; }
 
 		/// <summary>
-		/// 関数名・属性名的な名前の比較フラグ
+		/// 函数名、属性名类型的比较标志
 		/// </summary>
 		public static StringComparison SCFunction { get; private set; }
 		/// <summary>
-		/// 変数名、命令名的な名前の比較フラグ
+		/// 变量名、命令名类型的比较标志
 		/// </summary>
 		public static StringComparison SCVariable { get; private set; }
 		/// <summary>
-		/// ファイル名的な名前の比較フラグ
+		/// 文件名类型的比较标志
 		/// </summary>
 		public const StringComparison SCIgnoreCase = StringComparison.OrdinalIgnoreCase;
 		/// <summary>
-		/// 式中での文字列比較フラグ
+		/// 表达式中的字符串比较标志
 		/// </summary>
 		public const StringComparison SCExpression = StringComparison.Ordinal;
 
 		/// <summary>
-		/// GDI+利用時に発生する文字列と図形・画像間の位置ずれ補正
+		/// 使用GDI+时产生的字符串与图形、图像之间的位置偏移修正
 		/// </summary>
 		public static int DrawingParam_ShapePositionShift { get; private set; }
 
@@ -453,7 +453,7 @@ namespace MinorShift.Emuera
 		public static TextDrawingMode TextDrawingMode { get { return TextDrawingMode.GRAPHICS; } private set { } }
 		public static int WindowX { get; private set; }
 		/// <summary>
-		/// 実際に描画可能な横幅
+		/// 实际可绘制的宽度
 		/// </summary>
 		public static int DrawableWidth { get; private set; }
 		public static int WindowY { get; private set; }
@@ -526,7 +526,7 @@ namespace MinorShift.Emuera
         public static bool AllowLongInputByMouse { get; private set; }
 
         public static bool TimesNotRigorousCalculation { get; private set; }
-        //一文字変数の禁止オプションを考えた名残
+        //曾经考虑过禁止单字符变量选项的遗迹
         //public static bool ForbidOneCodeVariable { get; private set; }
 		#endregion
 

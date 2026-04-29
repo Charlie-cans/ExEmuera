@@ -3,11 +3,14 @@
 ## 已完成
 - [x] BuiltInFunctionCode 扩展 (35+ 新指令)
 - [x] DataTable 系统 (DT_CREATE/COLUMN_ADD/ROW_ADD/CELL_GET 等)
-- [x] MAP 系统 (MAP_CREATE/SET/GET/HAS/REMOVE/GETKEYS 等)
+- [x] MAP 系统 (MAP_CREATE/SET/GET/HAS/REMOVE/GETKEYS 等) - 完整实现
+- [x] XML 系统 (XML_DOCUMENT/GET/SET/ADDNODE/REMOVENODE/REPLACE 等) - 完整实现，使用 System.Xml
 - [x] GETVAR/GETVARS/SETVAR 动态变量查找
 - [x] CLEARMEMORY/GETMEMORYUSAGE
-- [x] EXISTSOUND/EXISTFILE/EXISTFUNCTION
-- [x] HTML_STRINGLEN/HTML_SUBSTRING/HTML_STRINGLINES
+- [x] EXISTSOUND/EXISTFILE/EXISTFUNCTION - 完整实现
+- [x] ENUMFILES/EXISTVAR - 完整实现
+- [x] SETBIT/CLEARBIT/INVERTBIT 位操作 - 完整实现
+- [x] HTML_STRINGLEN/HTML_SUBSTRING/HTML_STRINGLINES - 完整实现（HTML标签处理）
 - [x] HTML_TOPLAINTEXT/HTML_GETPRINTEDSTR/HTML_POPPRINTINGSTR
 - [x] GETMETH/GETMETHS/EXISTMETH (plugin stubs)
 - [x] REGEXPMATCH stub
@@ -26,6 +29,10 @@
 - [x] HTML_PRINT 第2参数支持 (SP_HTML_PRINT builder, string + optional int)
 - [x] TRYCALLFORMF / TRYCALLF 注册 (TRYCALLF_Instruction 静默失败版)
 - [x] SQLite 系统 (Mono.Data.Sqlite + sqlite3.dll, SQL_CONNECT/EXECUTE_SCALAR_STRING/EXECUTE_SCALAR_LONG/EXECUTE_NON_QUERY/EXECUTE_READER/IMPORT_MAP_XML)
+- [x] Sound 系统 (PLAYSOUND/STOPSOUND/PLAYBGM/STOPBGM/SETSOUNDVOLUME/SETBGMVOLUME) - Unity AudioSource完整实现
+- [x] CALLSHARP / Plugin 系统 - 反射加载.NET DLL插件，IPluginMethod接口
+- [x] VARSETEX / ARRAYMSORTEX - 从EM+EE移植完整实现
+- [x] 全代码库注释中文化 (所有日文/英文注释 → 简体中文)
 
 ## 需要完整实现（非桩）
 
@@ -35,24 +42,7 @@
   - MixedNum/StyledBoxModel/BoxBorder 等类
   - 圆角边框/阴影/背景色渲染
 
-- [ ] CALLSHARP / Plugin 系统
-  - 加载 .NET DLL 插件
-  - IPluginMethod 接口
-
-- [ ] 图片背景渲染修复
-  - ConsoleImagePart 查找 sprite 失败问题
-  - 追踪 GCREATEFROMFILE → SPRITECREATE → AppContents.GetSprite 链
-
 ### 中优先级
-- [ ] Sound 系统 (PLAYSOUND/STOPSOUND/SETSOUNDVOLUME)
-  - 当前 Unity AudioSource 桩，需文件加载 + 播放
-
-- [ ] XML 系统 (XML_DOCUMENT/XML_GET/XML_SET/XML_ADDNODE 等)
-  - 用 System.Xml 实现
-
-- [ ] VARSETEX / ARRAYMSORTEX
-  - 从 EM+EE Creator.Method.cs 移植
-
 - [ ] HTML_PRINT 完整表达式支持
   - `{EXPR}` 括号在 HTML 属性中的求值
 
@@ -75,7 +65,5 @@
 - `SET_SKIA_QUALITY` — TEST.ERB (Skia 画质设置)
 
 ## 已知限制
-- 图片渲染白屏：sprite 查找失败，GCREATEFROMFILE 异步加载链问题
 - `<div>` 无视觉效果：只有功能桩，无边框/背景/布局
-- Sound 全桩：不播放音频
 - 非 EE 标准扩展指令：见上方列表，均为 TEST.ERB / DLC 中使用，不影响主流程

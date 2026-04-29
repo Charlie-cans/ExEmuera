@@ -8,7 +8,7 @@ using uEmuera.Drawing;
 
 namespace MinorShift.Emuera.GameView
 {
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	//混淆用属性。如果使用enum.ToString()或enum.Parse()，则需设置为(Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude=false)]
 	internal enum DisplayLineLastState
 	{
@@ -18,7 +18,7 @@ namespace MinorShift.Emuera.GameView
 		BackLog = 3,
 	}
 	
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	//混淆用属性。如果使用enum.ToString()或enum.Parse()，则需设置为(Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude=false)]
 	internal enum DisplayLineAlignment
 	{
@@ -27,7 +27,7 @@ namespace MinorShift.Emuera.GameView
 		RIGHT = 2,
 	}
 	/// <summary>
-	/// 表示行。1つ以上のボタン（ConsoleButtonString）からなる
+	/// 显示行。由一个或多个按钮（ConsoleButtonString）组成
 	/// </summary>
 	internal sealed class ConsoleDisplayLine
 	{
@@ -48,7 +48,7 @@ namespace MinorShift.Emuera.GameView
 		}
 		public int LineNo = -1;
 		
-		///論理行の最初となる場合だけtrue。表示の都合で改行された2行目以降はfalse
+		///仅当为逻辑行的首行时为true。因显示需要而换行的第2行及之后为false
 		readonly public bool IsLogicalLine = true;
 		readonly public bool IsTemporary = false;
 		//EmueraConsole parent;
@@ -65,18 +65,18 @@ namespace MinorShift.Emuera.GameView
 			this.align = align;
 			if (buttons.Length == 0)
 				return;
-			//DisplayLineの幅
+			//DisplayLine的宽度
 			int width = 0;
             for(var i = 0; i < buttons.Length; ++i)
                 width += buttons[i].Width;
-			//現在位置
+			//当前位置
 			int pointX = buttons[0].PointX;
 
-			//目標位置
+			//目标位置
 			int movetoX = 0;
 			if (align == DisplayLineAlignment.LEFT)
 			{
-				//位置固定に対応
+				//支持固定位置
 				if (IsLogicalLine)
 					return;
 				movetoX = 0;
@@ -86,7 +86,7 @@ namespace MinorShift.Emuera.GameView
 			else if (align == DisplayLineAlignment.RIGHT)
 				movetoX = Config.WindowX - width;
 
-			//移動距離
+			//移动距离
 			int shiftX = movetoX - pointX;
 			if(shiftX != 0)
 				this.ShiftPositionX(shiftX);
@@ -116,8 +116,8 @@ namespace MinorShift.Emuera.GameView
 
 		//public ConsoleButtonString GetPointingButton(int pointX)
 		//{
-		//	////1815 優先順位を逆順にする
-		//	////後から描画されるボタンが優先されるように
+		//	////1815 将优先级改为逆序
+		//	////使后绘制的按钮优先
 		//	for (int i = 0; i < buttons.Length; i++)
 		//	{
 		//		ConsoleButtonString button = buttons[buttons.Length - i - 1];
@@ -142,7 +142,7 @@ namespace MinorShift.Emuera.GameView
 		{
 			//foreach (ConsoleButtonString button in buttons)
 			//	button.GDIDrawTo(pointY, isBackLog);
-			//1819 毎回全消去するので穴埋め処理は不要になった
+			//1819 由于每次全部清除，不再需要填充处理
 			//int pointX = 0;
 			//foreach (ConsoleButtonString button in buttons)
 			//{
@@ -154,7 +154,7 @@ namespace MinorShift.Emuera.GameView
 			//		GDI.FillRectBGColor(rect);
 			//	}
 			//	button.GDIDrawTo(pointY, isBackLog);
-			//	//フォントの実高さ＜行間の場合隙間ができてしまうので埋める処理
+			//	//当字体实际高度小于行距时会产生间隙，因此进行填充处理
 			//	GDI.FillGap(Config.LineHeight, button.Width + (button.PointX - pointX), new Point(pointX, pointY));
 			//	pointX = button.PointX + button.Width;
 			//}

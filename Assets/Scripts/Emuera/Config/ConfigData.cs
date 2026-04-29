@@ -12,9 +12,9 @@ using uEmuera.Drawing;
 namespace MinorShift.Emuera
 {
 	/// <summary>
-	/// プログラム全体で使用される値でWindow作成前に設定して以後変更されないもの
-	/// (という予定だったが今は違う)
-	/// 1756 Config → ConfigDataへ改名
+	/// 整个程序使用的值，在Window创建前设置，之后不会改变
+	/// (原计划是这样，但现在不同了)
+	/// 1756 Config → 更名为ConfigData
 	/// </summary>
 	internal sealed class ConfigData
 	{
@@ -29,7 +29,7 @@ static ConfigData() { }
 
 		private ConfigData() { setDefault(); }
 
-		//適当に大き目の配列を作っておく。
+		//预先创建一个适当大小的数组。
 		private AConfigItem[] configArray = new AConfigItem[70];
 		private AConfigItem[] replaceArray = new AConfigItem[50];
 		private AConfigItem[] debugArray = new AConfigItem[20];
@@ -44,32 +44,32 @@ static ConfigData() { }
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.UseMenu, "メニューを使用する", true);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.UseDebugCommand, "デバッグコマンドを使用する", false);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.AllowMultipleInstances, "多重起動を許可する", true);
-			configArray[i++] = new ConfigItem<bool>(ConfigCode.AutoSave, "オートセーブを行なう", true);
+			configArray[i++] = new ConfigItem<bool>(ConfigCode.AutoSave, "执行自动保存", true);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.UseKeyMacro, "キーボードマクロを使用する", true);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.SizableWindow, "ウィンドウの高さを可変にする", true);
-			configArray[i++] = new ConfigItem<TextDrawingMode>(ConfigCode.TextDrawingMode, "描画インターフェース", TextDrawingMode.GRAPHICS);
+			configArray[i++] = new ConfigItem<TextDrawingMode>(ConfigCode.TextDrawingMode, "绘制接口", TextDrawingMode.GRAPHICS);
 			//configArray[i++] = new ConfigItem<bool>(ConfigCode.UseImageBuffer, "イメージバッファを使用する", true);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.WindowX, "ウィンドウ幅", 760);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.WindowX, "窗口宽度", 760);
 			configArray[i++] = new ConfigItem<int>(ConfigCode.WindowY, "ウィンドウ高さ", 480);
 			configArray[i++] = new ConfigItem<int>(ConfigCode.WindowPosX, "ウィンドウ位置X", 0);
 			configArray[i++] = new ConfigItem<int>(ConfigCode.WindowPosY, "ウィンドウ位置Y", 0);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.SetWindowPos, "起動時のウィンドウ位置を指定する", false);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.WindowMaximixed, "起動時にウィンドウを最大化する", false);
 			configArray[i++] = new ConfigItem<int>(ConfigCode.MaxLog, "履歴ログの行数", 5000);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.PrintCPerLine, "PRINTCを並べる数", 3);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.PrintCLength, "PRINTCの文字数", 25);
-			configArray[i++] = new ConfigItem<string>(ConfigCode.FontName, "フォント名", "ＭＳ ゴシック");
-			configArray[i++] = new ConfigItem<int>(ConfigCode.FontSize, "フォントサイズ", 18);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.LineHeight, "一行の高さ", 19);
-			configArray[i++] = new ConfigItem<Color>(ConfigCode.ForeColor, "文字色", Color.FromArgb(192, 192, 192));//LIGHTGRAY
-			configArray[i++] = new ConfigItem<Color>(ConfigCode.BackColor, "背景色", Color.FromArgb(0, 0, 0));//BLACK
-			configArray[i++] = new ConfigItem<Color>(ConfigCode.FocusColor, "選択中文字色", Color.FromArgb(255, 255, 0));//YELLOW
+			configArray[i++] = new ConfigItem<int>(ConfigCode.PrintCPerLine, "PRINTC排列数量", 3);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.PrintCLength, "PRINTC的字符数", 25);
+			configArray[i++] = new ConfigItem<string>(ConfigCode.FontName, "字体名称", "ＭＳ ゴシック");
+			configArray[i++] = new ConfigItem<int>(ConfigCode.FontSize, "字体大小", 18);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.LineHeight, "一行的高度", 19);
+			configArray[i++] = new ConfigItem<Color>(ConfigCode.ForeColor, "文字色", Color.FromArgb(192, 192, 192));//浅灰色
+			configArray[i++] = new ConfigItem<Color>(ConfigCode.BackColor, "背景色", Color.FromArgb(0, 0, 0));//黑色
+			configArray[i++] = new ConfigItem<Color>(ConfigCode.FocusColor, "選択中文字色", Color.FromArgb(255, 255, 0));//黄色
 			configArray[i++] = new ConfigItem<Color>(ConfigCode.LogColor, "履歴文字色", Color.FromArgb(192, 192, 192));//LIGHTGRAY//Color.FromArgb(128, 128, 128);//GRAY
-			configArray[i++] = new ConfigItem<int>(ConfigCode.FPS, "フレーム毎秒", 5);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.SkipFrame, "最大スキップフレーム数", 3);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.ScrollHeight, "スクロール行数", 1);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.InfiniteLoopAlertTime, "無限ループ警告までのミリ秒数", 5000);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.DisplayWarningLevel, "表示する最低警告レベル", 1);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.FPS, "每秒帧数", 5);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.SkipFrame, "最大跳过帧数", 3);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.ScrollHeight, "滚动行数", 1);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.InfiniteLoopAlertTime, "无限循环警告的毫秒数", 5000);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.DisplayWarningLevel, "显示的最低警告级别", 1);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.DisplayReport, "ロード時にレポートを表示する", false);
 			configArray[i++] = new ConfigItem<ReduceArgumentOnLoadFlag>(ConfigCode.ReduceArgumentOnLoad, "ロード時に引数を解析する", ReduceArgumentOnLoadFlag.NO);
 			//configArray[i++] = new ConfigItem<bool>(ConfigCode.ReduceFormattedStringOnLoad, "ロード時にFORM文字列を解析する", true);
@@ -82,7 +82,7 @@ static ConfigData() { }
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.SearchSubdirectory, "サブディレクトリを検索する", false);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.SortWithFilename, "読み込み順をファイル名順にソートする", false);
 			configArray[i++] = new ConfigItem<long>(ConfigCode.LastKey, "最終更新コード", 0);
-			configArray[i++] = new ConfigItem<int>(ConfigCode.SaveDataNos, "表示するセーブデータ数", 20);
+			configArray[i++] = new ConfigItem<int>(ConfigCode.SaveDataNos, "显示的存档数据数量", 20);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.WarnBackCompatibility, "eramaker互換性に関する警告を表示する", true);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.AllowFunctionOverloading, "システム関数の上書きを許可する", true);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.WarnFunctionOverloading, "システム関数が上書きされたとき警告を表示する", true);
@@ -109,7 +109,7 @@ static ConfigData() { }
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.CompatiFuncArgAutoConvert, "ユーザー関数の引数に自動的にTOSTRを補完する", false);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.SystemIgnoreTripleSymbol, "FORM中の三連記号を展開しない", false);
             configArray[i++] = new ConfigItem<bool>(ConfigCode.TimesNotRigorousCalculation, "TIMESの計算をeramakerにあわせる", false);
-            //一文字変数の禁止オプションを考えた名残
+            //曾经考虑过禁止单字符变量选项的遗迹
 			//configArray[i++] = new ConfigItem<bool>(ConfigCode.ForbidOneCodeVariable, "一文字変数の使用を禁止する", false);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.SystemNoTarget, "キャラクタ変数の引数を補完しない", false);
 			configArray[i++] = new ConfigItem<bool>(ConfigCode.SystemIgnoreStringSet, "文字列変数の代入に文字列式を強制する", false);
@@ -124,22 +124,22 @@ static ConfigData() { }
 			debugArray[i++] = new ConfigItem<int>(ConfigCode.DebugWindowPosY, "デバッグウィンドウ位置Y", 0);
 
 			i = 0;
-			replaceArray[i++] = new ConfigItem<string>(ConfigCode.MoneyLabel, "お金の単位", "$");
-			replaceArray[i++] = new ConfigItem<bool>(ConfigCode.MoneyFirst, "単位の位置", true);
+			replaceArray[i++] = new ConfigItem<string>(ConfigCode.MoneyLabel, "金钱的单位", "$");
+			replaceArray[i++] = new ConfigItem<bool>(ConfigCode.MoneyFirst, "单位的位置", true);
 			replaceArray[i++] = new ConfigItem<string>(ConfigCode.LoadLabel, "起動時簡略表示", "Now Loading...");
-			replaceArray[i++] = new ConfigItem<int>(ConfigCode.MaxShopItem, "販売アイテム数", 100);
+			replaceArray[i++] = new ConfigItem<int>(ConfigCode.MaxShopItem, "出售道具数量", 100);
 			replaceArray[i++] = new ConfigItem<string>(ConfigCode.DrawLineString, "DRAWLINE文字", "-");
 			replaceArray[i++] = new ConfigItem<char>(ConfigCode.BarChar1, "BAR文字1", '*');
 			replaceArray[i++] = new ConfigItem<char>(ConfigCode.BarChar2, "BAR文字2", '.');
-			replaceArray[i++] = new ConfigItem<string>(ConfigCode.TitleMenuString0, "システムメニュー0", "最初からはじめる");
-			replaceArray[i++] = new ConfigItem<string>(ConfigCode.TitleMenuString1, "システムメニュー1", "ロードしてはじめる");
+			replaceArray[i++] = new ConfigItem<string>(ConfigCode.TitleMenuString0, "系统菜单0", "最初からはじめる");
+			replaceArray[i++] = new ConfigItem<string>(ConfigCode.TitleMenuString1, "系统菜单1", "ロードしてはじめる");
 			replaceArray[i++] = new ConfigItem<int>(ConfigCode.ComAbleDefault, "COM_ABLE初期値", 1);
 			replaceArray[i++] = new ConfigItem<List<Int64>>(ConfigCode.StainDefault, "汚れの初期値", new List<Int64>(new Int64[] { 0, 0, 2, 1, 8 }));
-			replaceArray[i++] = new ConfigItem<string>(ConfigCode.TimeupLabel, "時間切れ表示", "時間切れ");
+			replaceArray[i++] = new ConfigItem<string>(ConfigCode.TimeupLabel, "时间到显示", "時間切れ");
 			replaceArray[i++] = new ConfigItem<List<Int64>>(ConfigCode.ExpLvDef, "EXPLVの初期値", new List<long>(new Int64[] { 0, 1, 4, 20, 50, 200 }));
 			replaceArray[i++] = new ConfigItem<List<Int64>>(ConfigCode.PalamLvDef, "PALAMLVの初期値", new List<long>(new Int64[] { 0, 100, 500, 3000, 10000, 30000, 60000, 100000, 150000, 250000 }));
-			replaceArray[i++] = new ConfigItem<Int64>(ConfigCode.pbandDef, "PBANDの初期値", 4);
-            replaceArray[i++] = new ConfigItem<Int64>(ConfigCode.RelationDef, "RELATIONの初期値", 0);
+			replaceArray[i++] = new ConfigItem<Int64>(ConfigCode.pbandDef, "PBAND的初始值", 4);
+            replaceArray[i++] = new ConfigItem<Int64>(ConfigCode.RelationDef, "RELATION的初始值", 0);
 		}
 
         public void Clear()
@@ -300,27 +300,27 @@ static ConfigData() { }
 			switch(item.Code)
 			{
 				//<bool>
-				case ConfigCode.AutoSave://"オートセーブを行なう"
-				case ConfigCode.MoneyFirst://"単位の位置"
+				case ConfigCode.AutoSave://"执行自动保存"
+				case ConfigCode.MoneyFirst://"单位的位置"
 					if(item.GetValue<bool>())
 						term = new SingleTerm(1);
 					else
 						term = new SingleTerm(0);
 					break;
 				//<int>
-				case ConfigCode.WindowX:// "ウィンドウ幅"
-				case ConfigCode.PrintCPerLine:// "PRINTCを並べる数"
-				case ConfigCode.PrintCLength:// "PRINTCの文字数"
-				case ConfigCode.FontSize:// "フォントサイズ"
-				case ConfigCode.LineHeight:// "一行の高さ"
-				case ConfigCode.FPS:// "フレーム毎秒"
-				case ConfigCode.SkipFrame:// "最大スキップフレーム数"
-				case ConfigCode.ScrollHeight:// "スクロール行数"
-				case ConfigCode.SaveDataNos:// "表示するセーブデータ数"
-				case ConfigCode.MaxShopItem:// "販売アイテム数"
+				case ConfigCode.WindowX://"窗口宽度"
+				case ConfigCode.PrintCPerLine://"PRINTC排列数量"
+				case ConfigCode.PrintCLength://"PRINTC的字符数"
+				case ConfigCode.FontSize://"字体大小"
+				case ConfigCode.LineHeight://"一行的高度"
+				case ConfigCode.FPS://"每秒帧数"
+				case ConfigCode.SkipFrame://"最大跳过帧数"
+				case ConfigCode.ScrollHeight://"滚动行数"
+				case ConfigCode.SaveDataNos://"显示的存档数据数量"
+				case ConfigCode.MaxShopItem://"出售道具数量"
 				case ConfigCode.ComAbleDefault:// "COM_ABLE初期値"
-				case ConfigCode.InfiniteLoopAlertTime:// "無限ループ警告までのミリ秒数"
-				case ConfigCode.DisplayWarningLevel:// "表示する最低警告レベル"
+				case ConfigCode.InfiniteLoopAlertTime://"无限循环警告的毫秒数"
+				case ConfigCode.DisplayWarningLevel://"显示的最低警告级别"
 					term = new SingleTerm(item.GetValue<int>());
 					break;
 				//<Color>
@@ -335,19 +335,19 @@ static ConfigData() { }
 					break;
 
 				//<Int64>
-				case ConfigCode.pbandDef:// "PBANDの初期値"
-				case ConfigCode.RelationDef:// "RELATIONの初期値"
+				case ConfigCode.pbandDef://"PBAND的初始值"
+				case ConfigCode.RelationDef://"RELATION的初始值"
 					term = new SingleTerm(item.GetValue<Int64>());
 					break;
 
 				//<string>
-				case ConfigCode.FontName:// "フォント名"
-				case ConfigCode.MoneyLabel:// "お金の単位"
+				case ConfigCode.FontName://"字体名称"
+				case ConfigCode.MoneyLabel://"金钱的单位"
 				case ConfigCode.LoadLabel:// "起動時簡略表示"
 				case ConfigCode.DrawLineString:// "DRAWLINE文字"
-				case ConfigCode.TitleMenuString0:// "システムメニュー0"
-				case ConfigCode.TitleMenuString1:// "システムメニュー1"
-				case ConfigCode.TimeupLabel:// "時間切れ表示"
+				case ConfigCode.TitleMenuString0://"系统菜单0"
+				case ConfigCode.TitleMenuString1://"系统菜单1"
+				case ConfigCode.TimeupLabel://"时间到显示"
 					term = new SingleTerm(item.GetValue<string>());
 					break;
 				
@@ -357,7 +357,7 @@ static ConfigData() { }
 					term = new SingleTerm(item.GetValue<char>().ToString());
 					break;
 				//<TextDrawingMode>
-				case ConfigCode.TextDrawingMode:// "描画インターフェース"
+				case ConfigCode.TextDrawingMode://"绘制接口"
 					term = new SingleTerm(item.GetValue<TextDrawingMode>().ToString());
 					break;
 				default:
@@ -384,7 +384,7 @@ static ConfigData() { }
 					if (item == null)
 						continue;
 					
-					//1806beta001 CompatiDRAWLINEの廃止、CompatiLinefeedAs1739へ移行
+					//1806beta001 CompatiDRAWLINE的废止，迁移至CompatiLinefeedAs1739
 					if (item.Code == ConfigCode.CompatiDRAWLINE)
 						continue;
 					if ((item.Code == ConfigCode.ChangeMasterNameIfDebug) && (item.GetValue<bool>()))
@@ -393,7 +393,7 @@ static ConfigData() { }
 						continue;
 					//if (item.Code == ConfigCode.IgnoreWarningFiles)
 					//{
-					//    List<string> files = item.GetValue<List<string>>();
+					//List<string> files = item.GetValue<List<string>>();
 					//    foreach (string filename in files)
 					//        writer.WriteLine(item.Text + ":" + filename.ToString());
 					//    continue;
@@ -415,7 +415,7 @@ static ConfigData() { }
 
         public bool ReLoadConfig()
         {
-            //_fixed.configの中身が変わった場合、非固定になったものが保持されてしまうので、ここで一旦すべて解除
+            //_fixed.config的内容发生变化时，已变为非固定的项目会被保留，因此在此一次性全部解除
             foreach (AConfigItem item in configArray)
             {
                 if (item == null)
@@ -492,7 +492,7 @@ static ConfigData() { }
                     }
 					if (item != null)
 					{
-						//1806beta001 CompatiDRAWLINEの廃止、CompatiLinefeedAs1739へ移行
+						//1806beta001 CompatiDRAWLINE的废止，迁移至CompatiLinefeedAs1739
 						if(item.Code == ConfigCode.CompatiDRAWLINE)
 						{
 							item = GetConfigItem(ConfigCode.CompatiLinefeedAs1739);
@@ -508,7 +508,7 @@ static ConfigData() { }
 						
 						if (item.Code == ConfigCode.TextEditor)
 						{
-							//パスの関係上tokens[2]は使わないといけない
+							//由于路径的关系，必须使用tokens[2]
 							if (tokens.Length > 2)
 							{
 								if (tokens[2].StartsWith("\\"))
@@ -524,13 +524,13 @@ static ConfigData() { }
 						}
 						if (item.Code == ConfigCode.EditorArgument)
 						{
-							//半角スペースを要求する引数が必要なエディタがあるので別処理で
+							//因为有些编辑器需要半角空格作为参数，所以另作处理
 							((ConfigItem<string>)item).Value = tokens[1];
 							continue;
 						}
                         if (item.Code == ConfigCode.MaxLog && Program.AnalysisMode)
                         {
-                            //解析モード時はここを上書きして十分な長さを確保する
+                            //解析模式时覆盖此处以确保足够的长度
                             tokens[1] = "10000";
                         }
 						if ((item.TryParse(tokens[1])) && (fix))
@@ -555,7 +555,7 @@ static ConfigData() { }
 		}
 
 #region replace
-		// 1.52a改変部分　（単位の差し替えおよび前置、後置のためのコンフィグ処理）
+		//1.52a修改部分（用于单位替换及前置、后置的配置处理）
 		public void LoadReplaceFile(string filename)
 		{
 			EraStreamReader eReader = new EraStreamReader(false);

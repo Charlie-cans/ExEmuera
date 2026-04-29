@@ -7,7 +7,7 @@ using uEmuera.Drawing;
 namespace MinorShift.Emuera.GameView
 {
 	/// <summary>
-	/// 描画の最小単位
+	/// 绘图的最小单位
 	/// </summary>
 	abstract class AConsoleDisplayPart
 	{
@@ -36,7 +36,7 @@ namespace MinorShift.Emuera.GameView
 	}
 
 	/// <summary>
-	/// 色つき
+	/// 带颜色的
 	/// </summary>
 	abstract partial class AConsoleColoredPart : AConsoleDisplayPart
 	{

@@ -1,7 +1,7 @@
 ﻿
 namespace MinorShift.Emuera
 {
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	//混淆用属性。如果进行enum.ToString()或enum.Parse()操作，应设为(Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude=true)]
 	internal enum DisplayWarningFlag
 	{
@@ -45,7 +45,7 @@ namespace MinorShift.Emuera
         USER_SETTING = 3,
     }
 
-	//数字に意味は無い。
+	//数字没有意义。
 	[global::System.Reflection.Obfuscation(Exclude = true)]
 	internal enum ConfigCode
 	{
@@ -126,7 +126,7 @@ namespace MinorShift.Emuera
 		SystemIgnoreTripleSymbol,
 		CompatiSPChara,
         TimesNotRigorousCalculation,
-        //一文字変数の禁止オプションを考えた名残
+        //曾经考虑过禁止单字符变量选项的遗迹
         //ForbidOneCodeVariable,
 		SystemNoTarget,
 		SystemIgnoreStringSet,

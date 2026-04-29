@@ -47,7 +47,7 @@ namespace MinorShift.Emuera.GameData.Function
 	{
 		
 		/// <summary>
-		/// エラーならnullを返す。
+		/// 如出错则返回null。
 		/// </summary>
 		public static UserDefinedMethodTerm Create(FunctionLabelLine targetLabel, IOperandTerm[] srcArgs, out string errMes)
 		{

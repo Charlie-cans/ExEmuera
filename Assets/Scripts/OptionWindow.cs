@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class OptionWindow : MonoBehaviour
 {
-	// Use this for initialization
+	// 用于初始化
 	void Start ()
     {
         GenericUtils.SetListenerOnClick(quick_button.gameObject, OnQuickButtonClick);

@@ -15,8 +15,8 @@ using MinorShift._Library;
 
 namespace MinorShift.Emuera
 {
-	//1756 新設。
-	//また、使用されている名前を記憶し衝突を検出する。
+	// 1756 新增。
+	// 同时，记录已使用的名称并检测冲突。
 	internal sealed class IdentifierDictionary
 	{
 		private enum DefinedNameType
@@ -38,7 +38,7 @@ namespace MinorShift.Emuera
 			' ', '　', '\t' ,
 			'\"','(', ')', '{', '}', '[', ']', ',', '.', ':',
 			'\\', '@', '$', '#', '?', ';', '\'',
-			//'_'はOK
+			// '_' 是允许的
 		};
 		readonly static Regex regexCom = new Regex("^COM[0-9]+$");
 		readonly static Regex regexComAble = new Regex("^COM_ABLE[0-9]+$");
@@ -127,8 +127,8 @@ namespace MinorShift.Emuera
 		{
 			this.varData = varData;
 			nameDic.Clear();
-			//予約語を登録。式中に登場すると構文解析が崩壊する名前群。
-			//ただしeramaker用スクリプトなら特に気にすることはない。式中に出てこない単語も同様。
+			// 注册保留字。这些名称若出现在表达式中会破坏语法解析。
+			// 不过如果是 eramaker 脚本则无需在意。不会出现在表达式中的单词也同样处理。
 			nameDic.Add("IS", DefinedNameType.Reserved);
 			nameDic.Add("TO", DefinedNameType.Reserved);
 			nameDic.Add("INT", DefinedNameType.Reserved);
@@ -139,7 +139,7 @@ namespace MinorShift.Emuera
 			nameDic.Add("GLOBAL", DefinedNameType.Reserved);
 			nameDic.Add("PRIVATE", DefinedNameType.Reserved);
 			nameDic.Add("SAVEDATA", DefinedNameType.Reserved);
-			nameDic.Add("CHARADATA", DefinedNameType.Reserved);//CHARDATAから変更
+			nameDic.Add("CHARADATA", DefinedNameType.Reserved);// 从 CHARDATA 更改而来
 			nameDic.Add("REF", DefinedNameType.Reserved);
 			nameDic.Add("__DEBUG__", DefinedNameType.Reserved);
 			nameDic.Add("__SKIP__", DefinedNameType.Reserved);
@@ -158,9 +158,9 @@ namespace MinorShift.Emuera
 
 			foreach (KeyValuePair<string, VariableToken> pair in varTokenDic)
 			{
-				//RANDが衝突している
-				//1808a3 GLOBAL、PRIVATEも
-				//1808beta009 REFも
+				// RAND 会冲突
+				// 1808a3 GLOBAL、PRIVATE 也会冲突
+				// 1808beta009 REF 也会冲突
 				if (!nameDic.ContainsKey(pair.Key)) 
 					nameDic.Add(pair.Key, DefinedNameType.SystemVariable);
 			}
@@ -172,8 +172,8 @@ namespace MinorShift.Emuera
 
 			foreach (KeyValuePair<string, FunctionIdentifier> pair in instructionDic)
 			{
-				//Methodと被る
-				//1808a3 SAVEDATAも
+				// 与 Method 重复
+				// 1808a3 SAVEDATA 也会重复
 				if (!nameDic.ContainsKey(pair.Key))
 					nameDic.Add(pair.Key, DefinedNameType.SystemInstrument);
 			}
@@ -191,7 +191,7 @@ namespace MinorShift.Emuera
 				warnLevel = 2;
 				return;
 			}
-			//1.721 記号をサポートしない方向に変更
+			// 1.721 改为不支持符号
 			if (labelName.IndexOfAny(badSymbolAsIdentifier) >= 0)
 			{
 				errMes = "ラベル名" + labelName + "に\"_\"以外の記号が含まれています";
@@ -247,7 +247,7 @@ namespace MinorShift.Emuera
 						warnLevel = 1;
 						break;
 					case DefinedNameType.UserMacro:
-						//字句解析がうまくいっていれば本来あり得ないはず
+						// 如果词法解析正常的话本来不可能发生
 						errMes = "関数名" + labelName + "はマクロに使用されています";
 						warnLevel = 2;
 						break;
@@ -267,7 +267,7 @@ namespace MinorShift.Emuera
 			//    warnLevel = 2;
 			//    return;
 			//}
-			//1.721 記号をサポートしない方向に変更
+			// 1.721 改为不支持符号
 			if (varName.IndexOfAny(badSymbolAsIdentifier) >= 0)
 			{
 				errMes = "変数名" + varName + "に\"_\"以外の記号が含まれています";
@@ -292,7 +292,7 @@ namespace MinorShift.Emuera
 						break;
 					case DefinedNameType.SystemInstrument:
 					case DefinedNameType.SystemMethod:
-						//代入文が使えなくなるために命令名との衝突は致命的。
+						// 因为会导致赋值语句无法使用，与命令名的冲突是致命的。
 						errMes = "変数名" + varName + "はEmueraの命令名として使われています";
 						warnLevel = 2;
 						break;
@@ -335,12 +335,12 @@ namespace MinorShift.Emuera
 						break;
 					case DefinedNameType.SystemInstrument:
 					case DefinedNameType.SystemMethod:
-						//命令名を上書きした時が面倒なのでとりあえず許可しない
+						// 因为覆盖命令名时处理起来很麻烦，暂且不允许
 						errMes = "マクロ名" + macroName + "はEmueraの命令名として使われています";
 						warnLevel = 2;
 						break;
 					case DefinedNameType.SystemVariable:
-						//別に上書きしてもいいがとりあえず許可しないでおく。いずれ解放するかもしれない
+						// 虽然覆盖也可以，但暂且不放开。将来可能会解除限制
 						errMes = "マクロ名" + macroName + "はEmueraの変数名として使われています";
 						warnLevel = 2;
 						break;
@@ -368,7 +368,7 @@ namespace MinorShift.Emuera
 				warnLevel = 2;
 				return;
 			}
-			//1.721 記号をサポートしない方向に変更
+			// 1.721 改为不支持符号
 			if (varName.IndexOfAny(badSymbolAsIdentifier) >= 0)
 			{
 				errMes = "変数名" + varName + "に\"_\"以外の記号が含まれています";
@@ -392,22 +392,22 @@ namespace MinorShift.Emuera
 						return;
 					case DefinedNameType.SystemInstrument:
 					case DefinedNameType.SystemMethod:
-						//代入文が使えなくなるために命令名との衝突は致命的。
+						// 因为会导致赋值语句无法使用，与命令名的冲突是致命的。
 						errMes = "変数名" + varName + "はEmueraの命令名として使われています";
 						warnLevel = 2;
 						return;
 					case DefinedNameType.SystemVariable:
-						//システム変数の上書きは不可
+						// 系统变量不可覆盖
                         errMes = "変数名" + varName + "はEmueraの変数名として使われています";
                         warnLevel = 2;
 						break;
 					case DefinedNameType.UserMacro:
-						//字句解析がうまくいっていれば本来あり得ないはず
+						// 如果词法解析正常的话本来不可能发生
 						errMes = "変数名" + varName + "はマクロに使用されています";
 						warnLevel = 2;
 						break;
 					case DefinedNameType.UserGlobalVariable:
-						//広域変数の上書きは禁止しておく
+						// 禁止覆盖全局变量
 						errMes = "変数名" + varName + "はユーザー定義の広域変数名に使用されています";
 						warnLevel = 2;
 						break;
@@ -422,7 +422,7 @@ namespace MinorShift.Emuera
 		#endregion
 
 		#region header.erb
-		//1807 ErbLoaderに移動
+		// 1807 已移至 ErbLoader
 		Dictionary<string, DefineMacro> macroDic = new Dictionary<string, DefineMacro>();
 
 		internal void AddUseDefinedVariable(VariableToken var)
@@ -492,7 +492,7 @@ namespace MinorShift.Emuera
 				LogicalLine line = GlobalStatic.Process.GetScaningLine();
 				if (string.IsNullOrEmpty(subKey))
 				{
-					//システムの入力待ち中にデバッグコマンドからLOCALを呼んだとき。
+					// 在系统等待输入期间从调试命令调用 LOCAL 时。
 					if ((line == null) || (line.ParentLabelLine == null))
 						throw new CodeEE("実行中の関数が存在しないため" + key + "を取得又は変更できませんでした");
 					subKey = line.ParentLabelLine.LabelName;
@@ -510,7 +510,7 @@ namespace MinorShift.Emuera
 			}
 			if (varTokenDic.TryGetValue(key, out ret))
 			{
-                //一文字変数の禁止オプションを考えた名残
+                // 曾经考虑过禁止单字符变量选项的遗留代码
                 //if (Config.ForbidOneCodeVariable && ret.CanForbid)
                 //    throw new CodeEE("設定によりシステム一文字数値変数の使用が禁止されています(呼び出された変数：" + ret.Name +")");
                 if (ret.IsForbid)
@@ -569,7 +569,7 @@ namespace MinorShift.Emuera
 		{
 			if (Config.ICFunction)
 				codeStr = codeStr.ToUpper();
-			if (arguments == null)//引数なし、名前のみの探索
+			if (arguments == null)// 无参数，仅按名称查找
 			{
                 UserDefinedRefMethod ref_method = null;
 				if (refmethodDic.TryGetValue(codeStr, out ref_method))
@@ -596,7 +596,7 @@ namespace MinorShift.Emuera
 							throw new CodeEE(errMes);
 						return ret;
 					}
-					//1.721 #FUNCTIONが定義されていない関数は組み込み関数を上書きしない方向に。 PANCTION.ERBのRANDとか。
+					// 1.721 改为未定义 #FUNCTION 的函数不覆盖内置函数。比如 PANCTION.ERB 的 RAND 等。
 					if (!methodDic.ContainsKey(codeStr))
 						throw new CodeEE("#FUNCTIONが定義されていない関数(" + func.Position.Filename + ":" + func.Position.LineNo + "行目)を式中で呼び出そうとしました");
 				}
@@ -612,13 +612,13 @@ namespace MinorShift.Emuera
 			return new FunctionMethodTerm(method, arguments);
 		}
 
-		//1756 作成中途
-		//名前リストを元に何がやりたかったのかを推定してCodeEEを投げる
-		//1822 DIMリストの解決中にIdentifierNotFoundCodeEEが飛んだ場合にはやり直しの可能性がある
+		// 1756 编写中途
+		// 根据名称列表推测原本想要做什么，然后抛出 CodeEE
+		// 1822 在 DIM 列表解析过程中如果抛出了 IdentifierNotFoundCodeEE，可能需要重试
 		public void ThrowException(string str, bool isFunc)
 		{
 			string idStr = str;
-			if(Config.ICFunction || Config.ICVariable) //片方だけなのは互換性用オプションなのでレアケースのはず。対応しない。
+			if(Config.ICFunction || Config.ICVariable) // 只启用其中一个的情况是兼容性选项，应该很少见。不予处理。
 				idStr = idStr.ToUpper();
 			if (disableList.Contains(idStr))
 				throw new CodeEE("\"" + str + "\"は#DISABLEが宣言されています");

@@ -2,17 +2,17 @@
 namespace MinorShift.Emuera.GameProc.Function
 {
 	/// <summary>
-	/// 命令コード
+	/// 命令代码
 	/// </summary>
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	//用于混淆的属性。如果进行enum.ToString()或enum.Parse()操作，请设置为(Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude = true)]
 	enum FunctionCode
 	{//数値不要
-		//FunctionCodeを定義したらstatic FunctionIdentifier()内でaddFunctionすること。
-		//その際に適切なFunctionArgとフラグを選ぶ。
+		//定义FunctionCode后在static FunctionIdentifier()内进行addFunction。
+		//此时选择合适的FunctionArg和标志。
 
-		//FunctionMethod(式中関数)を定義した場合には自動で拾うので何もしなくてよい。
-		//ただし、式中関数バージョンと命令バージョンで動作が違うなら追加する必要がある。
+		//如果定义了FunctionMethod（式中函数），会自动拾取所以无需额外处理。
+		//但如果式中函数版本和命令版本的行为不同，则需要额外添加。
 
 		__NULL__ = 0x0000,
 		SET,//数値代入文 or 文字列代入文

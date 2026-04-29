@@ -9,7 +9,7 @@ using uEmuera.Drawing;
 
 namespace MinorShift._Library
 {
-	//http://www.pinvoke.net/default.aspx/gdi32.BitBlt からコピペ
+	//从 http://www.pinvoke.net/default.aspx/gdi32.BitBlt 复制粘贴
 	/// <summary>
 	///     Specifies a raster-operation code. These codes define how the color data for the
 	///     source rectangle is to be combined with the color data for the destination
@@ -291,7 +291,7 @@ namespace MinorShift._Library
 		//}
 
 		/// <summary>
-		/// 必要に応じてStretch。アルファブレンドなし。
+		/// 根据需要Stretch。无Alpha混合。
 		/// </summary>
 		public static void DrawImage(int destX, int destY,int width, int height, IntPtr srchDC, Rectangle srcRect)
 		{

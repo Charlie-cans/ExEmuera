@@ -84,7 +84,7 @@ namespace MinorShift.Emuera
 		{
 			if(this is ConfigItem<bool>)
 			{
-				//ConfigItem<T>をConfigItem<bool>に直接キャストすることはできない
+				//无法将ConfigItem<T>直接转换为ConfigItem<bool>
 				bool b = ((ConfigItem<bool>)(AConfigItem)this).Value;
 				if (b)
 					return "YES";
@@ -106,7 +106,7 @@ namespace MinorShift.Emuera
 
 
 
-		/// ジェネリック化大失敗。なんかうまい方法ないかな～
+		/// 泛型化大失败。有没有什么好办法呢～
 		public override bool TryParse(string param)
 		{
 			bool ret = false;
@@ -119,7 +119,7 @@ namespace MinorShift.Emuera
 			{
 				bool b = false;
 				ret = tryStringToBool(str, ref b);
-				if (ret)//ConfigItem<T>をConfigItem<bool>に直接キャストすることはできない
+				if (ret)//无法将ConfigItem<T>直接转换为ConfigItem<bool>
 					((ConfigItem<bool>)(AConfigItem)this).Value = b;
 			}
 			else if (this is ConfigItem<Color>)
@@ -262,7 +262,7 @@ namespace MinorShift.Emuera
 			}
 			if (str.Equals("NO", StringComparison.CurrentCultureIgnoreCase)
 				|| str.Equals("FALSE", StringComparison.CurrentCultureIgnoreCase)
-				|| str.Equals("後", StringComparison.CurrentCultureIgnoreCase))//"単位の位置"用
+				|| str.Equals("後", StringComparison.CurrentCultureIgnoreCase))//用于"单位的位置"
 			{
 				p = false;
 				return true;

@@ -44,8 +44,8 @@ namespace MinorShift.Emuera.GameView
 			strs = lex(new StringStream(printString));
 			if (strs == null)
 				goto nonButton;
-			bool beforeButton = false;//最初のボタン（"[1]"とか）より前にテキストがある
-			bool afterButton = false;//最後のボタン（"[1]"とか）より後にテキストがある
+			bool beforeButton = false;//在第一个按钮（如"[1]"）之前存在文本
+			bool afterButton = false;//在最后一个按钮（如"[1]"）之后存在文本
 			int buttonCount = 0;
 			Int64 inpL = 0;
 			for (int i = 0; i < strs.Count; i++)
@@ -54,17 +54,17 @@ namespace MinorShift.Emuera.GameView
 					continue;
 				char c = strs[i][0];
 				if (LexicalAnalyzer.IsWhiteSpace(c))
-				{//ただの空白
+				{//只是空白
 				}
-				//数値以外はボタン化しない方向にした。
+				//非数值不转为按钮。
 				//else if ((c == '[') && (!isSymbols(strArray[i])))
 				else if (isButtonCore(strs[i], ref inpL))
-				{//[]で囲まれた文字列。選択肢の核となるかどうかはこの段階では判定しない。
+				{//[]包围的字符串。在此阶段不判断是否作为选项的核心。
 					buttonCount++;
 					afterButton = false;
 				}
 				else
-				{//選択肢の説明になるかもしれない文字列
+				{//可能成为选项说明的字符串
                     afterButton = true;
 					if (buttonCount == 0)
 						beforeButton = true;
@@ -80,9 +80,9 @@ namespace MinorShift.Emuera.GameView
 				return ret;
 			}
 			buttonCount = 0;
-			bool alignmentRight = !beforeButton && afterButton;//説明はボタンの右固定
-			bool alignmentLeft = beforeButton && !afterButton;//説明はボタンの左固定
-			bool alignmentEtc = !alignmentRight && !alignmentLeft;//臨機応変に
+			bool alignmentRight = !beforeButton && afterButton;//说明固定在按钮右侧
+			bool alignmentLeft = beforeButton && !afterButton;//说明固定在按钮左侧
+			bool alignmentEtc = !alignmentRight && !alignmentLeft;//随机应变
 			bool canSelect = false;
 			Int64 input = 0;
 
@@ -107,10 +107,10 @@ namespace MinorShift.Emuera.GameView
 					continue;
 				char c = strs[i][0];
 				if (LexicalAnalyzer.IsWhiteSpace(c))
-				{//ただの空白
+				{//只是空白
 					if (((state & 3) == 3) && (alignmentEtc) && (strs[i].Length >= 2))
-					{//核と説明を含んだものが完成していればボタン生成。
-						//一文字以下のスペースはキニシナイ。キャラ購入画面対策
+					{//如果包含核心和说明的内容已完成，则生成按钮。
+						//单个字符以下的空格忽略。应对角色购买界面
                         reduce();
 						buffer.Append(strs[i]);
 						state = 0;
@@ -125,7 +125,7 @@ namespace MinorShift.Emuera.GameView
 				{
 					buttonCount++;
 					if (((state & 1) == 1) || alignmentRight)
-					{//bufferが既に核を含んでいる、又は強制的に右配置
+					{//buffer已包含核心，或强制右对齐
 						reduce();
 						buffer.Append(strs[i]);
 						input = inpL;
@@ -133,7 +133,7 @@ namespace MinorShift.Emuera.GameView
 						state = 1;
 					}//((state & 2) == 2) || 
 					else if (alignmentLeft)
-					{//bufferが説明を含んでいる、又は強制的に左配置
+					{//buffer已包含说明，或强制左对齐
 						buffer.Append(strs[i]);
 						input = inpL;
 						canSelect = true;
@@ -141,7 +141,7 @@ namespace MinorShift.Emuera.GameView
 						state = 0;
 					}
 					else
-					{//bufferが空または空白文字列
+					{//buffer为空或空白字符串
 						buffer.Append(strs[i]);
 						input = inpL;
 						canSelect = true;
@@ -169,7 +169,7 @@ namespace MinorShift.Emuera.GameView
 		readonly static Regex numReg = new Regex(@"\[\s*([0][xXbB])?[+-]?[0-9]+([eEpP][0-9]+)?\s*\]");
 
 		/// <summary>
-		/// []付き文字列が数値的であるかどうかを調べる
+		/// 检查带[]的字符串是否可视为数值
 		/// </summary>
 		/// <param name="str"></param>
 		/// <returns></returns>
@@ -179,8 +179,8 @@ namespace MinorShift.Emuera.GameView
 		}
 
 		/// <summary>
-		/// ボタンの核になるかどうか。とりあえずは整数のみ。
-		/// try-catchを利用するので少し重い。
+		/// 判断是否成为按钮的核心。目前仅限整数。
+		/// 由于使用try-catch，性能略重。
 		/// </summary>
 		/// <param name="str"></param>
 		/// <param name="input"></param>
@@ -209,8 +209,8 @@ namespace MinorShift.Emuera.GameView
 		delegate void VoidMethod();
 
 		/// <summary>
-		/// 字句分割
-		/// "[1] あ [2] いうえ "を"[1]"," ", "あ"," ","[2]"," ","いうえ"," "に分割
+		/// 词法分割
+		/// 将"[1] あ [2] いうえ "分割为"[1]"," ", "あ"," ","[2]"," ","いうえ"," "
 		/// </summary>
 		/// <param name="st"></param>
 		/// <returns></returns>

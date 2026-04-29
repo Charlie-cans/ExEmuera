@@ -8,6 +8,7 @@ using MinorShift.Emuera.GameData.Variable;
 using MinorShift.Emuera.GameView;
 using MinorShift.Emuera.GameData.Function;
 using MinorShift.Emuera.GameProc.Function;
+using MinorShift.Emuera.PluginSystem;
 using uEmuera.Drawing;
 
 namespace MinorShift.Emuera.GameProc
@@ -20,20 +21,20 @@ namespace MinorShift.Emuera.GameProc
 			{
 				//bool sequential = state.Sequential;
 				state.ShiftNextLine();
-				//WinmmTimerから時間を取得するのはそれ自体結構なコストがかかるので10000行に一回くらいで。
+				//从WinmmTimer获取时间本身开销较大，大约每10000行执行一次即可。
 				if (Config.InfiniteLoopAlertTime > 0 && (state.lineCount % 10000 == 0))
 					checkInfiniteLoop();
 				LogicalLine line = state.CurrentLine;
 				InstructionLine func = line as InstructionLine;
-				//これがNULLになる様な処理は現状ないはず
+				//应该不存在line为NULL的情况
 				//if (line == null)
-				//	throw new ExeEE("Emuera.exeは次に実行する行を見失いました");
+				//	throw new ExeEE("Emuera.exe丢失了下一步要执行的行");
 				if (line.IsError)
 					throw new CodeEE(line.ErrMes);
 				else if (func != null)
-				{//1753 InstructionLineを先に持ってきてみる。わずかに速くなった気がしないでもない
+				{//1753 先检查InstructionLine。感觉稍微快了一些
 					if (!Program.DebugMode && func.Function.IsDebug())
-					{//非DebugモードでのDebug系命令。何もしない。（SIF文のためにコメント行扱いにはできない）
+					{//非Debug模式下的Debug系列命令。什么也不做。（因SIF语句的关系，不能按注释行处理）
 						continue;
 					}
 					if (func.Argument == null)
@@ -60,19 +61,19 @@ namespace MinorShift.Emuera.GameProc
 						doNormalFunction(func);
 				}
 				else if ((line is NullLine) || (line is FunctionLabelLine))
-				{//（関数終端） or ファイル終端
+				{//（函数末尾）或文件末尾
 					//if (sequential)
-					//{//流れ落ちてきた
+					//{//顺序流过来的
 					if (!state.IsFunctionMethod)
 						vEvaluator.RESULT = 0;
 					state.Return(0);
 					//}
-					//1750 飛んできた直後にShiftNextが入るのでここが実行されることは無いはず
-					//else//CALLやJUMPで飛んできた
+					//1750 因为在跳转后立即执行ShiftNext，所以这里不应该被执行
+					//else//通过CALL或JUMP跳过来的
 					//return;
 				}
 				else if (line is GotoLabelLine)
-					continue;//＄ラベル。何もすることはない。
+					continue;//$标签。无需做任何事情。
 				else if (line is InvalidLine)
 				{
 					if (string.IsNullOrEmpty(line.ErrMes))
@@ -80,9 +81,9 @@ namespace MinorShift.Emuera.GameProc
 					else
 						throw new CodeEE(line.ErrMes);
 				}
-				//現在そんなものはない
+				//目前没有这种情况
 				//else
-				//	throw new ExeEE("定義されていない種類の行です");
+				//	throw new ExeEE("未定义类型的行");
 				if (!console.IsRunning || state.ScriptEnd)
 					return;
 			}
@@ -107,7 +108,7 @@ namespace MinorShift.Emuera.GameProc
 			switch (func.FunctionCode)
 			{
 
-				case FunctionCode.PRINTBUTTON://変数の内容
+				case FunctionCode.PRINTBUTTON://变量的内容
 					{
 						if (skipPrint)
 							break;
@@ -115,7 +116,7 @@ namespace MinorShift.Emuera.GameProc
                         exm.Console.UseSetColorStyle = true;
                         SpButtonArgument bArg = (SpButtonArgument)func.Argument;
 						str = bArg.PrintStrTerm.GetStrValue(exm);
-						//ボタン処理に絡んで表示がおかしくなるため、PRINTBUTTONでの改行コードはオミット
+						//由于按钮处理的显示会变得异常，因此省略PRINTBUTTON中的换行代码
 						str = str.Replace("\n", "");
 						if (bArg.ButtonWord.GetOperandType() == typeof(long))
 							exm.Console.PrintButton(str, bArg.ButtonWord.GetIntValue(exm));
@@ -123,7 +124,7 @@ namespace MinorShift.Emuera.GameProc
 							exm.Console.PrintButton(str, bArg.ButtonWord.GetStrValue(exm));
 					}
 					break;
-				case FunctionCode.PRINTBUTTONC://変数の内容
+				case FunctionCode.PRINTBUTTONC://变量的内容
 				case FunctionCode.PRINTBUTTONLC:
 					{
 						if (skipPrint)
@@ -132,7 +133,7 @@ namespace MinorShift.Emuera.GameProc
                         exm.Console.UseSetColorStyle = true;
                         SpButtonArgument bArg = (SpButtonArgument)func.Argument;
 						str = bArg.PrintStrTerm.GetStrValue(exm);
-						//ボタン処理に絡んで表示がおかしくなるため、PRINTBUTTONでの改行コードはオミット
+						//由于按钮处理的显示会变得异常，因此省略PRINTBUTTON中的换行代码
 						str = str.Replace("\n", "");
 						bool isRight = (func.FunctionCode == FunctionCode.PRINTBUTTONC) ? true : false;
 						if (bArg.ButtonWord.GetOperandType() == typeof(long))
@@ -152,7 +153,7 @@ namespace MinorShift.Emuera.GameProc
 						exm.Console.PrintPlain(term.GetStrValue(exm));
 					}
 					break;
-				case FunctionCode.DRAWLINE://画面の左端から右端まで----と線を引く。
+				case FunctionCode.DRAWLINE://从画面左端到右端画一条----线。
 					if (skipPrint)
 						break;
 					exm.Console.PrintBar();
@@ -172,10 +173,10 @@ namespace MinorShift.Emuera.GameProc
 						//exm.Console.setStBar(Config.DrawLineString);
 					}
 					break;
-				case FunctionCode.PRINT_ABL://能力。引数は登録番号
-				case FunctionCode.PRINT_TALENT://素質
+				case FunctionCode.PRINT_ABL://能力。参数为登记编号
+				case FunctionCode.PRINT_TALENT://素质
 				case FunctionCode.PRINT_MARK://刻印
-				case FunctionCode.PRINT_EXP://経験
+				case FunctionCode.PRINT_EXP://经验
 					{
 						if (skipPrint)
 							break;
@@ -185,14 +186,14 @@ namespace MinorShift.Emuera.GameProc
 						exm.Console.NewLine();
 					}
 					break;
-				case FunctionCode.PRINT_PALAM://パラメータ
+				case FunctionCode.PRINT_PALAM://参数
 					{
 						if (skipPrint)
 							break;
 						ExpressionArgument intExpArg = (ExpressionArgument)func.Argument;
 						Int64 target = intExpArg.Term.GetIntValue(exm);
 						int count = 0;
-						///100以降は否定の珠とかなので表示しない
+						///100以后是消极的宝珠之类的，所以不显示
 						for (int i = 0; i < 100; i++)
 						{
 							string printStr = vEvaluator.GetCharacterParamString(target, i);
@@ -208,13 +209,13 @@ namespace MinorShift.Emuera.GameProc
 						exm.Console.RefreshStrings(false);
 					}
 					break;
-				case FunctionCode.PRINT_ITEM://所持アイテム
+				case FunctionCode.PRINT_ITEM://持有的道具
 					if (skipPrint)
 						break;
 					exm.Console.Print(vEvaluator.GetHavingItemsString());
 					exm.Console.NewLine();
 					break;
-				case FunctionCode.PRINT_SHOPITEM://ショップで売っているアイテム
+				case FunctionCode.PRINT_SHOPITEM://商店出售的道具
 					{
 						if (skipPrint)
 							break;
@@ -230,7 +231,7 @@ namespace MinorShift.Emuera.GameProc
 								if (printStr == null)
 									printStr = "";
 								Int64 price = vEvaluator.ITEMPRICE[i];
-								// 1.52a改変部分　（単位の差し替えおよび前置、後置に対応）
+								// 1.52a改动部分（支持单位替换以及前置、后置）
 								if (Config.MoneyFirst)
 									exm.Console.PrintC(string.Format("[{2}] {0}({3}{1})", printStr, price, i, Config.MoneyLabel), false);
 								else
@@ -244,10 +245,10 @@ namespace MinorShift.Emuera.GameProc
 						exm.Console.RefreshStrings(false);
 					}
 					break;
-				case FunctionCode.UPCHECK://パラメータの変動
+				case FunctionCode.UPCHECK://参数变动
 					vEvaluator.UpdateInUpcheck(exm.Console, skipPrint);
 					break;
-				case FunctionCode.CUPCHECK://パラメータの変動(任意キャラ版)
+				case FunctionCode.CUPCHECK://参数变动(任意角色版)
 					{
 						ExpressionArgument intExpArg = (ExpressionArgument)func.Argument;
 						Int64 target = intExpArg.Term.GetIntValue(exm);
@@ -277,15 +278,15 @@ namespace MinorShift.Emuera.GameProc
 					break;
 				case FunctionCode.ADDDEFCHARA:
 					{
-						//デバッグコマンドなら通す
+						//如果是调试命令则放行
 						if ((func.ParentLabelLine != null) && (func.ParentLabelLine.LabelName != "SYSTEM_TITLE"))
-							throw new CodeEE("@SYSTEM_TITLE以外でこの命令を使うことはできません");
+							throw new CodeEE("不能在@SYSTEM_TITLE以外使用此命令");
 						vEvaluator.AddCharacterFromCsvNo(0);
 						if (GlobalStatic.GameBaseData.DefaultCharacter > 0)
 							vEvaluator.AddCharacterFromCsvNo(GlobalStatic.GameBaseData.DefaultCharacter);
 						break;
 					}
-				case FunctionCode.PUTFORM://@SAVEINFO関数でのみ使用可能。PRINTFORMと同様の書式でセーブデータに概要をつける。
+				case FunctionCode.PUTFORM://仅在@SAVEINFO函数中可用。使用与PRINTFORM相同的格式向存档数据添加概要。
 					{
 						term = ((ExpressionArgument)func.Argument).Term;
 						str = term.GetStrValue(exm);
@@ -295,7 +296,7 @@ namespace MinorShift.Emuera.GameProc
 							vEvaluator.SAVEDATA_TEXT = str;
 						break;
 					}
-				case FunctionCode.QUIT://ゲームを終了
+				case FunctionCode.QUIT://结束游戏
 					exm.Console.Quit();
 					break;
 				case FunctionCode.QUIT_AND_RESTART:
@@ -313,14 +314,48 @@ namespace MinorShift.Emuera.GameProc
 					SkipLog = ((int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm)) != 0;
 					break;
 				case FunctionCode.CALLSHARP:
-					// Plugin system stub - not implemented in Unity port
+					{
+						// 加载插件（首次调用时）
+						PluginSystem.PluginManager.Instance.LoadPlugins();
+						string callStr = ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
+						int parenIdx = callStr.IndexOf('(');
+						string methodName = parenIdx >= 0 ? callStr.Substring(0, parenIdx).Trim() : callStr.Trim();
+						var plugin = PluginSystem.PluginManager.Instance.GetMethod(methodName);
+						if (plugin == null)
+						{
+							ParserMediator.Warn("插件方法未找到: " + methodName, func, 2, true, false);
+							break;
+						}
+						// 解析参数
+						var paramList = new System.Collections.Generic.List<PluginSystem.PluginMethodParameter>();
+						if (parenIdx >= 0)
+						{
+							int endParen = callStr.LastIndexOf(')');
+							if (endParen > parenIdx)
+							{
+								string argsStr = callStr.Substring(parenIdx + 1, endParen - parenIdx - 1);
+								string[] argParts = argsStr.Split(',');
+								foreach (string arg in argParts)
+								{
+									string trimmed = arg.Trim();
+									if (string.IsNullOrEmpty(trimmed)) continue;
+									// 尝试解析为整数
+									if (long.TryParse(trimmed, out long intVal))
+										paramList.Add(new PluginSystem.PluginMethodParameter(intVal));
+									else
+										paramList.Add(new PluginSystem.PluginMethodParameter(trimmed.Trim('\'', '"')));
+								}
+							}
+						}
+						plugin.Execute(paramList.ToArray());
+					}
 					break;
 				case FunctionCode.INPUTANY:
 				case FunctionCode.BINPUT:
 				case FunctionCode.BINPUTS:
 				case FunctionCode.ONEBINPUT:
 				case FunctionCode.ONEBINPUTS:
-					// Input variants stub: treat as normal INPUT
+					// 输入变体桩：作为普通的INPUT处理
 					break;
 
 				case FunctionCode.VARSIZE:
@@ -367,7 +402,7 @@ namespace MinorShift.Emuera.GameProc
 					{
 						SpSwapVarArgument arg = (SpSwapVarArgument)func.Argument;
 						//1756beta2+v11
-						//値を読み出す前に添え字を確定させておかないと、RANDが添え字にある場合正しく処理できない
+						//在读取值之前必须先确定下标，否则当下标中有RAND时无法正确处理
 						FixedVariableTerm vTerm1 = arg.var1.GetFixedVariableTerm(exm);
 						FixedVariableTerm vTerm2 = arg.var2.GetFixedVariableTerm(exm);
 						if (vTerm1.GetOperandType() != vTerm2.GetOperandType())
@@ -399,7 +434,7 @@ namespace MinorShift.Emuera.GameProc
 						date = date * 100 + DateTime.Now.Minute;
 						date = date * 100 + DateTime.Now.Second;
 						date = date * 1000 + DateTime.Now.Millisecond;
-						vEvaluator.RESULT = date;//17桁。2京くらい。
+						vEvaluator.RESULT = date;//17位。约2京。
 						vEvaluator.RESULTS = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
 					}
 					break;
@@ -608,7 +643,7 @@ namespace MinorShift.Emuera.GameProc
 				case FunctionCode.OUTPUTLOG:
 					exm.Console.OutputLog(null);
 					break;
-				case FunctionCode.ARRAYSHIFT: //配列要素をずらす
+				case FunctionCode.ARRAYSHIFT: //移动数组元素
 					{
 						SpArrayShiftArgument arrayArg = (SpArrayShiftArgument)func.Argument;
 						if (!arrayArg.VarToken.Identifier.IsArray1D)
@@ -733,7 +768,7 @@ namespace MinorShift.Emuera.GameProc
 						string target = term.GetStrValue(exm);
 
 						int length = vEvaluator.RESULT_ARRAY.Length;
-						// result:0には長さが入るのでその分-1
+						// result:0中存放长度，因此相应地减1
 						if (target.Length > length - 1)
 							throw new CodeEE(String.Format("ENCODETOUNIの引数が長すぎます（現在{0}文字。最大{1}文字まで）", target.Length, length - 1));
 
@@ -754,7 +789,7 @@ namespace MinorShift.Emuera.GameProc
 					break;
 				case FunctionCode.STRDATA:
 					{
-						//表示データが空なら何もしないで飛ぶ
+						//如果显示数据为空则什么都不做直接跳过
 						if (func.dataList.Count == 0)
 						{
 							state.JumpTo(func.JumpTo);
@@ -778,7 +813,7 @@ namespace MinorShift.Emuera.GameProc
 								str += "\n";
 						}
 						((StrDataArgument)func.Argument).Var.SetValue(str, exm);
-						//ジャンプするが、流れが連続であることを保証。
+						//进行跳转，但保证流程是连续的。
 						state.JumpTo(func.JumpTo);
 						break;
 					}
@@ -824,7 +859,7 @@ namespace MinorShift.Emuera.GameProc
 				case FunctionCode.TRYCALLLIST:
 				case FunctionCode.TRYJUMPLIST:
 					{
-						//if (!sequential)//RETURNで帰ってきた
+						//if (!sequential)//通过RETURN返回了
 						//{
 						//	state.JumpTo(func.JumpTo);
 						//	break;
@@ -902,16 +937,16 @@ namespace MinorShift.Emuera.GameProc
 					{
 						switch (state.SystemState)
 						{
-							//case SystemStateCode.Train_Begin://BEGIN TRAINから。
-							case SystemStateCode.Train_CallEventTrain://@EVENTTRAINの呼び出し中。スキップ可能
-							case SystemStateCode.Train_CallShowStatus://@SHOW_STATUSの呼び出し中
-							//case SystemStateCode.Train_CallComAbleXX://@COM_ABLExxの呼び出し中。
-							case SystemStateCode.Train_CallShowUserCom://@SHOW_USERCOMの呼び出し中
-							//case SystemStateCode.Train_WaitInput://入力待ち状態。選択が実行可能ならEVENTCOMからCOMxx、そうでなければ@USERCOMにRESULTを渡す
-							//case SystemStateCode.Train_CallEventCom://@EVENTCOMの呼び出し中
-							//case SystemStateCode.Train_CallComXX://@COMxxの呼び出し中
-							//case SystemStateCode.Train_CallSourceCheck://@SOURCE_CHECKの呼び出し中
-							case SystemStateCode.Train_CallEventComEnd://@EVENTCOMENDの呼び出し中。スキップ可能。Train_CallEventTrainへ帰る。@USERCOMの呼び出し中もここ
+							//case SystemStateCode.Train_Begin://从BEGIN TRAIN。
+							case SystemStateCode.Train_CallEventTrain://@EVENTTRAIN调用中。可跳过
+							case SystemStateCode.Train_CallShowStatus://@SHOW_STATUS调用中
+							//case SystemStateCode.Train_CallComAbleXX://@COM_ABLExx调用中。
+							case SystemStateCode.Train_CallShowUserCom://@SHOW_USERCOM调用中
+							//case SystemStateCode.Train_WaitInput://等待输入状态。如果选择可执行则从EVENTCOM到COMxx，否则将RESULT传递给@USERCOM
+							//case SystemStateCode.Train_CallEventCom://@EVENTCOM调用中
+							//case SystemStateCode.Train_CallComXX://@COMxx调用中
+							//case SystemStateCode.Train_CallSourceCheck://@SOURCE_CHECK调用中
+							case SystemStateCode.Train_CallEventComEnd://@EVENTCOMEND调用中。可跳过。返回Train_CallEventTrain。@USERCOM调用中也是这里
 								break;
 							default:
 								exm.Console.PrintSystemLine(state.SystemState.ToString());
@@ -944,9 +979,9 @@ namespace MinorShift.Emuera.GameProc
 		List<ProcessState> prevStateList = new List<ProcessState>();
 		public void saveCurrentState(bool single)
 		{
-			//怖いところだが、現状起こらない現象なので一旦消してみる
+			//虽然令人担心，但这是当前不会发生的现象，所以先删除试试
 			//if (single && (prevStateList.Count > 0))
-			//	throw new ExeEE("記憶している状態があるのに再度記憶しようとした");
+			//	throw new ExeEE("明明有记忆的状态却试图再次记忆");
 			if (state != null)
 			{
 				prevStateList.Add(state);
@@ -956,9 +991,9 @@ namespace MinorShift.Emuera.GameProc
 
 		public void loadPrevState()
 		{
-			//怖いところだが、現状起こらない現象なので一旦消してみる
+			//虽然令人担心，但这是当前不会发生的现象，所以先删除试试
 			//if (prevStateList.Count == 0)
-			//	throw new ExeEE("記憶している状態がないのに呼び戻しされた");
+			//	throw new ExeEE("明明没有记忆的状态却被调用了");
 			if (state != null)
 			{
 				state.ClearFunctionList();

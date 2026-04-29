@@ -2,9 +2,9 @@
 namespace MinorShift.Emuera.GameProc.Function
 {
 	/// <summary>
-	/// 命令の引数タイプ
+	/// 命令的参数类型
 	/// </summary>
-	//難読化用属性。enum.ToString()やenum.Parse()を行うなら(Exclude=true)にすること。
+	//用于混淆的属性。如果进行enum.ToString()或enum.Parse()操作，请设置为(Exclude=true)。
 	[global::System.Reflection.Obfuscation(Exclude=false)]
 	enum FunctionArgType
 	{//数値不要
@@ -48,7 +48,7 @@ namespace MinorShift.Emuera.GameProc.Function
 		CASE,//<CASE条件式>(, <CASE条件式>...)
 		
 
-        //TODO　省略時の処理に違いがあるが統合可能なはず
+        //TODO　省略时的处理有所不同但应该可以统一
 		VAR_INT,//<可変数値変数> //引数は省略可
         SP_GETINT,//<可変数値変数>(今までこれがないことに驚いた)
 

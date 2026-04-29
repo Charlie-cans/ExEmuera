@@ -4,8 +4,8 @@ using MinorShift.Emuera.GameData.Expression;
 namespace MinorShift.Emuera.Sub
 {
 	/// <summary>
-	/// 字句解析結果の保存場所。Listとその現在位置を結びつけるためのもの。
-	/// 基本的に全てpublicで
+	/// 词法分析结果的存储位置。用于将List与其当前位置关联起来。
+	/// 基本上全部为public
 	/// </summary>
 	internal sealed class WordCollection
 	{

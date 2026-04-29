@@ -16,11 +16,11 @@ namespace MinorShift.Emuera.GameProc
 	{
 		public static bool ParseSharpLine(FunctionLabelLine label, StringStream st, ScriptPosition position, List<string> OnlyLabel)
 		{
-			st.ShiftNext();//'#'を飛ばす
-			string token = LexicalAnalyzer.ReadSingleIdentifier(st);//#～自体にはマクロ非適用
+			st.ShiftNext();//跳过'#'
+			string token = LexicalAnalyzer.ReadSingleIdentifier(st);//#～本身不应用宏
 			if (Config.ICFunction)
 				token = token.ToUpper();
-            //#行として不正な行でもAnalyzeに行って引っかかることがあるので、先に存在しない#～は弾いてしまう
+            //即使是不正确的#行，有时也会进入Analyze而误判，因此先排除不存在的#～
             if (token == null || (token != "SINGLE" && token != "LATER" && token != "PRI" && token != "ONLY" && token != "FUNCTION" && token != "FUNCTIONS" 
                 && token != "LOCALSIZE" && token != "LOCALSSIZE" && token != "DIM" && token != "DIMS"))
             {
@@ -203,7 +203,7 @@ namespace MinorShift.Emuera.GameProc
 								ParserMediator.Warn("#" + token + "の後に有効な数値が指定されていません", position, 2);
 								break;
 							}
-                            //イベント関数では指定しても無視される
+                            //在事件函数中即使指定也会被忽略
                             if (label.IsEvent)
                             {
                                 ParserMediator.Warn("イベント関数では#" + token + "による" + token.Substring(0, token.Length - 4)+ "のサイズ指定は無視されます", position, 1);
@@ -295,7 +295,7 @@ namespace MinorShift.Emuera.GameProc
 			try
 			{
 				int warnLevel = -1;
-                stream.ShiftNext();//@か$を除去
+                stream.ShiftNext();//去除@或$
 				WordCollection wc = LexicalAnalyzer.Analyse(stream, LexEndWith.EoL, LexAnalyzeFlag.AllowAssignment);
 				if (wc.EOL || !(wc.Current is IdentifierWord))
 				{
@@ -313,7 +313,7 @@ namespace MinorShift.Emuera.GameProc
 						goto err;
 					ParserMediator.Warn(errMes, position, warnLevel);
 				}
-				if (!isFunction)//$ならこの時点で終了
+				if (!isFunction)//如果是$，则在此时结束
 				{
 					if (!wc.EOL)
 						ParserMediator.Warn("$で始まるラベルに引数が設定されています", position, 1);
@@ -387,13 +387,13 @@ namespace MinorShift.Emuera.GameProc
 		{
 			int lineNo = position.LineNo;
 			string errMes = "";
-			LexicalAnalyzer.SkipWhiteSpace(stream);//先頭のホワイトスペースを読み飛ばす
+			LexicalAnalyzer.SkipWhiteSpace(stream);//跳过开头的空白字符
 			if (stream.EOS)
 				return null;
-			//コメント行かどうかはここに来る前に判定しておく
+			//是否为注释行应在到达此处之前判断
 			try
 			{
-				#region 前置インクリメント、デクリメント行
+				#region 前置递增、递减行
 				if (stream.Current == '+' || stream.Current == '-')
 				{
 					char op = stream.Current;
@@ -421,10 +421,10 @@ namespace MinorShift.Emuera.GameProc
 				if (idWT != null)
 				{
 					FunctionIdentifier func = GlobalStatic.IdentifierDictionary.GetFunctionIdentifier(idWT.Code);
-					//命令文
-					if (func != null)//関数文
+					//指令行
+					if (func != null)//函数行
 					{
-						if (stream.EOS) //引数の無い関数
+						if (stream.EOS) //无参数的函数
 							return new InstructionLine(position, func, stream);
 						if ((stream.Current != ';') && (stream.Current != ' ') && (stream.Current != '\t') && (!Config.SystemAllowFullSpace || (stream.Current != '　')))
 						{
@@ -444,7 +444,7 @@ namespace MinorShift.Emuera.GameProc
 					errMes = "解釈できない行です";
 					goto err;
 				}
-				//命令行ではない→代入行のはず
+				//不是命令行的行→应该是赋值行
 				stream.Seek(0, System.IO.SeekOrigin.Begin);
 				OperatorCode assignOP = OperatorCode.NULL;
 				WordCollection wc1 = LexicalAnalyzer.Analyse(stream, LexEndWith.Operator, LexAnalyzeFlag.None);
@@ -459,11 +459,11 @@ namespace MinorShift.Emuera.GameProc
 					errMes = "解釈できない行です";
 					goto err;
 				}
-				//eramaker互換警告
+				//eramaker兼容性警告
 				//stream.Jump(-1);
 				//if ((stream.Current != ' ') && (stream.Current != '\t'))
 				//{
-				//	errMes = "変数で行が始まっていますが、演算子の直前に半角スペースまたはタブがありません";
+				//	errMes = "变量开头的行中，运算符前没有半角空格或制表符";
 				//	goto err;
 				//}
 				//stream.ShiftNext();
@@ -473,7 +473,7 @@ namespace MinorShift.Emuera.GameProc
 				{
 					if (console != null)
 						ParserMediator.Warn("代入演算子に\"==\"が使われています", position, 0);
-					//"=="を代入文に使うのは本当はおかしいが結構使われているので仕様にする
+					//将"=="用于赋值语句本来是不对的，但很多人这样用，所以将其作为规范
 					assignOP = OperatorCode.Assignment;
 				}
 				return new InstructionLine(position, FunctionIdentifier.SETFunction, assignOP, wc1, stream);

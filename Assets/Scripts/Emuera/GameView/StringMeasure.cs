@@ -11,8 +11,8 @@ namespace MinorShift.Emuera.GameView
 {
 
 	/// <summary>
-	/// テキスト長計測装置
-	/// 1819 必要になるたびにCreateGraphicsする方式をやめてあらかじめGraphicsを用意しておくことにする
+	/// 文本长度测量装置
+	/// 1819 不再采用每次需要时CreateGraphics的方式，改为预先准备好Graphics
 	/// </summary>
 	internal sealed class StringMeasure : IDisposable
 	{
