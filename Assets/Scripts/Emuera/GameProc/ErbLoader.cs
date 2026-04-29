@@ -91,7 +91,7 @@ namespace MinorShift.Emuera.GameProc
 			catch (Exception e)
 			{
 				ParserMediator.FlushWarningList();
-				uEmuera.Media.SystemSounds.Hand.Play();
+				uEmuera.Media.SystemSounds.Hand.Play($"ERB加载错误: {e.GetType().Name}:{e.Message}");
 				output.PrintError("予期しないエラーが発生しました:" + Program.ExeName);
 				output.PrintError(e.GetType().ToString() + ":" + e.Message);
 				return false;
@@ -471,7 +471,7 @@ namespace MinorShift.Emuera.GameProc
 				}
 				catch (Exception exc)
 				{
-					uEmuera.Media.SystemSounds.Hand.Play();
+					uEmuera.Media.SystemSounds.Hand.Play($"函数参数错误: {exc.Message}");
 					string errmes = exc.Message;
 					if (!(exc is EmueraException))
 						errmes = exc.GetType().ToString() + ":" + errmes;
@@ -841,7 +841,7 @@ namespace MinorShift.Emuera.GameProc
 			}
 			catch (Exception exc)
 			{
-				uEmuera.Media.SystemSounds.Hand.Play();
+				uEmuera.Media.SystemSounds.Hand.Play($"解析错误: {exc.Message}");
                 //1756beta2+v6.1 为了提高修复效率，当出现与解析相关但未被处理的错误时，改为抛出堆栈跟踪
                 string errmes = (exc is EmueraException) ? exc.Message : exc.GetType().ToString() + ":" + exc.Message;
                 ParserMediator.Warn("@" + label.LabelName + " の解析中にエラー:" + errmes, label, 2, true, false, !(exc is EmueraException) ? exc.StackTrace : null);

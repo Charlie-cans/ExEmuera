@@ -30,7 +30,7 @@ namespace MinorShift.Emuera.GameProc
 				//if (line == null)
 				//	throw new ExeEE("Emuera.exe丢失了下一步要执行的行");
 				if (line.IsError)
-					throw new CodeEE(line.ErrMes);
+					throw new CodeEE(line.ErrMes, line.Position);
 				else if (func != null)
 				{//1753 先检查InstructionLine。感觉稍微快了一些
 					if (!Program.DebugMode && func.Function.IsDebug())
@@ -41,7 +41,7 @@ namespace MinorShift.Emuera.GameProc
 					{
 						ArgumentParser.SetArgumentTo(func);
 						if (func.IsError)
-							throw new CodeEE(func.ErrMes);
+							throw new CodeEE(func.ErrMes, func.Position);
 					}
 					if ((skipPrint) && (func.Function.IsPrint()))
 					{

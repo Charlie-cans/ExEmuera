@@ -207,7 +207,7 @@ namespace MinorShift.Emuera.GameData
 			}
 			catch
 			{
-				uEmuera.Media.SystemSounds.Hand.Play();
+				uEmuera.Media.SystemSounds.Hand.Play("CSV解析错误");
 				if (position != null)
 					ParserMediator.Warn("予期しないエラーが発生しました", position, 3);
 				else
@@ -1159,7 +1159,7 @@ check1break:
 			}
 			catch
 			{
-				uEmuera.Media.SystemSounds.Hand.Play();
+				uEmuera.Media.SystemSounds.Hand.Play("CSV解析错误");
 				if (position != null)
 					ParserMediator.Warn("予期しないエラーが発生しました", position, 3);
 				else
@@ -1455,7 +1455,7 @@ check1break:
 			}
 			catch
 			{
-				uEmuera.Media.SystemSounds.Hand.Play();
+				uEmuera.Media.SystemSounds.Hand.Play("CSV解析错误");
 				if (position != null)
 					ParserMediator.Warn("予期しないエラーが発生しました", position, 3);
 				else
@@ -1520,7 +1520,7 @@ check1break:
 			}
 			catch
 			{
-				uEmuera.Media.SystemSounds.Hand.Play();
+				uEmuera.Media.SystemSounds.Hand.Play("CSV解析错误");
 				if (position != null)
 					ParserMediator.Warn("予期しないエラーが発生しました", position, 3);
 				else

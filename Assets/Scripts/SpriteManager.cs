@@ -124,9 +124,10 @@ internal static class SpriteManager
     public static void GetSprite(ASprite src,
                                 object obj, Action<object, SpriteInfo> callback)
     {
-        if(src == null || src.Bitmap == null)
+        if (src == null || src.Bitmap == null)
         {
-            if(callback != null)
+            Log.ForContext("Tag", "IMG").Warning($"GetSprite: src={(src != null ? src.Name : "null")} Bitmap={src?.Bitmap != null}");
+            if (callback != null)
                 callback(null, null);
             return;
         }
@@ -484,3 +485,4 @@ internal static class SpriteManager
     static Dictionary<string, TextureInfo> texture_dict =
         new Dictionary<string, TextureInfo>();
 }
+

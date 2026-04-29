@@ -1,4 +1,4 @@
-using Serilog;
+﻿using Serilog;
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -156,10 +156,19 @@ public class EmueraImage : EmueraBehaviour
 
             width = Mathf.Max(image_part.PointX - ud.posx + image_rect.Width, width);
 
-            image.name = image_part.Image.Name;
-			if (image_part.Image == null) Log.ForContext("Tag", "IMG").Warning($"Render: NULL sprite for {image_part.ResourceName}");
-			else Log.ForContext("Tag", "IMG").Debug($"Render: {image_part.ResourceName} -> {image_part.Image.Name}");
-            imageinfo.Load(image_part.Image);
+            var sprite = AppContents.GetSprite(image_part.ResourceName) ?? image_part.Image;
+            image.name = sprite?.Name ?? image_part.ResourceName;
+            if (sprite == null)
+                Log.ForContext("Tag", "IMG").Warning($"Render: NULL sprite for {image_part.ResourceName}");
+            else
+            {
+                var ss = sprite as ASpriteSingle;
+                Log.ForContext("Tag", "IMG").Debug($"Render: {image_part.ResourceName} -> {sprite.Name} " +
+                    $"Bitmap={sprite.Bitmap != null} IsCreated={sprite.IsCreated} " +
+                    $"BaseImage={(ss != null ? (ss.BaseImage != null ? ss.BaseImage.GetType().Name : "null") : "N/A")} " +
+                    $"BaseImgCreated={ss?.BaseImage?.IsCreated}");
+            }
+            imageinfo.Load(sprite);
             image_infos_.Add(imageinfo);
         }
 

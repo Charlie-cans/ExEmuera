@@ -286,10 +286,13 @@ namespace MinorShift.Emuera.GameProc
 			}
 			catch (Exception ec)
 			{
-				Log.ForContext("Tag", "Process").Error(ec, "脚本执行异常");
 				LogicalLine currentLine = state.ErrorLine;
 				if (currentLine != null && currentLine is NullLine)
 					currentLine = null;
+				string posInfo = "";
+				if (currentLine != null && currentLine.Position != null)
+					posInfo = " [" + currentLine.Position.Filename + ":" + currentLine.Position.LineNo + "]";
+				Log.ForContext("Tag", "Process").Error(ec, "脚本执行异常" + posInfo);
 				if (systemProcRunning)
 					handleExceptionInSystemProc(ec, currentLine, true);
 				else
@@ -435,7 +438,7 @@ namespace MinorShift.Emuera.GameProc
 		
 		private void handleException(Exception exc, LogicalLine current, bool playSound)
 		{
-            Log.ForContext("Tag", "Process").Error(exc, "DebugDialog异常");
+            Log.ForContext("Tag", "Process").Error(exc, "脚本错误 — 显示错误对话框");
 
 			console.ThrowError(playSound);
 			ScriptPosition position = null;

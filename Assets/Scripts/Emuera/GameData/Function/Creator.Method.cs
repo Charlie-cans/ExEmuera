@@ -4119,6 +4119,34 @@ namespace MinorShift.Emuera.GameData.Function
 			}
 		}
 
+			private sealed class GetAnimeTimerMethod : FunctionMethod
+			{
+				public GetAnimeTimerMethod()
+				{
+					ReturnType = typeof(Int64);
+					argumentTypeArray = new Type[0];
+					CanRestructure = false;
+				}
+				public override Int64 GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+				{
+					return exm.Console.getRedrawTimer();
+				}
+			}
+
+			private sealed class GetTextDrawingModeMethod : FunctionMethod
+			{
+				public GetTextDrawingModeMethod()
+				{
+					ReturnType = typeof(Int64);
+					argumentTypeArray = new Type[0];
+					CanRestructure = false;
+				}
+				public override Int64 GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+				{
+					return (Int64)Config.TextDrawingMode;
+				}
+			}
+
 		/// <summary>
 		/// int SAVETEXT str text, int fileNo{, int force_savdir, int force_UTF8}
 		/// </summary>
@@ -4633,21 +4661,49 @@ namespace MinorShift.Emuera.GameData.Function
 		{
 			public DataTableSelectMethod()
 			{
-				ReturnType = typeof(string);
-				argumentTypeArray = new Type[] { typeof(string), typeof(string), typeof(string) };
+				ReturnType = typeof(long);
 				CanRestructure = false;
 			}
-			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments)
+			{
+				if (arguments.Length < 1 || arguments.Length > 4)
+					return name + "函数参数数量不正确(需要1～4个)";
+				if (arguments[0] == null || arguments[0].GetOperandType() != typeof(string))
+					return name + "函数第1参数必须是字符串类型";
+				return null;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
 			{
 				string key = arguments[0].GetStrValue(exm);
-				string col = arguments[1].GetStrValue(exm);
-				string val = arguments[2].GetStrValue(exm);
 				var dict = GlobalStatic.VariableData.DataTables;
-				if (!dict.TryGetValue(key, out var dt)) return "";
-				foreach (System.Data.DataRow row in dt.Rows)
-					if (!row.IsNull(col) && row[col].ToString() == val)
-						return row[0].ToString();
-				return "";
+				if (!dict.TryGetValue(key, out var dt)) return -1;
+				string filter = arguments.Length > 1 && arguments[1] != null ? arguments[1].GetStrValue(exm) : null;
+				string sort = arguments.Length > 2 && arguments[2] != null ? arguments[2].GetStrValue(exm) : null;
+				System.Data.DataRow[] rows;
+				if (!string.IsNullOrEmpty(sort)) rows = dt.Select(filter ?? "", sort);
+				else if (!string.IsNullOrEmpty(filter)) rows = dt.Select(filter);
+				else rows = dt.Select();
+				// 如果有第4参数，写入结果数组
+				if (arguments.Length >= 4 && arguments[3] is VariableTerm vtOut && vtOut.Identifier != null)
+				{
+					var outArray = vtOut.Identifier.GetArray() as Int64[];
+					if (outArray != null)
+					{
+						int count = System.Math.Min(rows.Length, outArray.Length);
+						for (int i = 0; i < count; i++)
+							outArray[i] = System.Convert.ToInt64(rows[i][0]);
+						for (int i = count; i < outArray.Length; i++)
+							outArray[i] = 0;
+					}
+				}
+				if (rows.Length > 0)
+				{
+					var resultArray = exm.VEvaluator.RESULT_ARRAY;
+					int count = System.Math.Min(rows.Length, resultArray.Length);
+					for (int i = 0; i < count; i++)
+						resultArray[i] = System.Convert.ToInt64(rows[i][0]);
+				}
+				return rows.Length;
 			}
 		}
 
@@ -4683,9 +4739,9 @@ namespace MinorShift.Emuera.GameData.Function
 			public override string CheckArgumentType(string name, IOperandTerm[] arguments)
 			{
 				if (arguments.Length < 2 || arguments.Length > 3)
-					return name + "関数:引数の数が間違っています";
+					return name + "函数参数数量不正确(需要2～4个)";
 				if (arguments[0] == null || arguments[0].GetOperandType() != typeof(string))
-					return name + "関数:第1引数は文字列型でなければなりません";
+						return name + "函数第1参数必须是字符串类型";
 				for (int i = 1; i < arguments.Length; i++)
 					if (arguments[i] == null) return name + "関数:引数がnullです";
 				return null;
@@ -4751,21 +4807,42 @@ namespace MinorShift.Emuera.GameData.Function
 			public XmlGetMethod(bool byname = false)
 			{
 				byName = byname;
-				ReturnType = typeof(string);
-				argumentTypeArray = byName ? new Type[] { typeof(string), typeof(string) } : new Type[] { typeof(long), typeof(string) };
+				ReturnType = typeof(long);
 				CanRestructure = false;
 			}
-			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments)
 			{
-				string key = byName ? arguments[0].GetStrValue(exm) : arguments[0].GetIntValue(exm).ToString();
-				if (!GlobalStatic.VariableData.DataXmlDocument.TryGetValue(key, out var doc)) return "";
+				if (arguments.Length < 2 || arguments.Length > 4)
+						return name + "函数参数数量不正确(需要2～4个)";
+				return null;
+			}
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
+			{
+				string key = (arguments[0].GetOperandType() == typeof(long) && !byName)
+					? arguments[0].GetIntValue(exm).ToString()
+					: arguments[0].GetStrValue(exm);
+				if (!GlobalStatic.VariableData.DataXmlDocument.TryGetValue(key, out var doc)) return 0;
 				try
 				{
 					var nodes = doc.SelectNodes(arguments[1].GetStrValue(exm));
-					if (nodes == null || nodes.Count == 0) return "";
-					return nodes[0].OuterXml;
+					if (nodes == null || nodes.Count == 0) return 0;
+					long style = arguments.Length > 3 ? arguments[3].GetIntValue(exm) : 0;
+					if (arguments.Length >= 3 && arguments[2] is VariableTerm vtOut && vtOut.Identifier != null)
+					{
+						var outArray = vtOut.Identifier.GetArray() as string[];
+						if (outArray != null)
+						{
+							int count = System.Math.Min(nodes.Count, outArray.Length);
+							for (int i = 0; i < count; i++)
+							{
+								var n = nodes[i];
+								outArray[i] = style == 1 ? n.InnerText : style == 2 ? n.InnerXml : style == 3 ? n.OuterXml : style == 4 ? n.Name : (n.Value ?? "");
+							}
+						}
+					}
+					return nodes.Count;
 				}
-				catch { return ""; }
+				catch { return 0; }
 			}
 		}
 		private sealed class XmlSetMethod : FunctionMethod
@@ -5149,17 +5226,19 @@ namespace MinorShift.Emuera.GameData.Function
 		}
 		private sealed class SetVarMethod : FunctionMethod
 		{
-			public SetVarMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[] { typeof(string), typeof(Int64) }; CanRestructure = false; }
+			public SetVarMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[] { typeof(string), typeof(void) }; CanRestructure = false; }
 			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
 			{
 				string name = arguments[0].GetStrValue(exm);
-				long val = arguments[1].GetIntValue(exm);
 				WordCollection wc = LexicalAnalyzer.Analyse(new StringStream(name), LexEndWith.EoL, LexAnalyzeFlag.None);
 				IOperandTerm[] terms = ExpressionParser.ReduceArguments(wc, ArgsEndWith.EoL, false);
-				if (terms != null && terms.Length > 0 && terms[0] is VariableTerm vt && vt.Identifier != null)
+				if (terms != null && terms.Length > 0 && terms[0] is VariableTerm vt && vt.Identifier != null && !vt.Identifier.IsConst)
 				{
-					vt.SetValue(new SingleTerm(val), exm);
-					return val;
+					if (vt.IsString)
+						vt.SetValue(arguments[1].GetStrValue(exm), exm);
+					else
+						vt.SetValue(arguments[1].GetIntValue(exm), exm);
+					return 1;
 				}
 				return 0;
 			}
@@ -5305,9 +5384,9 @@ namespace MinorShift.Emuera.GameData.Function
 			public override string CheckArgumentType(string name, IOperandTerm[] arguments)
 			{
 				if (arguments.Length < 1 || arguments.Length > 2)
-					return name + "関数の引数の数が正しくありません(1～2個必要です)";
+						return name + "函数参数数量不正确(需要1～2个)";
 				if (arguments[0] == null || arguments[0].GetOperandType() != typeof(string))
-					return name + "関数の第1引数は文字列型でなければなりません";
+						return name + "函数第1参数必须是字符串类型";
 				return null;
 			}
 			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)

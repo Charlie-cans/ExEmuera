@@ -228,21 +228,16 @@ namespace uEmuera.Window
             if(console_.IsInitializing)
             {
                 ShowProcess();
-                if(!dirty_)
-                    return;
             }
             else if(console_.IsInProcess)
             {
                 CheckProcess();
+                ShowProcess();
                 if(wait_process && !EmueraThread.instance.IsSkipFlag)
                     return;
-                if(!dirty_)
-                    return;
             }
-            else if(!dirty_)
-            {
+            if(!dirty_)
                 return;
-            }
 
             uEmuera.Logger.Info("MainWindow.Update Dirty");
             dirty_ = false;

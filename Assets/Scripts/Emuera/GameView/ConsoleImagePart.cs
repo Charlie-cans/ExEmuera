@@ -1,4 +1,4 @@
-using Serilog;
+﻿using Serilog;
 ﻿using MinorShift._Library;
 using MinorShift.Emuera.Content;
 using System;
@@ -13,7 +13,8 @@ namespace MinorShift.Emuera.GameView
 {
 	class ConsoleImagePart : AConsoleDisplayPart
 	{
-		public ConsoleImagePart(string resName, string resNameb, int raw_height, int raw_width, int raw_ypos)
+		// EE兼容: heightPx/widthPx/yposPx 为 true 时表示px像素单位，false 表示%字体百分比单位
+		public ConsoleImagePart(string resName, string resNameb, int raw_height, int raw_width = 0, int raw_ypos = 0, bool heightPx = false, bool widthPx = false, bool yposPx = false)
 		{
 			top = 0;
 			bottom = Config.FontSize;
@@ -80,12 +81,20 @@ namespace MinorShift.Emuera.GameView
 				Width = cImage.DestBaseSize.Width * height / cImage.DestBaseSize.Height;
 				XsubPixel = ((float)cImage.DestBaseSize.Width * height) / cImage.DestBaseSize.Height - Width;
 			}
+			else if (widthPx)
+			{
+				Width = raw_width;
+				XsubPixel = 0;
+			}
 			else
 			{
 				Width = Config.FontSize * raw_width / 100;
 				XsubPixel = ((float)Config.FontSize * raw_width / 100f) - Width;
 			}
-			top = raw_ypos * Config.FontSize / 100;
+			if (yposPx)
+				top = raw_ypos;
+			else
+				top = raw_ypos * Config.FontSize / 100;
 			destRect = new Rectangle(0, top, Width, height);
 			if (destRect.Width < 0)
 			{

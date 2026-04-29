@@ -71,19 +71,11 @@ namespace MinorShift.Emuera.Content
 
         internal void GCreateFromF(Bitmap bmp, bool useGDI)
         {
-            //if(useGDI)
-            //    throw new NotImplementedException();
-            //this.GDispose();
-            //Bitmap = new Bitmap(bmp.Width, bmp.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            //size = new Size(bmp.Width, bmp.Height);
-            //g = Graphics.FromImage(Bitmap);
-            //g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);
-
             this.GDispose();
+            Bitmap = bmp;
             is_created = true;
             width = bmp.Width;
             height = bmp.Height;
-
         }
 
         /// <summary>

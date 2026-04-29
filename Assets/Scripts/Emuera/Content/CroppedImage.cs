@@ -53,6 +53,8 @@ namespace MinorShift.Emuera.Content
 		{
 			SrcRectangle = rect;
 			BaseImage = img;
+			if (img != null && img.IsCreated && img.Bitmap != null)
+				parentPath = img.Bitmap.path;
 		}
 		public AbstractImage BaseImage;
 
@@ -69,6 +71,10 @@ namespace MinorShift.Emuera.Content
 				return null;
 			}
 		}
+
+		// 父图像路径，BaseImage被Dispose后仍可用 
+		public string ParentPath { get { return parentPath; } }
+		string parentPath;
 
 		public override bool IsCreated
 		{
@@ -332,3 +338,4 @@ namespace MinorShift.Emuera.Content
 
 	}
 }
+

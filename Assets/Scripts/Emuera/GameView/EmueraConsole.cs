@@ -460,7 +460,7 @@ namespace MinorShift.Emuera.GameView
 		public void ThrowError(bool playSound)
 		{
 			if (playSound)
-				uEmuera.Media.SystemSounds.Hand.Play();
+				uEmuera.Media.SystemSounds.Hand.Play("控制台错误提示");
 			forceUpdateGeneration();
 			UseUserStyle = false;
 			PrintFlush(false);
@@ -632,6 +632,11 @@ namespace MinorShift.Emuera.GameView
 				tickcount = 10;
 			redrawTimer.Interval = tickcount;
 			redrawTimer.Enabled = true;
+		}
+
+		public long getRedrawTimer()
+		{
+			return redrawTimer.Enabled ? (long)redrawTimer.Interval : 0;
 		}
 
 
@@ -1069,7 +1074,7 @@ namespace MinorShift.Emuera.GameView
 			}
 			catch (System.ComponentModel.Win32Exception)
 			{
-				uEmuera.Media.SystemSounds.Hand.Play();
+				uEmuera.Media.SystemSounds.Hand.Play($"无法打开编辑器: Win32Exception");
 				PrintError("エディタを開くことができませんでした");
 				forceUpdateGeneration();
 			}

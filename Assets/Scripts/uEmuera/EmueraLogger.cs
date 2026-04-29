@@ -20,18 +20,30 @@ namespace uEmuera
                 DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
             Directory.CreateDirectory(_sessionDir);
 
+            var logPath = Path.Combine(_sessionDir, "session.log");
+            var errPath = Path.Combine(_sessionDir, "errors.log");
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.File(
-                    path: Path.Combine(_sessionDir, "emuera.log"),
+                    path: logPath,
                     outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{Tag}] {Message}{NewLine}{Exception}",
-                    fileSizeLimitBytes: 16 * 1024 * 1024,
+                    fileSizeLimitBytes: 256 * 1024 * 1024,
                     rollOnFileSizeLimit: true,
-                    retainedFileCountLimit: 9,
+                    retainedFileCountLimit: 31,
                     encoding: System.Text.Encoding.UTF8,
                     flushToDiskInterval: TimeSpan.FromSeconds(2),
                     buffered: true)
-                .WriteTo.Sink(new UnityConsoleSink(), LogEventLevel.Debug)
+                .WriteTo.File(
+                    path: errPath,
+                    outputTemplate: "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{Tag}] {Message}{NewLine}{Exception}",
+                    restrictedToMinimumLevel: LogEventLevel.Warning,
+                    fileSizeLimitBytes: 128 * 1024 * 1024,
+                    rollOnFileSizeLimit: true,
+                    retainedFileCountLimit: 31,
+                    encoding: System.Text.Encoding.UTF8,
+                    flushToDiskInterval: TimeSpan.FromSeconds(1))
+                .WriteTo.Sink(new UnityConsoleSink(), LogEventLevel.Information)
                 .Enrich.WithProperty("Tag", "App")
                 .CreateLogger();
 

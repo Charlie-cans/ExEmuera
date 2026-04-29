@@ -211,6 +211,8 @@ namespace MinorShift.Emuera.GameData.Function
                 ["SPRITEANIMECREATE"] = new SpriteAnimeCreateMethod(),
                 ["SPRITEANIMEADDFRAME"] = new SpriteAnimeAddFrameMethod(),
                 ["SETANIMETIMER"] = new SetAnimeTimerMethod(),
+                ["GET_TEXT_DRAWING_MODE"] = new GetTextDrawingModeMethod(),
+                ["GETANIMETIMER"] = new GetAnimeTimerMethod(),
 
                 // EM+EE DataTable
                 ["DT_CREATE"] = new DataTableManagementMethod(DataTableManagementMethod.Operation.Create),
@@ -332,7 +334,7 @@ namespace MinorShift.Emuera.GameData.Function
                 ["REGEXPMATCH"] = new RegexStubMethod(),
                 ["ENUMFILES"] = new EnumFilesMethod(),
                 ["EXISTVAR"] = new ExistVarMethod(),
-                ["MOUSEB"] = new SqlStubMethod(0),
+                ["MOUSEB"] = new SqlStrStubMethod(0),
                 ["HOTKEY_STATE"] = new SqlStubMethod(1),
                 ["BITMAP_CACHE_ENABLE"] = new SqlStubMethod(1),
                 ["GDRAWLINE"] = new SqlStubMethod(4),

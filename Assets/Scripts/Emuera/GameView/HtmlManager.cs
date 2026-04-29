@@ -729,9 +729,9 @@ namespace MinorShift.Emuera.GameView
 						string attrValue = null;
 						string src = null;
 						string srcb = null;
-						int height = 0;
-						int width = 0;
-						int ypos = 0;
+						int height = 0; bool heightPx = false;
+						int width = 0; bool widthPx = false;
+						int ypos = 0; bool yposPx = false;
 						while (wc != null && !wc.EOL)
 						{
 							word = wc.Current as IdentifierWord;
@@ -759,6 +759,8 @@ namespace MinorShift.Emuera.GameView
 							{
 								if (height != 0)
 									throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+								heightPx = attrValue.EndsWith("px", StringComparison.OrdinalIgnoreCase);
+								if (heightPx) attrValue = attrValue.Substring(0, attrValue.Length - 2);
 								if (!int.TryParse(attrValue, out height))
 									throw new CodeEE("<" + tag + ">タグのheight属性の属性値が数値として解釈できません");
 							}
@@ -766,6 +768,8 @@ namespace MinorShift.Emuera.GameView
 							{
 								if (width != 0)
 									throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+								widthPx = attrValue.EndsWith("px", StringComparison.OrdinalIgnoreCase);
+								if (widthPx) attrValue = attrValue.Substring(0, attrValue.Length - 2);
 								if (!int.TryParse(attrValue, out width))
 									throw new CodeEE("<" + tag + ">タグのwidth属性の属性値が数値として解釈できません");
 							}
@@ -773,6 +777,8 @@ namespace MinorShift.Emuera.GameView
 							{
 								if (ypos != 0)
 									throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+								yposPx = attrValue.EndsWith("px", StringComparison.OrdinalIgnoreCase);
+								if (yposPx) attrValue = attrValue.Substring(0, attrValue.Length - 2);
 								if (!int.TryParse(attrValue, out ypos))
 									throw new CodeEE("<" + tag + ">タグのypos属性の属性値が数値として解釈できません");
 							}
@@ -781,7 +787,7 @@ namespace MinorShift.Emuera.GameView
 						}
 						if (src == null)
 							throw new CodeEE("<" + tag + ">タグにsrc属性が設定されていません");
-						return new ConsoleImagePart(src, srcb, height, width, ypos);
+						return new ConsoleImagePart(src, srcb, height, width, ypos, heightPx, widthPx, yposPx);
 					}
 
 				case "shape":
