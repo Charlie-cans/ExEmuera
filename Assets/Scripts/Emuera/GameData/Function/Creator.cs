@@ -275,8 +275,6 @@ namespace MinorShift.Emuera.GameData.Function
                 ["SQL_P_EXECUTE_NON_QUERY"] = new SqlStubMethod(3),
                 ["SQL_P_EXECUTE_READER"] = new SqlStubMethod(3),
                 ["SQL_EXECUTE_SCALAR_S"] = new SqlStubMethod(2),
-                ["SQL_EXECUTE_NON_QUERY"] = new SqlStubMethod(2),
-                ["SQL_IMPORT_MAP_XML"] = new SqlStubMethod(2),
                 ["SQL_EXPORT_MAP_XML"] = new SqlStubMethod(2),
                 ["SQL_IMPORT_DT_XML"] = new SqlStubMethod(2),
                 ["SQL_EXPORT_DT_XML"] = new SqlStubMethod(2),

@@ -37,9 +37,9 @@ public static class ResolutionHelper
         var height = resolutions[resolution_index];
         var width = (int)Mathf.Ceil(height * aspect);
         if(Screen.width > Screen.height)
-            Screen.SetResolution(width, height, true, 24);
+            Screen.SetResolution(width, height, FullScreenMode.FullScreenWindow);
         else
-            Screen.SetResolution(height, width, true, 24);
+            Screen.SetResolution(height, width, FullScreenMode.FullScreenWindow);
     }
 
     static float aspect {

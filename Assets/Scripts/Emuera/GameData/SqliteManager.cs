@@ -1,3 +1,4 @@
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -79,6 +80,7 @@ namespace MinorShift.Emuera.GameData
 			string dir = Path.Combine(_Library.Sys.ExeDir, "dat");
 			Directory.CreateDirectory(dir);
 			string dbPath = Path.Combine(dir, dbName + ".db");
+			Log.ForContext("Tag", "SQLite").Information($"Connect: {dbName} → {dbPath} (exists={File.Exists(dbPath)})");
 			int rc = sqlite3_open_v2(U8(dbPath), out IntPtr db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, null);
 			if (rc != SQLITE_OK)
 				throw new CodeEE($"SQL_CONNECT '{dbName}' failed to open {dbPath} (code {rc})");
@@ -173,8 +175,12 @@ namespace MinorShift.Emuera.GameData
 				string gameRoot = Path.GetDirectoryName(Program.CsvDir.TrimEnd('/', '\\'));
 				fullPath = Path.Combine(gameRoot, xmlPath);
 			}
+			Log.ForContext("Tag", "SQLite").Information($"ImportMapXml: db={dbName} table={tableName} path={fullPath} exists={File.Exists(fullPath)}");
 			if (!File.Exists(fullPath))
+			{
+				Log.ForContext("Tag", "SQLite").Warning($"ImportMapXml: file not found at {fullPath}");
 				return;
+			}
 
 			sqlite3_exec(db, U8($"CREATE TABLE IF NOT EXISTS {tableName} (k TEXT PRIMARY KEY, v TEXT)"), IntPtr.Zero, IntPtr.Zero, out _);
 			sqlite3_exec(db, U8("BEGIN"), IntPtr.Zero, IntPtr.Zero, out _);

@@ -1,3 +1,4 @@
+using Serilog;
 ﻿using System;
 using System.Collections.Generic;
 using uEmuera.Forms;
@@ -96,7 +97,7 @@ namespace uEmuera.Window
 							break;
 					}
 				}
-				catch (System.Exception e) { UnityEngine.Debug.Log("[Emuera-Sound] 错误: " + e.Message); }
+				catch (System.Exception e) { Log.ForContext("Tag", "Sound").Warning($"错误: " + e.Message); }
 			}
 		}
 
@@ -120,7 +121,7 @@ namespace uEmuera.Window
 					source.Play();
 					return;
 				}
-				UnityEngine.Debug.Log("[Emuera-Sound] 文件未找到: " + filename);
+				Log.ForContext("Tag", "Sound").Warning($"文件未找到: " + filename);
 				return;
 			}
 			// 使用协程加载音频（由 EmueraMain 驱动）
@@ -148,7 +149,7 @@ namespace uEmuera.Window
 						source.Play();
 					}
 				}
-				else UnityEngine.Debug.Log("[Emuera-Sound] 加载失败: " + path + " - " + www.error);
+				else Log.ForContext("Tag", "Sound").Warning($"加载失败: " + path + " - " + www.error);
 			}
 		}
 

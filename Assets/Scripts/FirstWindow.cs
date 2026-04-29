@@ -37,7 +37,7 @@ public class FirstWindow : MonoBehaviour
             yield return null;
 
         EmueraContent.instance.SetNoReady();
-        var emuera = GameObject.FindObjectOfType<EmueraMain>();
+        var emuera = Object.FindAnyObjectByType<EmueraMain>();
         emuera.Run();
     }
 
@@ -68,7 +68,7 @@ public class FirstWindow : MonoBehaviour
 #endif
 
 #if UNITY_EDITOR
-        var main_entry = GameObject.FindObjectOfType<MainEntry>();
+        var main_entry = Object.FindAnyObjectByType<MainEntry>();
         if(!string.IsNullOrEmpty(main_entry.era_path))
             GetList(main_entry.era_path);
 #endif

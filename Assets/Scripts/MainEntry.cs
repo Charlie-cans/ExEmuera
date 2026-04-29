@@ -17,9 +17,10 @@ public class MainEntry : MonoBehaviour
     void Start()
     {
         LoadConfigMaps();
+        uEmuera.EmueraLogger.Init();
         if(!MultiLanguage.SetLanguage())
         {
-            Object.FindObjectOfType<OptionWindow>().ShowLanguageBox();
+            Object.FindAnyObjectByType<OptionWindow>().ShowLanguageBox();
         }
 
 #if UNITY_EDITOR

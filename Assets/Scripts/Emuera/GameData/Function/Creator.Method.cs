@@ -1,3 +1,4 @@
+using Serilog;
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
@@ -3356,7 +3357,7 @@ namespace MinorShift.Emuera.GameData.Function
 						filepath = Program.ContentDir + filename;
 					if (!System.IO.File.Exists(filepath))
 						return 0;
-			UnityEngine.Debug.Log("[Emuera-IMG] GCREATEFROMFILE: " + filepath + " exists=" + System.IO.File.Exists(filepath));
+			Log.ForContext("Tag", "IMG").Debug($"GCREATEFROMFILE: {filepath} exists={System.IO.File.Exists(filepath)}");
 					bmp = new BitmapTexture(filepath);
 					if (bmp.Width > AbstractImage.MAX_IMAGESIZE || bmp.Height > AbstractImage.MAX_IMAGESIZE)
 						return 0;
@@ -5156,7 +5157,10 @@ namespace MinorShift.Emuera.GameData.Function
 				WordCollection wc = LexicalAnalyzer.Analyse(new StringStream(name), LexEndWith.EoL, LexAnalyzeFlag.None);
 				IOperandTerm[] terms = ExpressionParser.ReduceArguments(wc, ArgsEndWith.EoL, false);
 				if (terms != null && terms.Length > 0 && terms[0] is VariableTerm vt && vt.Identifier != null)
-					vt.SetValue(new SingleTerm(val), exm); return val;
+				{
+					vt.SetValue(new SingleTerm(val), exm);
+					return val;
+				}
 				return 0;
 			}
 		}

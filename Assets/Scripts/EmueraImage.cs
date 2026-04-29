@@ -1,3 +1,4 @@
+using Serilog;
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -41,12 +42,13 @@ public class EmueraImage : EmueraBehaviour
             {
                 image.sprite = null;
                 image.color = kTransparent;
+                Log.ForContext("Tag", "IMG").Warning($"SetSprite: NULL for {gameObject.name}");
             }
             else
             {
                 image.sprite = spriteinfo.sprite;
                 image.color = Color.white;
-
+                Log.ForContext("Tag", "IMG").Debug($"SetSprite: OK {gameObject.name} sprite={spriteinfo.sprite?.name ?? "null"}");
                 FixTextureOffset();
             }
         }
@@ -136,6 +138,7 @@ public class EmueraImage : EmueraBehaviour
             if(imageinfo == null)
                 imageinfo = image.gameObject.AddComponent<ImageInfo>();
             image.raycastTarget = false;
+            image.color = kTransparent;
 
             var rt = image.gameObject.transform as RectTransform;
             rt.SetParent(prt);
@@ -152,8 +155,8 @@ public class EmueraImage : EmueraBehaviour
             width = Mathf.Max(image_part.PointX - ud.posx + image_rect.Width, width);
 
             image.name = image_part.Image.Name;
-			if (image_part.Image == null) UnityEngine.Debug.Log("[Emuera-IMG] Render: NULL sprite for " + image_part.ResourceName);
-			else UnityEngine.Debug.Log("[Emuera-IMG] Render: " + image_part.ResourceName + " -> " + image_part.Image.Name);
+			if (image_part.Image == null) Log.ForContext("Tag", "IMG").Warning($"Render: NULL sprite for {image_part.ResourceName}");
+			else Log.ForContext("Tag", "IMG").Debug($"Render: {image_part.ResourceName} -> {image_part.Image.Name}");
             imageinfo.Load(image_part.Image);
             image_infos_.Add(imageinfo);
         }

@@ -1,3 +1,4 @@
+using Serilog;
 ﻿using System;
 using System.Collections.Generic;
 
@@ -60,14 +61,15 @@ namespace uEmuera.Drawing
             while(tiot.mutex == null)
                 System.Threading.Thread.Sleep(10);
             tiot.mutex.WaitOne();
-			tiot.mutex.WaitOne();
-			if (textureinfo != null) {
-				UnityEngine.Debug.Log("[Emuera-IMG] Bitmap OK: " + path + " " + size.Width + "x" + size.Height);
-				tiot.mutex.ReleaseMutex();
-				tiot.mutex.Close();
-			} else {
-				UnityEngine.Debug.Log("[Emuera-IMG] Bitmap FAIL: " + path);
-			}
+            if (textureinfo != null) {
+                Log.ForContext("Tag", "IMG").Debug($"Bitmap OK: {path} {size.Width}x{size.Height}");
+                tiot.mutex.ReleaseMutex();
+                tiot.mutex.Close();
+            } else {
+                Log.ForContext("Tag", "IMG").Warning($"Bitmap FAIL: {path}");
+                tiot.mutex.ReleaseMutex();
+                tiot.mutex.Close();
+            }
 
         }
         public UnityEngine.Texture2D texture
@@ -336,7 +338,7 @@ namespace uEmuera.Drawing
             if (name.StartsWith("#")) return ParseHexColor(name);
             var n = name.ToLowerInvariant().Replace(" ", "");
             if (colorMap.TryGetValue(n, out var c)) return c;
-            UnityEngine.Debug.LogWarning("[Emuera] Not Match Color '" + name + "'");
+            Log.ForContext("Tag", "IMG").Warning($"Not Match Color: {name}");
             return Black;
         }
         static Color ParseHexColor(string hex)

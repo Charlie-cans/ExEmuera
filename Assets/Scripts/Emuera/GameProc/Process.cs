@@ -1,4 +1,5 @@
-﻿using System;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -285,6 +286,7 @@ namespace MinorShift.Emuera.GameProc
 			}
 			catch (Exception ec)
 			{
+				Log.ForContext("Tag", "Process").Error(ec, "脚本执行异常");
 				LogicalLine currentLine = state.ErrorLine;
 				if (currentLine != null && currentLine is NullLine)
 					currentLine = null;
@@ -330,7 +332,7 @@ namespace MinorShift.Emuera.GameProc
 			if (!console.Enabled)
 				return;
 			// Unity：重置计时器而非显示MessageBox（后台线程不可用）
-			UnityEngine.Debug.LogWarning("[Emuera] Infinite loop check triggered, resetting timer");
+			Log.ForContext("Tag", "Process").Warning("无限循环检测触发，重置计时器");
 			state.lineCount = 0;
 			startTime = _Library.WinmmTimer.TickCount;
 		}
@@ -433,7 +435,7 @@ namespace MinorShift.Emuera.GameProc
 		
 		private void handleException(Exception exc, LogicalLine current, bool playSound)
 		{
-            UnityEngine.Debug.Log(exc);
+            Log.ForContext("Tag", "Process").Error(exc, "DebugDialog异常");
 
 			console.ThrowError(playSound);
 			ScriptPosition position = null;

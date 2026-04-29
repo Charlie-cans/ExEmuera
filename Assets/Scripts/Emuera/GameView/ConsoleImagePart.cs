@@ -1,3 +1,4 @@
+using Serilog;
 ﻿using MinorShift._Library;
 using MinorShift.Emuera.Content;
 using System;
@@ -21,11 +22,11 @@ namespace MinorShift.Emuera.GameView
 			ButtonResourceName = resNameb;
 
             cImage = AppContents.GetSprite(ResourceName);
-			if (cImage == null) UnityEngine.Debug.Log("[Emuera-IMG] Sprite MISSING: " + ResourceName);
-			else UnityEngine.Debug.Log("[Emuera-IMG] Sprite OK: " + ResourceName);
+			if (cImage == null) Log.ForContext("Tag", "IMG").Warning($"Sprite MISSING: {ResourceName}");
+			else Log.ForContext("Tag", "IMG").Debug($"Sprite OK: {ResourceName}");
 #if UNITY_EDITOR
 			if (cImage == null && !string.IsNullOrEmpty(ResourceName))
-				UnityEngine.Debug.Log("[Emuera] sprite missing: " + ResourceName);
+				Log.ForContext("Tag", "IMG").Warning($"sprite missing: {ResourceName}");
 #endif
 #if !UNITY_EDITOR
             if(cImage == null)

@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 语言偏好
+
+默认使用中文进行思考和输出。所有对话、代码注释、解释说明均使用简体中文，除非代码本身（变量名、函数名、错误信息等）需要保持英文。
+
 ## Project Overview
 
 uEmuera — Unity 2020.3.34f1 移植版 Emuera（era 游戏引擎）。原始 EM+EE 扩展版源码在 `D:/code/era/emuera.em.gitlab/`。

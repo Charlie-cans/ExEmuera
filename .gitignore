@@ -12,4 +12,14 @@
 .DS_Store
 Thumbs.db
 *.bak
-.claude/skills/andrej-karpathy-skills/
+.claude/
+
+# Unity generated
+*.csproj
+*.sln
+.vsconfig
+
+# Unity recovery
+Assets/_Recovery/
+Assets/_Recovery.meta
+*.bak.meta

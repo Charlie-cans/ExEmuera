@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using Serilog;
 using UnityEngine;
 using MinorShift.Emuera.Content;
 using uEmuera.Drawing;
@@ -130,7 +131,7 @@ internal static class SpriteManager
             return;
         }
 
-        var basename = src.Bitmap.path;
+        var basename = src.Bitmap.path.ToUpper();
         TextureInfo ti = null;
         texture_dict.TryGetValue(basename, out ti);
         if(ti == null)
@@ -152,8 +153,9 @@ internal static class SpriteManager
 
     public static TextureInfo GetTextureInfo(string filename)
     {
+        var pathKey = filename.ToUpper();
         TextureInfo ti = null;
-        if(texture_dict.TryGetValue(filename, out ti))
+        if(texture_dict.TryGetValue(pathKey, out ti))
             return ti;
         if(string.IsNullOrEmpty(filename))
             return null;
@@ -165,13 +167,16 @@ internal static class SpriteManager
         FileStream fs = fi.OpenRead();
         var filesize = fs.Length;
         byte[] content = new byte[filesize];
-        fs.Read(content, 0, (int)filesize);
+        int bytesRead = fs.Read(content, 0, (int)filesize);
+        fs.Close();
 
-        TextureFormat format = TextureFormat.DXT1;
+        if (bytesRead < filesize)
+        {
+            Log.ForContext("Tag", "IMG").Warning($"{filename} incomplete read: {bytesRead}/{filesize}");
+            return null;
+        }
 
         var extname = uEmuera.Utils.GetSuffix(filename).ToLower();
-        if (extname == "png")
-            format = TextureFormat.DXT5;
 
         if (extname == "webp")
         {
@@ -181,25 +186,25 @@ internal static class SpriteManager
                     out Error err);
                 if (err != Error.Success)
                 {
-                    Debug.LogWarning($"{filename} {err.ToString()}");
+                    Log.ForContext("Tag", "IMG").Warning($"{filename} {err.ToString()}");
                     return null;
                 }
-                ti = new TextureInfo(filename, tex);
-                texture_dict.Add(filename, ti);
+                ti = new TextureInfo(pathKey, tex);
+                texture_dict.Add(pathKey, ti);
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"{filename} WebP decode failed: {e.Message}");
+                Log.ForContext("Tag", "IMG").Warning($"{filename} WebP decode failed: {e.Message}");
                 return null;
             }
         }
         else
         {
-            var tex = new Texture2D(4, 4, format, false);
-            if (tex.LoadImage(content))
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            if (ImageConversion.LoadImage(tex, content))
             {
-                ti = new TextureInfo(filename, tex);
-                texture_dict.Add(filename, ti);
+                ti = new TextureInfo(pathKey, tex);
+                texture_dict.Add(pathKey, ti);
             }
         }
         return ti;
@@ -267,6 +272,7 @@ internal static class SpriteManager
     static IEnumerator Loading(Bitmap baseimage)
     {
         TextureInfo ti = null;
+        var pathKey = baseimage.path.ToUpper();
         FileInfo fi = new FileInfo(baseimage.path);
         if(fi.Exists)
         {
@@ -277,12 +283,16 @@ internal static class SpriteManager
             var async = fs.BeginRead(content, 0, (int)filesize, null, null);
             while(!async.IsCompleted)
                 yield return null;
+            int bytesRead = fs.EndRead(async);
+            fs.Close();
 
-            TextureFormat format = TextureFormat.DXT1;
+            if (bytesRead < filesize)
+            {
+                Log.ForContext("Tag", "IMG").Warning($"{baseimage.path} incomplete read: {bytesRead}/{filesize}");
+                yield break;
+            }
 
             var extname = uEmuera.Utils.GetSuffix(baseimage.path).ToLower();
-            if (extname == "png")
-                format = TextureFormat.DXT5;
 
             if (extname == "webp")
             {
@@ -292,28 +302,28 @@ internal static class SpriteManager
                     out Error err);
                     if (err != Error.Success)
                     {
-                        Debug.LogWarning($"{baseimage.path} {err.ToString()}");
+                        Log.ForContext("Tag", "IMG").Warning($"{baseimage.path} {err.ToString()}");
                         yield break;
                     }
-                    ti = new TextureInfo(baseimage.path, tex);
-                    texture_dict.Add(baseimage.path, ti);
+                    ti = new TextureInfo(pathKey, tex);
+                    texture_dict[pathKey] = ti;
 
                     baseimage.size.Width = tex.width;
                     baseimage.size.Height = tex.height;
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogWarning($"{baseimage.path} WebP decode failed: {e.Message}");
+                    Log.ForContext("Tag", "IMG").Warning($"{baseimage.path} WebP decode failed: {e.Message}");
                     yield break;
                 }
             }
             else
             {
-                var tex = new Texture2D(4, 4, format, false);
-                if (tex.LoadImage(content))
+                var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+                if (ImageConversion.LoadImage(tex, content))
                 {
-                    ti = new TextureInfo(baseimage.path, tex);
-                    texture_dict.Add(baseimage.path, ti);
+                    ti = new TextureInfo(pathKey, tex);
+                    texture_dict[pathKey] = ti;
 
                     baseimage.size.Width = tex.width;
                     baseimage.size.Height = tex.height;
@@ -321,7 +331,7 @@ internal static class SpriteManager
             }
         }
         List<CallbackInfo> list = null;
-        if(loading_set.TryGetValue(baseimage.path, out list))
+        if(loading_set.TryGetValue(pathKey, out list))
         {
             var count = list.Count;
             CallbackInfo item = null;
@@ -336,6 +346,8 @@ internal static class SpriteManager
     }
     static SpriteInfo GetSpriteInfo(TextureInfo textinfo, ASprite src)
     {
+        if (textinfo == null)
+            return null;
         return textinfo.GetSprite(src);
     }
     internal static void GivebackSpriteInfo(SpriteInfo info)
@@ -368,7 +380,7 @@ internal static class SpriteManager
             }
             if(tinfo != null)
             {
-                Debug.Log("Unload Texture " + tinfo.imagePath);
+                Log.ForContext("Tag", "IMG").Debug($"Unload Texture {tinfo.imagePath}");
 
                 tinfo.Dispose();
                 texture_dict.Remove(tinfo.imagePath);

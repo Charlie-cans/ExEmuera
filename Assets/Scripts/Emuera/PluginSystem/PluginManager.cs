@@ -1,3 +1,4 @@
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,7 +54,7 @@ namespace MinorShift.Emuera.PluginSystem
 						}
 					}
 				}
-				catch (Exception e) { UnityEngine.Debug.Log("[PluginManager] 加载插件失败: " + dllPath + " - " + e.Message); }
+				catch (Exception e) { Log.ForContext("Tag", "Plugin").Warning(e, $"加载插件失败: {dllPath}"); }
 			}
 		}
 
