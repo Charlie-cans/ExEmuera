@@ -1546,15 +1546,7 @@ namespace MinorShift.Emuera.GameProc.Function
 				flag = METHOD_SAFE | EXTENDED;
 			}
 
-			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
-			{
-				throw new NotImplCodeEE();
-				//SpSaveVarArgument arg = (SpSaveVarArgument)func.Argument;
-				//VariableToken[] vars = arg.VarTokens;
-				//string datFilename = arg.Term.GetStrValue(exm);
-				//string savMes = arg.SavMes.GetStrValue(exm);
-				//exm.VEvaluator.SaveVariable(datFilename, savMes, vars);
-			}
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
 		}
 		private sealed class LOADVAR_Instruction : AbstractInstruction
 		{
@@ -1564,18 +1556,7 @@ namespace MinorShift.Emuera.GameProc.Function
 				flag = METHOD_SAFE | EXTENDED;
 			}
 
-			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
-			{
-				throw new NotImplCodeEE();
-				//ExpressionArgument arg = (ExpressionArgument)func.Argument;
-				//string datFilename = null;
-				//if (arg.IsConst)
-				//    datFilename = arg.ConstStr;
-				//else
-				//    datFilename = arg.Term.GetStrValue(exm);
-				//exm.VEvaluator.LoadVariable(datFilename);
-
-			}
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
 		}
 
 		private sealed class DELDATA_Instruction : AbstractInstruction
@@ -1630,11 +1611,8 @@ namespace MinorShift.Emuera.GameProc.Function
 
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
 			{
-				throw new NotImplCodeEE();
 
-#pragma warning disable CS0162 // 到達できないコードが検出されました
 				RefArgument arg = (RefArgument)func.Argument;
-#pragma warning restore CS0162 // 到達できないコードが検出されました
 				string str = null;
 				if (arg.SrcTerm != null)
 					str = arg.SrcTerm.GetStrValue(exm);
@@ -2641,6 +2619,71 @@ namespace MinorShift.Emuera.GameProc.Function
 		{
 			public FORCE_BEGIN_Instruction() { ArgBuilder = null; flag = METHOD_SAFE | EXTENDED | FLOW_CONTROL; }
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { GlobalStatic.Process.Initialize(); }
+		}
+		// SETBGIMAGE/CLEARBGIMAGE/REMOVEBGIMAGE stubs
+		private sealed class SETBGIMAGE_Instruction : AbstractInstruction
+		{
+			public SETBGIMAGE_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_SETBGIMAGE); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
+		}
+		private sealed class CLEARBGIMAGE_Instruction : AbstractInstruction
+		{
+			public CLEARBGIMAGE_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
+		}
+		private sealed class REMOVEBGIMAGE_Instruction : AbstractInstruction
+		{
+			public REMOVEBGIMAGE_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_EXPRESSION); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
+		}
+		// INPUTANY stub
+		private sealed class INPUTANY_Instruction : AbstractInstruction
+		{
+			public INPUTANY_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_INPUTANY); flag = IS_INPUT | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
+		}
+		// HTML_PRINT_ISLAND stubs
+		private sealed class HTML_PRINT_ISLAND_Instruction : AbstractInstruction
+		{
+			public HTML_PRINT_ISLAND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_HTML_PRINT_ISLAND); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
+		}
+		private sealed class HTML_PRINT_ISLAND_CLEAR_Instruction : AbstractInstruction
+		{
+			public HTML_PRINT_ISLAND_CLEAR_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
+		}
+		// VARI/VARS stubs
+		private sealed class VARI_Instruction : AbstractInstruction
+		{
+			public VARI_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_VARI); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
+		}
+		private sealed class VARS_Instruction : AbstractInstruction
+		{
+			public VARS_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_VARS); flag = METHOD_SAFE | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { }
+		}
+		// BINPUT/BINPUTS/ONEBINPUT/ONEBINPUTS stubs (button input waiting is complex in Unity)
+		private sealed class BINPUT_Instruction : AbstractInstruction
+		{
+			public BINPUT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_INPUT); flag = IS_INPUT | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { exm.VEvaluator.RESULT = 0; }
+		}
+		private sealed class BINPUTS_Instruction : AbstractInstruction
+		{
+			public BINPUTS_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_INPUTS); flag = IS_INPUT | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { exm.VEvaluator.RESULT = 0; }
+		}
+		private sealed class ONEBINPUT_Instruction : AbstractInstruction
+		{
+			public ONEBINPUT_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_INPUT); flag = IS_INPUT | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { exm.VEvaluator.RESULT = 0; }
+		}
+		private sealed class ONEBINPUTS_Instruction : AbstractInstruction
+		{
+			public ONEBINPUTS_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_INPUTS); flag = IS_INPUT | EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { exm.VEvaluator.RESULT = 0; }
 		}
 		#endregion
 		#region SQL Instructions

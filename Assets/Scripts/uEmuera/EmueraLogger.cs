@@ -4,6 +4,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
+using UnityEngine;
 
 namespace uEmuera
 {
@@ -15,8 +16,9 @@ namespace uEmuera
 
         public static void Init()
         {
+            var baseDir = UnityEngine.Application.isEditor ? Environment.CurrentDirectory : UnityEngine.Application.persistentDataPath;
             _sessionDir = Path.Combine(
-                Environment.CurrentDirectory, "Logs",
+                baseDir, "Logs",
                 DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
             Directory.CreateDirectory(_sessionDir);
 

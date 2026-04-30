@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 using System.Runtime.CompilerServices;
 
 namespace uEmuera.Media.SystemSounds

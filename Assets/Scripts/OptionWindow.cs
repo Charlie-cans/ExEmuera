@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Serilog;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,6 +21,7 @@ public class OptionWindow : MonoBehaviour
         GenericUtils.SetListenerOnClick(msg_cancel, OnMsgCancel);
 
         GenericUtils.SetListenerOnClick(menu_pad, OnMenuPad);
+        InitPathButton();
         GenericUtils.SetListenerOnClick(menu_1_resolution, OnMenuResolution);
         GenericUtils.SetListenerOnClick(menu_1_language, ShowLanguageBox);
         GenericUtils.SetListenerOnClick(menu_1_github, OnGithub);
@@ -135,6 +137,39 @@ public class OptionWindow : MonoBehaviour
             orientation_lock_image.sprite = unlock_sprite;
         }
     }
+
+    // prefab里的storage按钮，绑定点击事件
+    void InitPathButton()
+    {
+        var t = menu_1.transform.Find("storage");
+        if (t == null) { Serilog.Log.ForContext("Tag", "Android").Warning("InitPathButton: storage not found"); return; }
+        menu_1_path_ = t.gameObject;
+        GenericUtils.SetListenerOnClick(menu_1_path_, OnSelectPath);
+        Serilog.Log.ForContext("Tag", "Android").Information("InitPathButton: OK");
+    }
+
+    void OnSelectPath()
+    {
+        Serilog.Log.ForContext("Tag", "Android").Information("OnSelectPath called");
+        menu_pad.SetActive(false);
+        menu_1.SetActive(false);
+#if UNITY_ANDROID && !UNITY_EDITOR
+        uEmuera.Utils.OpenFolderPicker();
+#else
+        Serilog.Log.ForContext("Tag", "Android").Information("OnSelectPath: not Android, skipping picker");
+#endif
+    }
+
+    // Android SAF回调
+    void OnFolderPicked(string result)
+    {
+        Serilog.Log.ForContext("Tag", "Android").Information("OptionWindow.OnFolderPicked: {Result}", result ?? "NULL");
+        var parts = result.Split(new[] { "||" }, System.StringSplitOptions.None);
+        string path = parts.Length > 1 ? parts[1] : result;
+        UnityEngine.PlayerPrefs.SetString("last_picked_path", path);
+    }
+
+    GameObject menu_1_path_;
 
     public void ShowMenu()
     {

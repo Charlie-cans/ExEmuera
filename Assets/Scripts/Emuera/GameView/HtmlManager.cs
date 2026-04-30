@@ -264,10 +264,22 @@ namespace MinorShift.Emuera.GameView
 		/// <param name="sm"></param>
 		/// <param name="console">如果不用于实际显示则设为null</param>
 		/// <returns></returns>
+		// EM_私家版_HTML_PRINT拡張: 从HTML中提取按钮列表，用于toPrintBuffer模式
+		public static ConsoleButtonString[] Html2ButtonList(string str, StringMeasure sm, EmueraConsole console)
+		{
+			var buttons = new List<ConsoleButtonString>();
+			Html2DisplayLine(str, sm, console, buttons);
+			return buttons.ToArray();
+		}
+
 		public static ConsoleDisplayLine[] Html2DisplayLine(string str, StringMeasure sm, EmueraConsole console)
 		{
+			return Html2DisplayLine(str, sm, console, new List<ConsoleButtonString>());
+		}
+
+		private static ConsoleDisplayLine[] Html2DisplayLine(string str, StringMeasure sm, EmueraConsole console, List<ConsoleButtonString> buttonList)
+		{
 			List<AConsoleDisplayPart> cssList = new List<AConsoleDisplayPart>();
-			List<ConsoleButtonString> buttonList = new List<ConsoleButtonString>();
 			StringStream st = new StringStream(str);
 			int found;
 			bool hasComment = str.IndexOf("<!--") >= 0;
@@ -287,9 +299,9 @@ namespace MinorShift.Emuera.GameView
 					string txt = Unescape(st.Substring());
 					cssList.Add(new ConsoleStyledString(txt, state.GetSS()));
 					if (state.FlagPClosed)
-						throw new CodeEE("</p>の後にテキストがあります");
+						throw new CodeEE("</p> 之后不允许有文本");
 					if (state.FlagNobrClosed)
-						throw new CodeEE("</nobr>の後にテキストがあります");
+						throw new CodeEE("</nobr> 之后不允许有文本");
 					break;
 				}
 				else if (found > 0)
@@ -319,7 +331,7 @@ namespace MinorShift.Emuera.GameView
 					st.ShiftNext();
 					AConsoleDisplayPart part = tagAnalyze(state, st);
 					if (st.Current != '>')
-						throw new CodeEE("タグ終端'>'が見つかりません");
+						throw new CodeEE("找不到标签结束符 '>'");
 					if (part != null)
 						cssList.Add(part);
 					st.ShiftNext();
@@ -342,7 +354,7 @@ namespace MinorShift.Emuera.GameView
 			}
 			//</nobr></p>允许省略
 			if (state.CurrentButtonTag != null || state.FontStyle != FontStyle.Regular || state.FonttagList.Count > 0)
-				throw new CodeEE("閉じられていないタグがあります");
+				throw new CodeEE("存在未关闭的标签");
 			if (cssList.Count > 0)
 				buttonList.Add(cssToButton(cssList, state, console));
 
@@ -351,9 +363,9 @@ namespace MinorShift.Emuera.GameView
 				if (button != null && button.PointXisLocked)
 				{
 					if (!state.FlagNobr)
-						throw new CodeEE("<nobr>が設定されていない行ではpos属性は使用できません");
+						throw new CodeEE("未设置 <nobr> 的行不能使用 pos 属性");
 					if (state.Alignment != DisplayLineAlignment.LEFT)
-						throw new CodeEE("alignがleftでない行ではpos属性は使用できません");
+						throw new CodeEE("align 不为 left 的行不能使用 pos 属性");
 					break;
 				}
 			}
@@ -420,8 +432,8 @@ namespace MinorShift.Emuera.GameView
 				if (found <= index + 1)
 				{
 					if (found < 0)
-						throw new CodeEE("'&'に対応する';'がみつかりません");
-					throw new CodeEE("'&'と';'が連続しています");
+						throw new CodeEE("找不到与 '&' 对应的 ';'");
+					throw new CodeEE("'&' 和 ';' 连续出现");
 				}
 				string escWordRow = str.Substring(index + 1, found - index - 1);
 				index = found + 1;
@@ -439,7 +451,7 @@ namespace MinorShift.Emuera.GameView
 						{
 							int iBbase = 10;
 							if (escWord[0] != '#')
-								throw new CodeEE("\"&" + escWordRow + ";\"は適切な文字参照ではありません");
+								throw new CodeEE("\"&" + escWordRow + ";\"不是合法的字符引用");
 							if (escWord.Length > 1 && escWord[1] == 'x')
 							{
 								iBbase = 16;
@@ -454,11 +466,11 @@ namespace MinorShift.Emuera.GameView
 							catch
 							{
 
-								throw new CodeEE("\"&" + escWordRow + ";\"は適切な文字参照ではありません");
+								throw new CodeEE("\"&" + escWordRow + ";\"不是合法的字符引用");
 							}
 
 							if (unicode < 0 || unicode > 0xFFFF)
-								throw new CodeEE("\"&" + escWordRow + ";\"はUnicodeの範囲外です(サロゲートペアは使えません)");
+								throw new CodeEE("\"&" + escWordRow + ";\"超出 Unicode 范围（不支持代理对）");
 							b.Append((char)unicode);
 							break;
 						}
@@ -603,40 +615,40 @@ namespace MinorShift.Emuera.GameView
 					case "u": endStyle = FontStyle.Underline; goto case "s";
 					case "s":
 						if ((state.FontStyle & endStyle) == FontStyle.Regular)
-							throw new CodeEE("</" + tag + ">の前に<" + tag + ">がありません");
+							throw new CodeEE("<" + tag + "> 之前缺少 </" + tag + ">");
 						state.FontStyle ^= endStyle;
 						return null;
 					case "p":
 						if ((!state.FlagP) || (state.FlagPClosed))
-							throw new CodeEE("</p>の前に<p>がありません");
+							throw new CodeEE("</p> 之前缺少 <p>");
 						state.FlagPClosed = true;
 						return null;
 					case "nobr":
 						if ((!state.FlagNobr) || (state.FlagNobrClosed))
-							throw new CodeEE("</nobr>の前に<nobr>がありません");
+							throw new CodeEE("</nobr> 之前缺少 <nobr>");
 						state.FlagNobrClosed = true;
 						return null;
 					case "font":
 						if (state.FonttagList.Count == 0)
-							throw new CodeEE("</font>の前に<font>がありません");
+							throw new CodeEE("</font> 之前缺少 <font>");
 						state.FonttagList.RemoveAt(state.FonttagList.Count - 1);
 						return null;
 					case "button":
 						if (state.CurrentButtonTag == null || !state.CurrentButtonTag.IsButtonTag)
-							throw new CodeEE("</button>の前に<button>がありません");
+							throw new CodeEE("</button> 之前缺少 <button>");
 						state.CurrentButtonTag = null;
 						state.FlagButton = true;
 						return null;
 					case "nonbutton":
 						if (state.CurrentButtonTag == null || state.CurrentButtonTag.IsButtonTag)
-							throw new CodeEE("</nonbutton>の前に<nonbutton>がありません");
+							throw new CodeEE("</nonbutton> 之前缺少 <nonbutton>");
 						state.CurrentButtonTag = null;
 						state.FlagButton = true;
 					return null;
 					case "div":
 						return null;
 					default:
-						throw new CodeEE("終了タグ</"+tag+">は解釈できません");
+						throw new CodeEE("无法解析结束标签 </"+tag+">");
 				}
 				//goto error;
 			}
@@ -667,33 +679,29 @@ namespace MinorShift.Emuera.GameView
 				case "u": newStyle = FontStyle.Underline; goto case "s";
 				case "s":
 					if (wc != null)
-						throw new CodeEE("<" + tag + ">タグにに属性が設定されています");
+						throw new CodeEE("<" + tag + "> 标签不应有属性");
 					if ((state.FontStyle & newStyle) != FontStyle.Regular)
-						throw new CodeEE("<" + tag + ">が二重に使われています");
+						throw new CodeEE("<" + tag + "> 被重复使用");
 					state.FontStyle |= newStyle;
 						return null;
 				case "br":
 					if (wc != null)
-						throw new CodeEE("<" + tag + ">タグにに属性が設定されています");
+						throw new CodeEE("<" + tag + "> 标签不应有属性");
 					state.FlagBr = true;
 						return null;
 				case "nobr":
 					if (wc != null)
-						throw new CodeEE("<" + tag + ">タグに属性が設定されています");
-					if (!state.LineHead)
-						throw new CodeEE("<nobr>が行頭以外で使われています");
+						throw new CodeEE("<" + tag + "> 标签不应有属性");
 					if (state.FlagNobr)
-						throw new CodeEE("<nobr>が2度以上使われています");
+						throw new CodeEE("<nobr> 被多次使用");
 					state.FlagNobr = true;
 						return null;
 				case "p":
 					{
 						if (wc == null)
-							throw new CodeEE("<" + tag + ">タグに属性が設定されていません");
-						if (!state.LineHead)
-							throw new CodeEE("<p>が行頭以外で使われています");
+							throw new CodeEE("<" + tag + "> 标签缺少属性");
 						if (state.FlagNobr)
-							throw new CodeEE("<p>が2度以上使われています");
+							throw new CodeEE("<p> 被多次使用");
 						word = wc.Current as IdentifierWord;
 						wc.ShiftNext();
 						OperatorWord op = wc.Current as OperatorWord;
@@ -703,7 +711,7 @@ namespace MinorShift.Emuera.GameView
 						if (!wc.EOL || word == null || op == null || op.Code != OperatorCode.Assignment || attr == null)
 							goto error;
 						if (!word.Code.Equals("align", StringComparison.OrdinalIgnoreCase))
-							throw new CodeEE("<p>タグの属性名" + word.Code + "は解釈できません");
+							throw new CodeEE("无法解析 <p> 标签的属性名 " + word.Code);
 						string attrValue = Unescape(attr.Str);
 						switch (attrValue.ToLower())
 						{
@@ -717,7 +725,7 @@ namespace MinorShift.Emuera.GameView
 								state.Alignment = DisplayLineAlignment.RIGHT;
 								break;
 							default:
-								throw new CodeEE("属性値" + attr.Str + "は解釈できません");
+								throw new CodeEE("无法解析属性值 " + attr.Str);
 						}
 						state.FlagP = true;
 						return null;
@@ -725,7 +733,7 @@ namespace MinorShift.Emuera.GameView
 				case "img":
 					{
 						if (wc == null)
-							throw new CodeEE("<" + tag + ">タグに属性が設定されていません");
+							throw new CodeEE("<" + tag + "> 标签缺少属性");
 						string attrValue = null;
 						string src = null;
 						string srcb = null;
@@ -746,54 +754,54 @@ namespace MinorShift.Emuera.GameView
 							if (word.Code.Equals("src", StringComparison.OrdinalIgnoreCase))
 							{
 								if (src != null)
-									throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+									throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 								src = attrValue;
 							}
 							else if (word.Code.Equals("srcb", StringComparison.OrdinalIgnoreCase))
 							{
 								if (srcb != null)
-									throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+									throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 								srcb = attrValue;
 							}
 							else if (word.Code.Equals("height", StringComparison.OrdinalIgnoreCase))
 							{
 								if (height != 0)
-									throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+									throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 								heightPx = attrValue.EndsWith("px", StringComparison.OrdinalIgnoreCase);
 								if (heightPx) attrValue = attrValue.Substring(0, attrValue.Length - 2);
 								if (!int.TryParse(attrValue, out height))
-									throw new CodeEE("<" + tag + ">タグのheight属性の属性値が数値として解釈できません");
+									throw new CodeEE("无法将 <" + tag + "> 标签的 height 属性值解析为数值");
 							}
 							else if (word.Code.Equals("width", StringComparison.OrdinalIgnoreCase))
 							{
 								if (width != 0)
-									throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+									throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 								widthPx = attrValue.EndsWith("px", StringComparison.OrdinalIgnoreCase);
 								if (widthPx) attrValue = attrValue.Substring(0, attrValue.Length - 2);
 								if (!int.TryParse(attrValue, out width))
-									throw new CodeEE("<" + tag + ">タグのwidth属性の属性値が数値として解釈できません");
+									throw new CodeEE("无法将 <" + tag + "> 标签的 width 属性值解析为数值");
 							}
 							else if (word.Code.Equals("ypos", StringComparison.OrdinalIgnoreCase))
 							{
 								if (ypos != 0)
-									throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+									throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 								yposPx = attrValue.EndsWith("px", StringComparison.OrdinalIgnoreCase);
 								if (yposPx) attrValue = attrValue.Substring(0, attrValue.Length - 2);
 								if (!int.TryParse(attrValue, out ypos))
-									throw new CodeEE("<" + tag + ">タグのypos属性の属性値が数値として解釈できません");
+									throw new CodeEE("无法将 <" + tag + "> 标签的 ypos 属性值解析为数值");
 							}
 							else
-								throw new CodeEE("<" + tag + ">タグの属性名" + word.Code + "は解釈できません");
+								throw new CodeEE("无法解析 <" + tag + "> 标签的属性名 " + word.Code);
 						}
 						if (src == null)
-							throw new CodeEE("<" + tag + ">タグにsrc属性が設定されていません");
+							throw new CodeEE("<" + tag + "> 标签缺少 src 属性");
 						return new ConsoleImagePart(src, srcb, height, width, ypos, heightPx, widthPx, yposPx);
 					}
 
 				case "shape":
 					{
 						if (wc == null)
-							throw new CodeEE("<" + tag + ">タグに属性が設定されていません");
+							throw new CodeEE("<" + tag + "> 标签缺少属性");
 						int[] param = null;
 						string type = null;
 						int color = -1;
@@ -813,22 +821,22 @@ namespace MinorShift.Emuera.GameView
 							{
 								case "color":
 									if (color >= 0)
-										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+										throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 									color = stringToColorInt32(attrValue);
 									break;
 								case "bcolor":
 									if (bcolor >= 0)
-										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+										throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 									bcolor = stringToColorInt32(attrValue);
 									break;
 								case "type":
 									if (type != null)
-										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+										throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 									type = attrValue;
 									break;
 									case "param":
 										if (param != null)
-											throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+											throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 										{
 											string[] tokens = attrValue.Split(',');
 											param = new int[tokens.Length];
@@ -838,18 +846,18 @@ namespace MinorShift.Emuera.GameView
 												if (t.EndsWith("px", StringComparison.OrdinalIgnoreCase))
 													t = t.Substring(0, t.Length - 2);
 												if (!int.TryParse(t, out param[i]))
-													throw new CodeEE("<" + tag + ">タグの" + word.Code + "属性の属性値が数値として解釈できません");
+													throw new CodeEE("无法将 <" + tag + "> 标签的 " + word.Code + " 属性值解析为数值");
 											}
 											break;
 										}
 								default:
-									throw new CodeEE("<" + tag + ">タグの属性名" + word.Code + "は解釈できません");
+									throw new CodeEE("无法解析 <" + tag + "> 标签的属性名 " + word.Code);
 							}
 						}
 						if (param == null)
-							throw new CodeEE("<" + tag + ">タグにparam属性が設定されていません");
+							throw new CodeEE("<" + tag + "> 标签缺少 param 属性");
 						if (type == null)
-							throw new CodeEE("<" + tag + ">タグにtype属性が設定されていません");
+							throw new CodeEE("<" + tag + "> 标签缺少 type 属性");
 						Color c = Config.ForeColor;
 						Color b = Config.FocusColor;
 						if (color >= 0)
@@ -878,13 +886,13 @@ namespace MinorShift.Emuera.GameView
 				case "nonbutton":
 					{
 						if (state.CurrentButtonTag != null)
-							throw new CodeEE("<button>又は<nonbutton>が入れ子にされています");
+							throw new CodeEE("<button> 或 <nonbutton> 不能嵌套使用");
 						HtmlAnalzeStateButtonTag buttonTag = new HtmlAnalzeStateButtonTag();
 						bool isButton = tag.ToLower() == "button";
 						string attrValue = null;
 						string value = null;
 						//if (wc == null)
-						//	throw new CodeEE("<" + tag + ">タグに属性が設定されていません");
+						//	throw new CodeEE("<" + tag + "> 标签缺少属性");
 						while (wc != null && !wc.EOL)
 						{
 							word = wc.Current as IdentifierWord;
@@ -901,13 +909,13 @@ namespace MinorShift.Emuera.GameView
 								if (!isButton)
 									throw new CodeEE("<" + tag + ">タグにvalue属性が設定されています");
 								if (value != null)
-                                    throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+                                    throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 								value = attrValue;
 							}
 							else if (word.Code.Equals("title", StringComparison.OrdinalIgnoreCase))
 							{
 								if (buttonTag.ButtonTitle != null)
-										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+										throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 								buttonTag.ButtonTitle = attrValue;
 							}
 							else if (word.Code.Equals("pos", StringComparison.OrdinalIgnoreCase))
@@ -915,14 +923,14 @@ namespace MinorShift.Emuera.GameView
 								//throw new NotImplCodeEE();
 								int pos = 0;
 								if (buttonTag.PointXisLocked)
-										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+										throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 								if (!int.TryParse(attrValue, out pos))
-									throw new CodeEE("<" + tag + ">タグのpos属性の属性値が数値として解釈できません");
+									throw new CodeEE("无法将 <" + tag + "> 标签的 pos 属性值解析为数值");
 								buttonTag.PointX = pos;
 								buttonTag.PointXisLocked = true;
 							}
 							else
-								throw new CodeEE("<" + tag + ">タグの属性名" + word.Code + "は解釈できません");
+								throw new CodeEE("无法解析 <" + tag + "> 标签的属性名 " + word.Code);
 						}
 						if (isButton)
 						{
@@ -942,7 +950,7 @@ namespace MinorShift.Emuera.GameView
 				case "font":
 					{
 						if (wc == null)
-							throw new CodeEE("<" + tag + ">タグに属性が設定されていません");
+							throw new CodeEE("<" + tag + "> 标签缺少属性");
 						HtmlAnalzeStateFontTag font = new HtmlAnalzeStateFontTag();
 						while (!wc.EOL)
 						{
@@ -959,24 +967,24 @@ namespace MinorShift.Emuera.GameView
 							{
 								case "color":
 									if (font.Color >= 0)
-										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+										throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 									font.Color = stringToColorInt32(attrValue);
 									break;
 								case "bcolor":
 									if (font.BColor >= 0)
-										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+										throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 									font.BColor = stringToColorInt32(attrValue);
 									break;
 								case "face":
 									if (font.FontName != null)
-										throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+										throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 									font.FontName = attrValue;
 									break;
 								//case "pos":
 								//	{
 								//		//throw new NotImplCodeEE();
 								//		if (font.PointXisLocked)
-								//			throw new CodeEE("<" + tag + ">タグに" + word.Code + "属性が2度以上指定されています");
+								//			throw new CodeEE("<" + tag + "> 标签的 " + word.Code + " 属性重复指定");
 								//		int pos = 0;
 								//		if (!int.TryParse(attrValue, out pos))
 								//			throw new CodeEE("<font>タグのpos属性の属性値が数値として解釈できません");
@@ -985,7 +993,7 @@ namespace MinorShift.Emuera.GameView
 								//		break;
 								//	}
 								default:
-								throw new CodeEE("<" + tag + ">タグの属性名" + word.Code + "は解釈できません");
+								throw new CodeEE("无法解析 <" + tag + "> 标签的属性名 " + word.Code);
 							}
 						}
 						//如果在其他font标签内部，则未设置项目继承外部font标签的设置（pos除外）
@@ -1014,7 +1022,7 @@ namespace MinorShift.Emuera.GameView
 		private static int stringToColorInt32(string str)
 		{
 			if(str.Length == 0)
-				throw new CodeEE("色を表す単語又は#RRGGBB値が必要です");
+				return -1;
 			int i = 0;
 			if (str[0] == '#')
 			{
@@ -1023,11 +1031,11 @@ namespace MinorShift.Emuera.GameView
 				{
 					i = Convert.ToInt32(colorvalue, 16);
 					if (i < 0 || i > 0xFFFFFF)
-						throw new CodeEE(colorvalue + "は適切な色指定の範囲外です");
+						throw new CodeEE(colorvalue + "超出颜色值范围");
 				}
 				catch
 				{
-					throw new CodeEE(colorvalue + "は数値として解釈できません");
+					throw new CodeEE(colorvalue + "无法解析为数值");
 				}
 			}
 			else
@@ -1036,7 +1044,7 @@ namespace MinorShift.Emuera.GameView
 				if (color.A == 0)//作为颜色名解析失败 确定错误
 				{
 					if(str.Equals("transparent", StringComparison.OrdinalIgnoreCase))
-						throw new CodeEE("無色透明(Transparent)は色として指定できません");
+						throw new CodeEE("透明色 (Transparent) 不能用作颜色");
 					try
 					{
 						i = Convert.ToInt32(str, 16);

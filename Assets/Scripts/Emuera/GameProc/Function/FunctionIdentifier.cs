@@ -417,23 +417,31 @@ namespace MinorShift.Emuera.GameProc.Function
 			addFunction(FunctionCode.PRINTSN, argb[FunctionArgType.STR_NULLABLE], METHOD_SAFE | EXTENDED);
 			addFunction(FunctionCode.PRINTFORMN, argb[FunctionArgType.STR_NULLABLE], METHOD_SAFE | EXTENDED);
 			addFunction(FunctionCode.PRINTFORMSN, argb[FunctionArgType.STR_NULLABLE], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.INPUTANY, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.BINPUT, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.BINPUTS, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.ONEBINPUT, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.ONEBINPUTS, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.INPUTANY, new INPUTANY_Instruction());
+			addFunction(FunctionCode.BINPUT, new BINPUT_Instruction());
+			addFunction(FunctionCode.BINPUTS, new BINPUTS_Instruction());
+			addFunction(FunctionCode.ONEBINPUT, new ONEBINPUT_Instruction());
+			addFunction(FunctionCode.ONEBINPUTS, new ONEBINPUTS_Instruction());
 			addFunction(FunctionCode.QUIT_AND_RESTART, argb[FunctionArgType.VOID], EXTENDED | FLOW_CONTROL);
 			addFunction(FunctionCode.FORCE_QUIT, argb[FunctionArgType.VOID], EXTENDED | FLOW_CONTROL);
 			addFunction(FunctionCode.FORCE_QUIT_AND_RESTART, argb[FunctionArgType.VOID], EXTENDED | FLOW_CONTROL);
 			addFunction(FunctionCode.FORCE_BEGIN, new FORCE_BEGIN_Instruction());
 			addFunction(FunctionCode.DT_COLUMN_OPTIONS, argb[FunctionArgType.SP_DT_COLUMN_OPTIONS], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.VARI, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.VARS, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.HTML_PRINT_ISLAND, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.HTML_PRINT_ISLAND_CLEAR, argb[FunctionArgType.VOID], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.SETBGIMAGE, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.CLEARBGIMAGE, argb[FunctionArgType.VOID], METHOD_SAFE | EXTENDED);
-			addFunction(FunctionCode.REMOVEBGIMAGE, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
+			addFunction(FunctionCode.VARI, new VARI_Instruction());
+			addFunction(FunctionCode.VARS, new VARS_Instruction());
+			addFunction(FunctionCode.HTML_PRINT_ISLAND, new HTML_PRINT_ISLAND_Instruction());
+			addFunction(FunctionCode.HTML_PRINT_ISLAND_CLEAR, new HTML_PRINT_ISLAND_CLEAR_Instruction());
+			addFunction(FunctionCode.SETBGIMAGE, new SETBGIMAGE_Instruction());
+			addFunction(FunctionCode.CLEARBGIMAGE, new CLEARBGIMAGE_Instruction());
+			addFunction(FunctionCode.REMOVEBGIMAGE, new REMOVEBGIMAGE_Instruction());
+
+			addFunction(FunctionCode.SQL_CONNECT, new SQL_Instruction(1));
+			addFunction(FunctionCode.SQL_DISCONNECT, new SQL_Instruction(1));
+			addFunction(FunctionCode.SQL_EXECUTE, new SQL_Instruction(2));
+			addFunction(FunctionCode.SQL_EXECUTE_NON_QUERY, new SQL_Instruction(2));
+			addFunction(FunctionCode.SQL_EXECUTE_READER, new SQL_Instruction(2));
+			addFunction(FunctionCode.SQL_IMPORT_MAP_XML, new SQL_Instruction(3));
+			addFunction(FunctionCode.SQL_IMPORT_DT_XML, new SQL_Instruction(3));
 				addFunction(FunctionCode.CALLSHARP, argb[FunctionArgType.STR_EXPRESSION], METHOD_SAFE | EXTENDED);
 			#endregion
 

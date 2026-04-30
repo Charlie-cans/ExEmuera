@@ -2285,17 +2285,15 @@ namespace MinorShift.Emuera.GameData.Function
             }
             public override Int64 GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
             {
-                Regex reg;
-                try
+                string pattern = arguments[1].GetStrValue(exm);
+                if (!regexCache.TryGetValue(pattern, out Regex reg))
                 {
-                    reg = new Regex(arguments[1].GetStrValue(exm));
-                }
-                catch (ArgumentException e)
-                {
-                    throw new CodeEE("第2引数が正規表現として不正です：" + e.Message);
+                    try { reg = new Regex(pattern); regexCache[pattern] = reg; }
+                    catch (ArgumentException e) { throw new CodeEE("第2引数が正規表現として不正です：" + e.Message); }
                 }
                 return (reg.Matches(arguments[0].GetStrValue(exm)).Count);
             }
+            static Dictionary<string, Regex> regexCache = new Dictionary<string, Regex>();
         }
 
         private sealed class ToStrMethod : FunctionMethod
@@ -3017,7 +3015,7 @@ namespace MinorShift.Emuera.GameData.Function
 				Int64[, ,] array; Int64 e3;
 				if (p.Identifier.IsCharacterData)
 				{
-					throw new NotImplCodeEE();
+					return null;
 				}
 				else
 				{
@@ -5553,9 +5551,21 @@ namespace MinorShift.Emuera.GameData.Function
 		}
 		private sealed class RegexStubMethod : FunctionMethod
 		{
-			public RegexStubMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[0]; CanRestructure = false; }
+			public RegexStubMethod() { ReturnType = typeof(long); argumentTypeArray = new Type[4] { typeof(void), typeof(void), typeof(void), typeof(void) }; CanRestructure = false; }
 			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
 			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 0; }
+			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
+		}
+		private sealed class MixedStubMethod : FunctionMethod
+		{
+			public MixedStubMethod(int argCount = 1) { ReturnType = typeof(long); argumentTypeArray = new Type[argCount]; for (int i = 0; i < argCount; i++) argumentTypeArray[i] = typeof(void); CanRestructure = false; }
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
+			public override long GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments) { return 1; }
+		}
+		private sealed class MixedStrStubMethod : FunctionMethod
+		{
+			public MixedStrStubMethod(int argCount = 1) { ReturnType = typeof(string); argumentTypeArray = new Type[argCount]; for (int i = 0; i < argCount; i++) argumentTypeArray[i] = typeof(void); CanRestructure = false; }
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments) { return null; }
 			public override string GetStrValue(ExpressionMediator exm, IOperandTerm[] arguments) { return ""; }
 		}
 		#endregion

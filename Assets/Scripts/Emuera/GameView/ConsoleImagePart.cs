@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 ﻿using MinorShift._Library;
 using MinorShift.Emuera.Content;
 using System;

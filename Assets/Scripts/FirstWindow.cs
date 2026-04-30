@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using Serilog;
 using UnityEngine;
 using UnityEngine.UI;
 using MinorShift._Library;
@@ -43,8 +44,9 @@ public class FirstWindow : MonoBehaviour
 
     void Start()
     {
+        gameObject.AddComponent<SafeArea>();
         if(!string.IsNullOrEmpty(MultiLanguage.FirstWindowTitlebar))
-            titlebar.text = MultiLanguage.FirstWindowTitlebar;  
+            titlebar.text = MultiLanguage.FirstWindowTitlebar;
 
         scroll_rect_ = GenericUtils.FindChildByName<ScrollRect>(gameObject, "ScrollRect");
         item_ = GenericUtils.FindChildByName(gameObject, "Item", true);
@@ -55,16 +57,26 @@ public class FirstWindow : MonoBehaviour
             .text = Application.version + " ";
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-        //安卓11以上检测文件权限
-        uEmuera.Utils.RequestAndroidAllFilesAccess();
+        // 安卓：先扫描内置存储（无需权限）
+        GetList(Application.persistentDataPath + "/emuera");
+        GetList(Application.persistentDataPath + "/era");
+        GetList(Application.persistentDataPath);
 
-        GetList("storage/emulated/0/emuera");
-        GetList("storage/emulated/1/emuera");
-        GetList("storage/emulated/2/emuera");
-
-        GetList("storage/sdcard0/emuera");
-        GetList("storage/sdcard1/emuera");
-        GetList("storage/sdcard2/emuera");
+        // 再尝试外部存储
+        if (uEmuera.Utils.HasAndroidAllFilesAccess())
+        {
+            GetList("/storage/emulated/0/emuera");
+            GetList("/storage/emulated/0/era");
+            GetList("/storage/emulated/1/emuera");
+            GetList("/storage/emulated/1/era");
+            GetList("/sdcard/emuera");
+            GetList("/sdcard/era");
+        }
+        else
+        {
+            uEmuera.Utils.RequestAndroidAllFilesAccess();
+            // 权限请求后，下次启动时重新扫描外部存储
+        }
 #endif
 
 #if UNITY_EDITOR
@@ -73,8 +85,31 @@ public class FirstWindow : MonoBehaviour
             GetList(main_entry.era_path);
 #endif
 
-        GetList(Application.persistentDataPath);
         setting_.SetActive(true);
+    }
+
+    // Android SAF回调: treeUri||displayPath||game1||game2||...
+    void OnFolderPicked(string result)
+    {
+        Log.ForContext("Tag", "Android").Information("OnFolderPicked: {Result}", result ?? "NULL");
+        var parts = result.Split(new[] { "||" }, System.StringSplitOptions.None);
+        Log.ForContext("Tag", "Android").Information("OnFolderPicked parts: {Count}", parts.Length);
+        for (int i = 0; i < parts.Length && i < 5; i++)
+            Log.ForContext("Tag", "Android").Information("  part[{I}] = {Val}", i, parts[i].Length > 100 ? parts[i].Substring(0, 100) : parts[i]);
+
+        string displayPath = parts.Length > 1 ? parts[1] : result;
+        UnityEngine.PlayerPrefs.SetString("last_picked_path", displayPath);
+        ClearList();
+
+        int added = 0;
+        for (int i = 2; i < parts.Length; i++)
+        {
+            if (string.IsNullOrEmpty(parts[i]) || parts[i].StartsWith("ERROR")) continue;
+            Log.ForContext("Tag", "Android").Information("AddItem: {Name} path={Path}", parts[i], displayPath);
+            AddItem(parts[i], displayPath);
+            added++;
+        }
+        Log.ForContext("Tag", "Android").Information("OnFolderPicked done: added={Added}", added);
     }
 
     void OnOptionClick()
@@ -140,9 +175,24 @@ public class FirstWindow : MonoBehaviour
         catch { }
     }
 
+    void ClearList()
+    {
+        if (scroll_rect_ == null) return;
+        var content = scroll_rect_.content;
+        for (int i = content.childCount - 1; i >= 0; i--)
+        {
+            var child = content.GetChild(i);
+            if (child.name != "Item")
+                Destroy(child.gameObject);
+        }
+        itemcount_ = 0;
+    }
+
     public Text titlebar = null;
     ScrollRect scroll_rect_ = null;
     GameObject item_ = null;
     GameObject setting_ = null;
+    GameObject path_btn_ = null;
+    GameObject path_input_ = null;
     int itemcount_ = 0;
 }

@@ -2,30 +2,97 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 开发铁律
+
+**绝对禁止"能用就行"的 hack 式修复。** 所有 EM+EE 功能移植必须：
+1. 先阅读 `D:/code/era/emuera.em.gitlab/` 中的原始 EE 源码
+2. 理解 EE 的完整实现后再动手
+3. 用 EE 相同的架构和调用链，不是自己做 patch
+4. 如果方法/类在 EE 中存在但 uEmuera 中没有，**完整移植**，不写简化版
+
+违反的代价：浪费时间反复修正，不如一次到位。
+
 ## 语言偏好
 
-默认使用中文进行思考和输出。所有对话、代码注释、解释说明均使用简体中文，除非代码本身（变量名、函数名、错误信息等）需要保持英文。
+默认使用中文进行思考和输出。
+
+**铁律：所有日文错误提示/警告/注释必须改为中文。** 阅读任何 .cs 文件时，遇到日文字符串（`throw new CodeEE("...")`、`warn("...")`、`PrintError("...")` 等），顺手改为中文。不允许新增日文提示。
+
+EE 源码（`D:/code/era/emuera.em.gitlab/`）可以保留日文作为参考，但 uEmuera 项目中的所有可见字符串必须中文化。
 
 ## Project Overview
 
-uEmuera — Unity 2020.3.34f1 移植版 Emuera（era 游戏引擎）。原始 EM+EE 扩展版源码在 `D:/code/era/emuera.em.gitlab/`。
+uEmuera — Unity 6000.4 移植版 Emuera（era 游戏引擎），已从 2020.3 升级。原始 EM+EE 扩展版源码在 `D:/code/era/emuera.em.gitlab/`。
 
 **目标：** 让 Unity 版支持 EM+EE 扩展指令，以运行 eratw-sub-modding 等魔改游戏。
 
+## Unity MCP 集成
+
+项目通过 **UnityMCP** (CoplayDev/unity-mcp) 插件直接与 Unity Editor 交互。
+
+### 工具速查（完整列表）
+
+| 工具 | 用途 |
+|------|------|
+| `batch_execute` | 批量执行多个 MCP 命令（10-100x 性能提升） |
+| `execute_code` | 在 Editor 内执行任意 C#，返回结果 |
+| `execute_menu_item` | 执行 Unity 菜单项（如 `GameObject/Create Empty`） |
+| `execute_custom_tool` | 执行项目注册的自定义工具 |
+| `find_gameobjects` | 按 name/tag/layer/component/path 搜索 GameObject |
+| `find_in_file` | 正则搜索文件内容 |
+| `read_console` | 读取/清除 Unity Console 日志 |
+| `refresh_unity` | 刷新 Asset Database + 可选编译 |
+| `run_tests` / `get_test_job` | 运行 EditMode/PlayMode 测试 |
+| `manage_editor` | Play/Pause/Stop、undo/redo、tag/layer 管理 |
+| `manage_scene` | 创建/加载/保存/关闭场景、scene view 控制 |
+| `manage_gameobject` | 创建/修改/删除/复制/移动/旋转 GameObject |
+| `manage_components` | 添加/移除/设置组件属性 |
+| `manage_asset` | 搜索/导入/创建/删除/重命名资源 |
+| `manage_prefabs` | 创建/打开/修改/保存 Prefab |
+| `manage_script` / `create_script` / `delete_script` | 脚本 CRUD |
+| `apply_text_edits` | 精确位置文本编辑（1-indexed 行列） |
+| `script_apply_edits` | 结构化脚本编辑（方法级替换/插入/删除） |
+| `validate_script` | 验证脚本编译 |
+| `manage_material` | 材质创建/属性修改/shader 管理 |
+| `manage_animation` | Animator 控制 + AnimationClip 创建 |
+| `manage_camera` | 摄像机管理（含 Cinemachine 预设/blend） |
+| `manage_graphics` | 渲染/Volume/后处理/光照烘焙/URP 管理 |
+| `manage_physics` | 物理设置/碰撞矩阵/关节/射线检测/力 |
+| `manage_ui` | UI Toolkit（UXML/USS/UIDocument）管理 |
+| `manage_vfx` | 粒子系统/VisualEffect/Line/Trail Renderer |
+| `manage_texture` | 程序化纹理生成 |
+| `manage_shader` | Shader 管理 |
+| `manage_probuilder` | ProBuilder 建模 |
+| `manage_build` | 触发构建/切换平台/配置 Player Settings |
+| `manage_packages` | 安装/移除/搜索 Unity Package |
+| `manage_profiler` | Profiler 控制/帧数据/内存快照 |
+| `manage_scriptable_object` | ScriptableObject 创建/修改 |
+| `unity_docs` | 获取 Unity 官方文档 |
+| `unity_reflect` | 反射检查 Unity C# API |
+| `set_active_instance` | 选择目标 Unity 实例（多实例时） |
+
+### Prefab Stage 注意事项
+
+Prefab Stage 中 `manage_gameobject` 的 `by_id`/`by_name`/`by_path` 搜索均不可用，用 `execute_code` 替代：
+
+```csharp
+var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+var obj = stage.prefabContentsRoot.transform.Find("路径/到/对象");
+obj.name = "新名字";
+UnityEditor.PrefabUtility.SaveAsPrefabAsset(stage.prefabContentsRoot, stage.assetPath);
+```
+
 ## Build / Compile Check
 
-### Unity Editor 未打开时（推荐）
-```bash
-"/c/Program Files/Unity/Hub/Editor/2020.3.49f1/Editor/Unity.exe" -batchmode -quit -nographics -projectPath "D:/code/era/uEmuera" -logFile "D:/code/era/unity_build.log"
+### MCP 方式（Unity Editor 打开时推荐）
 ```
-编译成功输出 `BUILD OK`，失败则 `grep "error CS" D:/code/era/unity_build.log`。
+read_console → types: ["error"] → 看编译错误
+editor_state → compilation.is_compiling → 确认编译完成
+```
 
-### Unity Editor 已打开时
-Unity Editor 锁定项目文件，batchmode 会报错退出。此时：
+### Batchmode（Unity Editor 未打开时）
 ```bash
-touch "D:/code/era/uEmuera/Assets/Scripts/<修改的文件>.cs"  # 触发自动重编译
-# 等待10-15秒后检查 Editor.log：
-grep "error CS" "/c/Users/charlie/AppData/Local/Unity/Editor/Editor.log" | tail -10
+"/c/Program Files/Unity/Hub/Editor/6000.4.4f1/Editor/Unity.exe" -batchmode -quit -nographics -projectPath "D:/code/era/uEmuera" -logFile "D:/code/era/unity_build.log" 2>&1 && echo "BUILD OK" || grep "error CS" "D:/code/era/unity_build.log"
 ```
 
 ## Architecture

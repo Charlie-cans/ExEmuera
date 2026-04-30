@@ -362,13 +362,17 @@ namespace uEmuera
             AndroidJavaClass javaClass = new AndroidJavaClass("android.os.Build$VERSION");
             return javaClass.GetStatic<int>("SDK_INT");
         }
+#endif
 
+#if UNITY_ANDROID && !UNITY_EDITOR
         public static bool HasAndroidAllFilesAccess()
         {
             AndroidJavaClass javaClass = new AndroidJavaClass("android.os.Environment");
             return javaClass.CallStatic<bool>("isExternalStorageManager");
-	    }
+        }
+#endif
 
+#if UNITY_ANDROID && !UNITY_EDITOR
         public static void RequestAndroidAllFilesAccess()
         {
             if (GetAndroidSDKVersion() < 30 || HasAndroidAllFilesAccess())
@@ -380,7 +384,13 @@ namespace uEmuera
             AndroidJavaObject intent = new AndroidJavaObject("android.content.Intent", "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION");
             intent.Call<AndroidJavaObject>("setData", uri);
             activity.Call("startActivity", intent);
-	    }
+        }
+
+        public static void OpenFolderPicker()
+        {
+            var cls = new AndroidJavaClass("com.xerysherry.uEmuera.FolderPickerActivity");
+            cls.CallStatic("OpenFolderPicker");
+        }
 #endif
 
 	}

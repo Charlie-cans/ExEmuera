@@ -1,4 +1,4 @@
-using Serilog;
+﻿using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -187,7 +187,7 @@ namespace MinorShift.Emuera.GameProc
 			catch (Exception e)
 			{
 				handleException(e, null, true);
-				console.PrintSystemLine("初期化中に致命的なエラーが発生したため処理を終了しました");
+				console.PrintSystemLine("初始化中发生致命错误，已终止处理");
 				return false;
 			}
 			if (labelDic == null)
@@ -224,7 +224,7 @@ namespace MinorShift.Emuera.GameProc
 			Int64[] selectcom = vEvaluator.SELECTCOM_ARRAY;
 			if (count >= selectcom.Length)
 			{
-				throw new CodeEE("CALLTRAIN命令の引数の値がSELECTCOMの要素数を超えています");
+				throw new CodeEE("CALLTRAIN 指令的参数值超出了 SELECTCOM 的元素数量");
 			}
 			for (int i = 0; i < (int)count; i++)
 			{
@@ -311,34 +311,32 @@ namespace MinorShift.Emuera.GameProc
 		{
 			startTime = _Library.WinmmTimer.TickCount;
 			state.lineCount = 0;
+			loopAlertCount = 0;
 		}
 
 		private void checkInfiniteLoop()
 		{
-			//无法正常工作。无法停止BEEP音，所以当这个处理不存在（1.51）
-			////防止冻结。即使在处理中也可以查看历史记录
-			//System.Windows.Forms.Application.DoEvents();
-			////System.Threading.Thread.Sleep(0);
-
-			//if (!console.Enabled)
-			//{
-			//    //如果在DoEvents()期间窗口被关闭就结束了。
-			//    console.ReadAnyKey();
-			//    return;
-			//}
 			uint time = _Library.WinmmTimer.TickCount - startTime;
 			if (time < Config.InfiniteLoopAlertTime)
 				return;
 			LogicalLine currentLine = state.CurrentLine;
 			if ((currentLine == null) || (currentLine is NullLine))
-				return;//当前行处于特殊状态时跳过
+				return;
 			if (!console.Enabled)
 				return;
-			// Unity：重置计时器而非显示MessageBox（后台线程不可用）
-			Log.ForContext("Tag", "Process").Warning("无限循环检测触发，重置计时器");
+			loopAlertCount++;
+			if (loopAlertCount > 6)
+			{
+				string errPos = currentLine.Position != null ? currentLine.Position.Filename + ":" + currentLine.Position.LineNo : "?";
+				throw new CodeEE("脚本执行超时（疑似死循环）: " + errPos);
+			}
+			string linePos = currentLine.Position != null ? $" {currentLine.Position.Filename}:{currentLine.Position.LineNo}" : "";
+			float lps = (float)state.lineCount / (time / 1000.0f);
+			Log.ForContext("Tag", "Process").Warning($"无限循环检测第{loopAlertCount}次 行/秒={lps:F0} 位置{linePos} 累计{time/1000:F1}秒");
 			state.lineCount = 0;
 			startTime = _Library.WinmmTimer.TickCount;
 		}
+		int loopAlertCount = 0;
 
 		int methodStack = 0;
 		public SingleTerm GetValue(SuperUserDefinedMethodTerm udmt)
@@ -348,7 +346,7 @@ namespace MinorShift.Emuera.GameProc
             {
                 //StackOverflowException无法被catch且没有可重现性，因此在发生前以固定次数终止。
                 //根据环境不同，可能在100之前就出现StackOverflowException？
-                throw new CodeEE("函数调用栈溢出（是否进行了无限递归调用？）");
+                throw new CodeEE("函数调用栈溢出（可能发生了无限递归调用）");
             }
             SingleTerm ret = null;
             int temp_current = state.currentMin;
@@ -411,31 +409,44 @@ namespace MinorShift.Emuera.GameProc
 		}
 		
 		
+		// 递归打印异常链（含所有 InnerException）
+		private void printExChain(Exception exc)
+		{
+			Exception current = exc;
+			while (current != null)
+			{
+				console.PrintError(current.GetType().FullName + ":" + current.Message);
+				if (current.StackTrace != null)
+				{
+					foreach (string line in current.StackTrace.Split('\n'))
+						console.PrintError(line.TrimEnd('\r'));
+				}
+				current = current.InnerException;
+				if (current != null)
+					console.PrintError("--- 内部异常 ---");
+			}
+		}
+
 		private void handleExceptionInSystemProc(Exception exc, LogicalLine current, bool playSound)
 		{
 			console.ThrowError(playSound);
 			if (exc is CodeEE)
 			{
-				console.PrintError("関数の終端でエラーが発生しました:" + Program.ExeName);
+				console.PrintError("函数末尾发生错误:" + Program.ExeName);
 				console.PrintError(exc.Message);
 			}
 			else if (exc is ExeEE)
 			{
-				console.PrintError("関数の終端でEmueraのエラーが発生しました:" + Program.ExeName);
+				console.PrintError("函数末尾发生 Emuera 错误:" + Program.ExeName);
 				console.PrintError(exc.Message);
 			}
 			else
 			{
-				console.PrintError("関数の終端で予期しないエラーが発生しました:" + Program.ExeName);
-				console.PrintError(exc.GetType().ToString() + ":" + exc.Message);
-				string[] stack = exc.StackTrace.Split('\n');
-				for (int i = 0; i < stack.Length; i++)
-				{
-					console.PrintError(stack[i]);
-				}
+				console.PrintError("函数末尾发生意外错误:" + Program.ExeName);
+				printExChain(exc);
 			}
 		}
-		
+
 		private void handleException(Exception exc, LogicalLine current, bool playSound)
 		{
             Log.ForContext("Tag", "Process").Error(exc, "脚本错误 — 显示错误对话框");
@@ -451,7 +462,7 @@ namespace MinorShift.Emuera.GameProc
 			if (position != null)
 			{
 				if (position.LineNo >= 0)
-					posString = position.Filename + "の" + position.LineNo.ToString() + "行目で";
+					posString = position.Filename + "の" + position.LineNo.ToString() + " 行: ";
 				else
 					posString = position.Filename + "で";
 					
@@ -463,50 +474,45 @@ namespace MinorShift.Emuera.GameProc
                     InstructionLine procline = current as InstructionLine;
                     if (procline != null && procline.FunctionCode == FunctionCode.THROW)
                     {
-                        console.PrintErrorButton(posString + "THROWが発生しました", position);
+                        console.PrintErrorButton(posString + "发生 THROW", position);
                         if (position.RowLine != null)
                             console.PrintError(position.RowLine);
-                        console.PrintError("THROW内容：" + exc.Message);
+                        console.PrintError("THROW 内容：" + exc.Message);
                     }
                     else
                     {
-						console.PrintErrorButton(posString + "エラーが発生しました:" + Program.ExeName, position);
+						console.PrintErrorButton(posString + "发生错误:" + Program.ExeName, position);
                         if (position.RowLine != null)
                             console.PrintError(position.RowLine);
-                        console.PrintError("エラー内容：" + exc.Message);
+                        console.PrintError("错误内容：" + exc.Message);
                     }
-                    console.PrintError("現在の関数：@" + current.ParentLabelLine.LabelName + "（" + current.ParentLabelLine.Position.Filename + "の" + current.ParentLabelLine.Position.LineNo.ToString() + "行目）");
-                    console.PrintError("関数呼び出しスタック：");
+                    console.PrintError("当前函数：@" + current.ParentLabelLine.LabelName + "（" + current.ParentLabelLine.Position.Filename + "の" + current.ParentLabelLine.Position.LineNo.ToString() + " 行）");
+                    console.PrintError("函数调用栈：");
                     LogicalLine parent = null;
                     int depth = 0;
                     while ((parent = state.GetReturnAddressSequensial(depth++)) != null)
                     {
                         if (parent.Position != null)
                         {
-                            console.PrintErrorButton("↑" + parent.Position.Filename + "の" + parent.Position.LineNo.ToString() + "行目（関数@" + parent.ParentLabelLine.LabelName + "内）", parent.Position);
+                            console.PrintErrorButton("↑" + parent.Position.Filename + "の" + parent.Position.LineNo.ToString() + " 行（函数 @" + parent.ParentLabelLine.LabelName + " 内）", parent.Position);
                         }
                     } 
 				}
 				else
 				{
-					console.PrintError(posString + "エラーが発生しました:" + Program.ExeName);
+					console.PrintError(posString + "发生错误:" + Program.ExeName);
 					console.PrintError(exc.Message);
 				}
 			}
 			else if (exc is ExeEE)
 			{
-				console.PrintError(posString + "Emueraのエラーが発生しました:" + Program.ExeName);
+				console.PrintError(posString + "Emueraの发生错误:" + Program.ExeName);
 				console.PrintError(exc.Message);
 			}
 			else
             {
-				console.PrintError(posString + "予期しないエラーが発生しました:" + Program.ExeName);
-				console.PrintError(exc.GetType().ToString() + ":" + exc.Message);
-				string[] stack = exc.StackTrace.Split('\n');
-				for (int i = 0; i < stack.Length; i++)
-				{
-					console.PrintError(stack[i]);
-				}
+				console.PrintError(posString + "发生意外错误:" + Program.ExeName);
+				printExChain(exc);
 			}
 		}
 

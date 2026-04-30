@@ -233,6 +233,12 @@ namespace MinorShift.Emuera.GameProc.Function
 			argb[FunctionArgType.SP_SQL_1] = new SQL_ArgumentBuilder(1);
 			argb[FunctionArgType.SP_SQL_2] = new SQL_ArgumentBuilder(2);
 			argb[FunctionArgType.SP_SQL_3] = new SQL_ArgumentBuilder(3);
+		argb[FunctionArgType.SP_INPUTANY] = new STR_EXPRESSION_ArgumentBuilder(false);
+		argb[FunctionArgType.SP_VARI] = new STR_EXPRESSION_ArgumentBuilder(false);
+		argb[FunctionArgType.SP_VARS] = new STR_EXPRESSION_ArgumentBuilder(false);
+		argb[FunctionArgType.SP_HTML_PRINT_ISLAND] = new STR_EXPRESSION_ArgumentBuilder(false);
+		argb[FunctionArgType.SP_SETBGIMAGE] = new STR_EXPRESSION_ArgumentBuilder(false);
+		argb[FunctionArgType.SP_EXPRESSION] = new STR_EXPRESSION_ArgumentBuilder(false);
 
         }
 		

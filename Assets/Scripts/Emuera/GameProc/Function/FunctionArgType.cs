@@ -78,5 +78,11 @@ namespace MinorShift.Emuera.GameProc.Function
 		SP_SQL_2,
 		SP_SQL_3,
 		SP_DT_COLUMN_OPTIONS,
+	SP_VARS,
+	SP_VARI,
+	SP_HTML_PRINT_ISLAND,
+	SP_INPUTANY,
+	SP_EXPRESSION,
+	SP_SETBGIMAGE,
 	}
 }

@@ -351,20 +351,30 @@ namespace MinorShift.Emuera.GameView
 			printBuffer.Append(part);
 		}
 
-		public void PrintHtml(string str)
+		#region EM_私家版_HTML_PRINT拡張
+		public void PrintHtml(string str, bool toPrintBuffer = false)
 		{
 			if (string.IsNullOrEmpty(str))
 				return;
 			if (!this.Enabled)
 				return;
-			if (!printBuffer.IsEmpty)
+			if (toPrintBuffer)
 			{
-				ConsoleDisplayLine[] dispList = printBuffer.Flush(stringMeasure, force_temporary);
-				addRangeDisplayLine(dispList);
+				foreach (var button in HtmlManager.Html2ButtonList(str, stringMeasure, this))
+					printBuffer.AppendButton(button);
 			}
-			addRangeDisplayLine(HtmlManager.Html2DisplayLine(str, stringMeasure, this));
+			else
+			{
+				if (!printBuffer.IsEmpty)
+				{
+					ConsoleDisplayLine[] dispList = printBuffer.Flush(stringMeasure, force_temporary);
+					addRangeDisplayLine(dispList);
+				}
+				addRangeDisplayLine(HtmlManager.Html2DisplayLine(str, stringMeasure, this));
+			}
 			RefreshStrings(false);
 		}
+		#endregion
 
 		private int printCWidth = -1;
 		private int printCWidthL = -1;

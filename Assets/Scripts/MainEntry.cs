@@ -16,6 +16,7 @@ public class MainEntry : MonoBehaviour
 
     void Start()
     {
+        gameObject.AddComponent<AndroidPermission>();
         LoadConfigMaps();
         uEmuera.EmueraLogger.Init();
         if(!MultiLanguage.SetLanguage())

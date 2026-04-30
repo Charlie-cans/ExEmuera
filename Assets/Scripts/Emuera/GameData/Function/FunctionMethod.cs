@@ -23,7 +23,7 @@ namespace MinorShift.Emuera.GameData.Function
 			{
 				if (arguments[i] == null)
 					return string.Format(Properties.Resources.SyntaxErrMesMethodDefaultArgumentNotNullable0, name, i+1);
-				if (argumentTypeArray[i] != arguments[i].GetOperandType())
+				if (argumentTypeArray[i] != typeof(void) && argumentTypeArray[i] != arguments[i].GetOperandType())
 					return string.Format(Properties.Resources.SyntaxErrMesMethodDefaultArgumentType0, name, i + 1);
 			}
 			return null;
