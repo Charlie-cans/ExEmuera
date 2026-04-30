@@ -264,22 +264,23 @@ namespace MinorShift.Emuera.GameView
 		/// <param name="sm"></param>
 		/// <param name="console">如果不用于实际显示则设为null</param>
 		/// <returns></returns>
-		// EM_私家版_HTML_PRINT拡張: 从HTML中提取按钮列表，用于toPrintBuffer模式
+		// EM_私家版_HTML_PRINT拡張
 		public static ConsoleButtonString[] Html2ButtonList(string str, StringMeasure sm, EmueraConsole console)
 		{
-			var buttons = new List<ConsoleButtonString>();
-			Html2DisplayLine(str, sm, console, buttons);
-			return buttons.ToArray();
+			var parts = new List<ConsoleButtonString>();
+			Html2DisplayLine(str, sm, console, parts);
+			return parts.ToArray();
 		}
 
 		public static ConsoleDisplayLine[] Html2DisplayLine(string str, StringMeasure sm, EmueraConsole console)
 		{
-			return Html2DisplayLine(str, sm, console, new List<ConsoleButtonString>());
+			return Html2DisplayLine(str, sm, console, null);
 		}
 
-		private static ConsoleDisplayLine[] Html2DisplayLine(string str, StringMeasure sm, EmueraConsole console, List<ConsoleButtonString> buttonList)
+		private static ConsoleDisplayLine[] Html2DisplayLine(string str, StringMeasure sm, EmueraConsole console, List<ConsoleButtonString> buttonsOutput)
 		{
 			List<AConsoleDisplayPart> cssList = new List<AConsoleDisplayPart>();
+			List<ConsoleButtonString> buttonList = buttonsOutput ?? new List<ConsoleButtonString>();
 			StringStream st = new StringStream(str);
 			int found;
 			bool hasComment = str.IndexOf("<!--") >= 0;
@@ -619,13 +620,13 @@ namespace MinorShift.Emuera.GameView
 						state.FontStyle ^= endStyle;
 						return null;
 					case "p":
-						if ((!state.FlagP) || (state.FlagPClosed))
-							throw new CodeEE("</p> 之前缺少 <p>");
+						if (!state.FlagP || state.FlagPClosed)
+							return null;
 						state.FlagPClosed = true;
 						return null;
 					case "nobr":
-						if ((!state.FlagNobr) || (state.FlagNobrClosed))
-							throw new CodeEE("</nobr> 之前缺少 <nobr>");
+						if (!state.FlagNobr || state.FlagNobrClosed)
+							return null;
 						state.FlagNobrClosed = true;
 						return null;
 					case "font":

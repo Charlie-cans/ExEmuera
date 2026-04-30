@@ -60,6 +60,8 @@ namespace uEmuera
         /// <returns></returns>
         public static string NormalizePath(string path)
         {
+            if (string.IsNullOrEmpty(path)) return "";
+            bool leadingSlash = path[0] == '/' || path[0] == '\\';
             var ps = path.Split('/', '\\');
             var n = "";
             for(int i = 0; i < ps.Length - 1; ++i)
@@ -70,9 +72,9 @@ namespace uEmuera
                 n = string.Concat(n, p, '/');
             }
             if(ps.Length == 1)
-                return ps[0];
+                return (leadingSlash ? "/" : "") + ps[0];
             else if(ps.Length > 0)
-                return n + ps[ps.Length - 1];
+                return (leadingSlash ? "/" : "") + n + ps[ps.Length - 1];
             return "";
         }
 

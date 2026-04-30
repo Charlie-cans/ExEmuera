@@ -39,7 +39,7 @@ public class FolderPickerActivity extends UnityPlayerActivity
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 } catch (Exception e) {}
 
-                // 扫描SAF目录找游戏
+                // 列出所有子目录作为候选游戏
                 StringBuilder result = new StringBuilder();
                 try {
                     DocumentFile root = DocumentFile.fromTreeUri(this, treeUri);
@@ -48,23 +48,9 @@ public class FolderPickerActivity extends UnityPlayerActivity
                         for (DocumentFile child : children) {
                             if (!child.isDirectory()) continue;
                             String name = child.getName();
-                            if (name == null) continue;
-                            // 检查子目录里有没有emuera.config或ERB目录
-                            DocumentFile[] subFiles = child.listFiles();
-                            if (subFiles != null) {
-                                boolean hasConfig = false;
-                                boolean hasErb = false;
-                                for (DocumentFile f : subFiles) {
-                                    String fn = f.getName();
-                                    if (fn == null) continue;
-                                    if (fn.equalsIgnoreCase("emuera.config")) hasConfig = true;
-                                    if (fn.equalsIgnoreCase("ERB") && f.isDirectory()) hasErb = true;
-                                }
-                                if (hasConfig || hasErb) {
-                                    if (result.length() > 0) result.append("||");
-                                    result.append(name);
-                                }
-                            }
+                            if (name == null || name.startsWith(".")) continue;
+                            if (result.length() > 0) result.append("||");
+                            result.append(name);
                         }
                     }
                 } catch (Exception e) {

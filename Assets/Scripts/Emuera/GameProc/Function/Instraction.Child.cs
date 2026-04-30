@@ -326,12 +326,7 @@ namespace MinorShift.Emuera.GameProc.Function
 					StrForm strForm = StrForm.FromWordToken(wt);
 					str = strForm.GetString(exm);
 				}
-				if (isC)
-					exm.Console.PrintC(str, true);
-				else if (isLC)
-					exm.Console.PrintC(str, false);
-				else
-					exm.Console.PrintHtml(str);
+				exm.Console.PrintHtml(str, toPrintBuffer: true);
 			}
 		}
 
@@ -346,7 +341,7 @@ namespace MinorShift.Emuera.GameProc.Function
 			{
 				if (GlobalStatic.Process.SkipPrint) return;
 				string str = func.Argument.IsConst ? func.Argument.ConstStr : ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
-				exm.Console.PrintHtml(str);
+				exm.Console.PrintHtml(str, toPrintBuffer: true);
 			}
 		}
 

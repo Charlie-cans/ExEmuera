@@ -16,6 +16,7 @@ public class FirstWindow : MonoBehaviour
     }
     static System.Collections.IEnumerator Run(string workspace, string era)
     {
+        Log.ForContext("Tag", "Android").Information("Run: starting, workspace={Workspace} era={Era}", workspace, era);
         var async = Resources.UnloadUnusedAssets();
         while(!async.isDone)
             yield return null;
@@ -26,20 +27,36 @@ public class FirstWindow : MonoBehaviour
         ow.ShowInProgress(true);
         yield return null;
 
+        Log.ForContext("Tag", "Android").Information("Run: GC+SpriteManager...");
         System.GC.Collect();
         SpriteManager.Init();
 
+        // 处理嵌套情况：如果 era 目录下还有一个同名子目录才包含真正的游戏数据
+        var basePath = uEmuera.Utils.NormalizePath(workspace + "/" + era);
+        var innerPath = basePath + "/" + era;
+        if (Directory.Exists(innerPath) &&
+            (File.Exists(innerPath + "/emuera.config") || Directory.Exists(innerPath + "/ERB")))
+        {
+            Log.ForContext("Tag", "Android").Warning("Run: detected nested game folder, using {Inner}", innerPath);
+            workspace = basePath;
+            era = era;
+        }
+
+        Log.ForContext("Tag", "Android").Information("Run: SetWorkFolder={W} SetSourceFolder={E}", workspace, era);
         Sys.SetWorkFolder(workspace);
         Sys.SetSourceFolder(era);
         uEmuera.Utils.ResourcePrepare();
 
+        Log.ForContext("Tag", "Android").Information("Run: ResourcePrepare done, UnloadUnusedAssets...");
         async = Resources.UnloadUnusedAssets();
         while(!async.isDone)
             yield return null;
 
+        Log.ForContext("Tag", "Android").Information("Run: calling emuera.Run()...");
         EmueraContent.instance.SetNoReady();
         var emuera = Object.FindAnyObjectByType<EmueraMain>();
         emuera.Run();
+        Log.ForContext("Tag", "Android").Information("Run: emuera.Run() returned");
     }
 
     void Start()
@@ -57,25 +74,33 @@ public class FirstWindow : MonoBehaviour
             .text = Application.version + " ";
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-        // 安卓：先扫描内置存储（无需权限）
-        GetList(Application.persistentDataPath + "/emuera");
-        GetList(Application.persistentDataPath + "/era");
-        GetList(Application.persistentDataPath);
-
-        // 再尝试外部存储
-        if (uEmuera.Utils.HasAndroidAllFilesAccess())
+        // 先检查上次SAF选择的路径
+        var lastPath = UnityEngine.PlayerPrefs.GetString("last_picked_path", "");
+        if (!string.IsNullOrEmpty(lastPath))
         {
-            GetList("/storage/emulated/0/emuera");
-            GetList("/storage/emulated/0/era");
-            GetList("/storage/emulated/1/emuera");
-            GetList("/storage/emulated/1/era");
-            GetList("/sdcard/emuera");
-            GetList("/sdcard/era");
+            Log.ForContext("Tag", "Android").Information("Start: using last picked path {Path}", lastPath);
+            GetList(lastPath);
         }
         else
         {
-            uEmuera.Utils.RequestAndroidAllFilesAccess();
-            // 权限请求后，下次启动时重新扫描外部存储
+            // 首次启动：扫描内部和外部存储
+            GetList(Application.persistentDataPath + "/emuera");
+            GetList(Application.persistentDataPath + "/era");
+            GetList(Application.persistentDataPath);
+
+            if (uEmuera.Utils.HasAndroidAllFilesAccess())
+            {
+                Log.ForContext("Tag", "Android").Information("Start: scanning external storage");
+                GetList("/storage/emulated/0/emuera");
+                GetList("/storage/emulated/0/era");
+                GetList("/sdcard/emuera");
+                GetList("/sdcard/era");
+            }
+            else
+            {
+                Log.ForContext("Tag", "Android").Warning("Start: no AllFiles access, requesting");
+                uEmuera.Utils.RequestAndroidAllFilesAccess();
+            }
         }
 #endif
 
@@ -159,20 +184,28 @@ public class FirstWindow : MonoBehaviour
     void GetList(string workspace)
     {
         workspace = uEmuera.Utils.NormalizePath(workspace);
+        Log.ForContext("Tag", "Android").Debug("GetList: checking {Path}", workspace);
         if(!Directory.Exists(workspace))
+        {
+            Log.ForContext("Tag", "Android").Debug("GetList: dir not exists: {Path}", workspace);
             return;
+        }
         try
         {
             var paths = Directory.GetDirectories(workspace, "*", SearchOption.TopDirectoryOnly);
+            Log.ForContext("Tag", "Android").Information("GetList: {Path} has {Count} subdirs", workspace, paths.Length);
             System.Array.Sort(paths);
             foreach(var p in paths)
             {
                 var path = uEmuera.Utils.NormalizePath(p);
                 if(File.Exists(path + "/emuera.config") || Directory.Exists(path + "/ERB"))
+                {
+                    Log.ForContext("Tag", "Android").Information("GetList: found game {Name}", Path.GetFileName(path));
                     AddItem(Path.GetFileName(path), workspace);
+                }
             }
         }
-        catch { }
+        catch (System.Exception e) { Log.ForContext("Tag", "Android").Warning(e, "GetList error: {Path}", workspace); }
     }
 
     void ClearList()
@@ -180,12 +213,9 @@ public class FirstWindow : MonoBehaviour
         if (scroll_rect_ == null) return;
         var content = scroll_rect_.content;
         for (int i = content.childCount - 1; i >= 0; i--)
-        {
-            var child = content.GetChild(i);
-            if (child.name != "Item")
-                Destroy(child.gameObject);
-        }
+            Destroy(content.GetChild(i).gameObject);
         itemcount_ = 0;
+        content.sizeDelta = new Vector2(content.sizeDelta.x, 0);
     }
 
     public Text titlebar = null;

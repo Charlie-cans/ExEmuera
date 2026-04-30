@@ -1,6 +1,6 @@
-﻿using System.Collections;
+﻿using Serilog;
+using System.Collections;
 using System.Collections.Generic;
-using Serilog;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -156,7 +156,7 @@ public class OptionWindow : MonoBehaviour
 #if UNITY_ANDROID && !UNITY_EDITOR
         uEmuera.Utils.OpenFolderPicker();
 #else
-        Serilog.Log.ForContext("Tag", "Android").Information("OnSelectPath: not Android, skipping picker");
+        Serilog.Log.ForContext("Tag", "Android").Information("OnSelectPath: Editor mode");
 #endif
     }
 

@@ -254,7 +254,7 @@ namespace MinorShift.Emuera.Content
 					ParserMediator.Warn("画像リソースの作成に失敗しました:" + arg2, sp, 1);
 					return null;
 				}
-				resourceDic.Add(parentName, img);
+				resourceDic[parentName] = img; // 索引用法，重复 key 自动覆盖
 			}
 			ConstImage parentImage = resourceDic[parentName] as ConstImage;
 			if (parentImage == null || !parentImage.IsCreated)

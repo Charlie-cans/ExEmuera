@@ -76,7 +76,14 @@ namespace MinorShift.Emuera.GameView
 				if (builder.Length > 2000)
 					return;
 				if (builder.Length + str.Length > 2000)
-					str = str.Substring(0, 2000 - builder.Length) + "※※※バッファーの文字数が2000字(全角1000字)を超えています。これ以降は表示できません※※※";
+				{
+					int cutAt = 2000 - builder.Length;
+					int lastLt = str.LastIndexOf('<', cutAt > 0 ? cutAt : 0, cutAt);
+					int lastGt = str.LastIndexOf('>', cutAt > 0 ? cutAt : 0, cutAt);
+					if (lastLt > lastGt) cutAt = lastLt;
+					if (cutAt <= 0) cutAt = 2000 - builder.Length;
+					str = str.Substring(0, cutAt) + "※※※缓冲区文字超过2000字(全角1000字)，已截断※※※";
+				}
 				builder.Append(str);
 				lastStringStyle = style;
 			}

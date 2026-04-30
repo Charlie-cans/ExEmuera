@@ -358,21 +358,29 @@ namespace MinorShift.Emuera.GameView
 				return;
 			if (!this.Enabled)
 				return;
-			if (toPrintBuffer)
+			try
 			{
-				foreach (var button in HtmlManager.Html2ButtonList(str, stringMeasure, this))
-					printBuffer.AppendButton(button);
-			}
-			else
-			{
-				if (!printBuffer.IsEmpty)
+				if (toPrintBuffer)
 				{
-					ConsoleDisplayLine[] dispList = printBuffer.Flush(stringMeasure, force_temporary);
-					addRangeDisplayLine(dispList);
+					foreach (var button in HtmlManager.Html2ButtonList(str, stringMeasure, this))
+						printBuffer.AppendButton(button);
 				}
-				addRangeDisplayLine(HtmlManager.Html2DisplayLine(str, stringMeasure, this));
+				else
+				{
+					if (!printBuffer.IsEmpty)
+					{
+						ConsoleDisplayLine[] dispList = printBuffer.Flush(stringMeasure, force_temporary);
+						addRangeDisplayLine(dispList);
+					}
+					addRangeDisplayLine(HtmlManager.Html2DisplayLine(str, stringMeasure, this));
+				}
+				RefreshStrings(false);
 			}
-			RefreshStrings(false);
+			catch (Exception ex)
+			{
+				var head = str.Length > 500 ? str.Substring(0, 500) : str;
+				Serilog.Log.ForContext("Tag", "Html").Error(ex, "HTML解析失败 len={Len} head={Head}", str.Length, head);
+			}
 		}
 		#endregion
 
